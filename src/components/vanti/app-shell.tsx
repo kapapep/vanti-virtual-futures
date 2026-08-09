@@ -36,6 +36,7 @@ const primaryNav = [
   { label: "Discover", to: "/discover", icon: Compass },
   { label: "Markets", to: "/markets", icon: LineChart },
   { label: "Portfolio", to: "/portfolio", icon: PieChart },
+  { label: "Watchlist", to: "/watchlist", icon: Star },
   { label: "Following", to: "/following", icon: Users },
 ] as const;
 
