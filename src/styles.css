@@ -283,7 +283,7 @@
 /* Ambient landing background: drifting market cards and drawing probability curves. */
 @keyframes vanti-drift {
   0% { transform: translate3d(0, 0, 0) scale(1); }
-  50% { transform: translate3d(18px, -22px, 0) scale(1.03); }
+  50% { transform: translate3d(12px, -16px, 0) scale(1.02); }
   100% { transform: translate3d(0, 0, 0) scale(1); }
 }
 
