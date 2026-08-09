@@ -7,6 +7,20 @@ const SEED_MARKETS = [
   { question: "Will the merger close in 2026?", base: 29, x: "85%", y: "72%", delay: "-27s", dur: "43s" },
 ] as const;
 
+const SEED_MARKETS_WIDE = [
+  { question: "Will the index close green this week?", base: 55, x: "18%", y: "4%", delay: "-5s", dur: "49s" },
+  { question: "Will the launch slip past Q4?", base: 34, x: "70%", y: "86%", delay: "-21s", dur: "55s" },
+] as const;
+
+const TICKER = [
+  { label: "FED CUT", value: 63 },
+  { label: "CPI < 3%", value: 77 },
+  { label: "MERGER", value: 29 },
+  { label: "SHIP Q3", value: 41 },
+  { label: "INDEX GREEN", value: 55 },
+  { label: "LAUNCH SLIP", value: 34 },
+] as const;
+
 /** Deterministic pseudo-random walk so SSR and client render the same curve. */
 function seededCurve(points: number, seed: number) {
   let s = seed;
@@ -33,6 +47,21 @@ function toPath(values: number[], width: number, height: number) {
     .join(" ");
 }
 
+function toArea(values: number[], width: number, height: number) {
+  return `${toPath(values, width, height)} L${width} ${height} L0 ${height} Z`;
+}
+
+function markers(values: number[], width: number, height: number, every: number) {
+  const out: { x: number; y: number }[] = [];
+  for (let i = 6; i < values.length; i += every) {
+    out.push({
+      x: (i / (values.length - 1)) * width,
+      y: height - values[i]! * height,
+    });
+  }
+  return out;
+}
+
 function usePrefersReducedMotion() {
   const [reduced, setReduced] = useState(false);
   useEffect(() => {
@@ -55,24 +84,50 @@ export function MarketAmbientBackground() {
     return () => window.clearInterval(id);
   }, [reduced]);
 
-  const paths = useMemo(
-    () => [
-      toPath(seededCurve(96, 20260809), 1800, 320),
-      toPath(seededCurve(96, 77771), 1800, 320),
-    ],
-    [],
-  );
+  const curves = useMemo(() => {
+    const a = seededCurve(96, 20260809);
+    const b = seededCurve(96, 77771);
+    return {
+      a: toPath(a, 1800, 320),
+      b: toPath(b, 1800, 320),
+      areaA: toArea(a, 1800, 320),
+      dots: markers(a, 1800, 320, 17),
+    };
+  }, []);
 
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {/* Faint chart grid */}
+      <div
+        className="absolute inset-0 opacity-[0.6]"
+        style={{
+          backgroundImage:
+            "linear-gradient(to right, var(--border) 1px, transparent 1px), linear-gradient(to bottom, var(--border) 1px, transparent 1px)",
+          backgroundSize: "72px 72px",
+          maskImage: "radial-gradient(circle at 50% 40%, transparent 18%, black 70%)",
+          WebkitMaskImage: "radial-gradient(circle at 50% 40%, transparent 18%, black 70%)",
+        }}
+      />
+
       {/* Primary brand probability curve */}
       <svg
         viewBox="0 0 1200 320"
         preserveAspectRatio="none"
         className="absolute inset-x-0 top-[6%] h-[66%] w-full text-accent-solid/30"
       >
+        <defs>
+          <linearGradient id="vanti-area" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="currentColor" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
+          </linearGradient>
+        </defs>
         <path
-          d={paths[0]}
+          d={curves.areaA}
+          fill="url(#vanti-area)"
+          className={reduced ? undefined : "vanti-curve"}
+        />
+        <path
+          d={curves.a}
           fill="none"
           stroke="currentColor"
           strokeWidth={3.5}
@@ -80,7 +135,7 @@ export function MarketAmbientBackground() {
           className={reduced ? undefined : "vanti-curve"}
         />
         <path
-          d={paths[1]}
+          d={curves.b}
           fill="none"
           stroke="currentColor"
           strokeWidth={2.5}
@@ -88,6 +143,18 @@ export function MarketAmbientBackground() {
           opacity={0.7}
           className={reduced ? undefined : "vanti-curve vanti-curve-slow"}
         />
+        <g className={reduced ? undefined : "vanti-curve"}>
+          {curves.dots.map((d) => (
+            <circle
+              key={`${d.x}-${d.y}`}
+              cx={d.x}
+              cy={d.y}
+              r={4}
+              fill="currentColor"
+              className={reduced ? undefined : "vanti-pulse"}
+            />
+          ))}
+        </g>
       </svg>
 
       {/* Secondary echo curve for depth */}
@@ -97,7 +164,7 @@ export function MarketAmbientBackground() {
         className="absolute inset-x-0 top-[12%] h-[54%] w-full text-accent-subtle/20"
       >
         <path
-          d={paths[0]}
+          d={curves.a}
           fill="none"
           stroke="currentColor"
           strokeWidth={4}
@@ -107,12 +174,15 @@ export function MarketAmbientBackground() {
         />
       </svg>
 
-      {SEED_MARKETS.map((m, i) => {
+      {[...SEED_MARKETS, ...SEED_MARKETS_WIDE].map((m, i) => {
         const yes = Math.min(96, Math.max(4, m.base + ((tick + i * 3) % 5) - 2));
         return (
           <div
             key={m.question}
-            className="absolute w-44 rounded-lg border border-border/40 bg-surface/25 p-2.5 opacity-[0.35]"
+            className={cn(
+              "absolute w-44 rounded-lg border border-border/50 bg-surface/40 p-2.5 opacity-[0.45]",
+              i >= SEED_MARKETS.length && "hidden xl:block",
+            )}
             style={{
               left: m.x,
               top: m.y,
@@ -131,6 +201,24 @@ export function MarketAmbientBackground() {
           </div>
         );
       })}
+
+      {/* Slow ticker strip near the bottom */}
+      <div className="absolute inset-x-0 bottom-[8%] overflow-hidden opacity-[0.4]">
+        <div className={cn("flex w-max gap-8", reduced ? undefined : "vanti-ticker")}>
+          {[...TICKER, ...TICKER].map((t, i) => {
+            const yes = Math.min(96, Math.max(4, t.value + ((tick + i) % 5) - 2));
+            return (
+              <span
+                key={`${t.label}-${i}`}
+                className="num flex items-center gap-2 whitespace-nowrap text-xs text-muted-foreground"
+              >
+                <span className="eyebrow text-muted-foreground">{t.label}</span>
+                <span className={yes >= 50 ? "text-yes" : "text-no"}>{yes}¢</span>
+              </span>
+            );
+          })}
+        </div>
+      </div>
 
       <div
         className="absolute inset-0 opacity-60"
