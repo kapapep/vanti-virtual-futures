@@ -181,14 +181,14 @@ export function AppShell({ children }: { children: ReactNode }) {
         className={cn(
           "sticky top-0 z-20 grid items-center gap-2 bg-background/90 px-4 py-3 backdrop-blur lg:hidden",
           isHome
-            ? "grid-cols-[auto_minmax(0,1fr)_auto]"
+            ? "grid-cols-[1fr_auto_1fr] border-b border-border"
             : "grid-cols-[minmax(0,1fr)_auto] border-b border-border",
         )}
       >
         <Link to="/home" className="flex min-w-0 items-center">
           <VantiMark size={36} title="Vanti" />
         </Link>
-        {isHome ? <HomeFeedTabs /> : null}
+        {isHome ? <HomeFeedTabs className="justify-self-center" /> : null}
         <div className="flex shrink-0 items-center gap-2">
           <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
             <DialogTrigger asChild>
