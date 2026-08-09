@@ -487,6 +487,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_virtual_cash: { Args: { p_amount: number }; Returns: Json }
       execute_trade: {
         Args: {
           p_action: string
