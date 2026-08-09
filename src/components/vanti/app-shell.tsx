@@ -63,9 +63,14 @@ function BalanceChip({ className }: { className?: string }) {
 
   return (
     <div
-      className={cn("rounded-md border border-border bg-surface px-3 py-1.5 text-right", className)}
+      className={cn(
+        "shrink-0 rounded-md border border-border bg-surface px-2 py-1 text-right lg:px-3 lg:py-1.5",
+        className,
+      )}
     >
-      <p className="text-meta font-medium uppercase text-muted-foreground">Virtual balance</p>
+      <p className="hidden text-meta font-medium uppercase text-muted-foreground sm:block lg:block">
+        Virtual balance
+      </p>
       {isPending && !profile ? (
         <p className="num text-sm font-semibold text-foreground">—</p>
       ) : (
