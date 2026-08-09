@@ -35,6 +35,7 @@ import {
 import { GlobalSearch } from "@/components/vanti/global-search";
 import { ThemeToggle } from "@/components/vanti/theme-toggle";
 import { Wordmark } from "@/components/vanti/wordmark";
+import { VantiMark } from "@/components/vanti/vanti-mark";
 import { useProfile } from "@/hooks/use-vanti-session";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -108,7 +109,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen w-full bg-background">
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 hidden w-60 flex-col border-r border-border bg-sidebar px-4 py-6 lg:flex">
-        <Link to="/home" className="px-2">
+        <Link to="/home" className="flex items-center gap-2 px-2">
+          <VantiMark size={22} title="Vanti" />
           <Wordmark />
         </Link>
         {/* Search stays in the chrome between lg and xl, where the right rail is hidden. */}
@@ -142,7 +144,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Mobile top bar */}
       <header className="sticky top-0 z-20 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border bg-background/90 px-4 py-3 backdrop-blur lg:hidden">
-        <Link to="/home" className="min-w-0">
+        <Link to="/home" className="flex min-w-0 items-center gap-2">
+          <VantiMark size={22} title="Vanti" />
           <Wordmark />
         </Link>
         <div className="flex shrink-0 items-center gap-2">
