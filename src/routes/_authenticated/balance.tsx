@@ -114,7 +114,9 @@ function BalancePage() {
       <section className="space-y-5 rounded-lg border border-border bg-card p-5 @md:p-6">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
           <div className="min-w-0">
-            <p className="text-meta font-medium uppercase text-muted-foreground">Available cash</p>
+            <p className="whitespace-nowrap text-meta font-medium uppercase text-muted-foreground">
+              Available cash
+            </p>
             {isPending ? (
               <Skeleton className="mt-2 h-7 w-32" />
             ) : (
