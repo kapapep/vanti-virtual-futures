@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CategoryIcon } from "@/components/vanti/category-icon";
 import { PriceChart } from "@/components/vanti/price-chart";
 import { ProbabilityBar } from "@/components/vanti/probability-bar";
+import { TradePanel } from "@/components/vanti/trade-panel";
 import { useSession } from "@/hooks/use-vanti-session";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -45,17 +46,6 @@ export const Route = createFileRoute("/_authenticated/market/$marketId")({
   ),
   notFoundComponent: () => <p className="text-sm text-muted-foreground">Market not found.</p>,
 });
-
-function TradePanelSlot() {
-  return (
-    <div className="rounded-lg border border-dashed border-border bg-card p-5 text-center">
-      <p className="text-sm font-semibold text-foreground">Trading — coming next</p>
-      <p className="mt-1 text-meta text-muted-foreground">
-        The YES/NO trade panel will live here.
-      </p>
-    </div>
-  );
-}
 
 function MarketDetailPage() {
   const { marketId } = Route.useParams();
@@ -244,13 +234,13 @@ function MarketDetailPage() {
 
         <div className="order-2 hidden @[760px]:block @[1060px]:order-3">
           <div className="sticky top-6">
-            <TradePanelSlot />
+            <TradePanel market={m} />
           </div>
         </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-16 z-20 border-t border-border bg-background/95 p-4 backdrop-blur @[760px]:hidden">
-        <TradePanelSlot />
+      <div className="fixed inset-x-0 bottom-16 z-20 max-h-[62vh] overflow-y-auto border-t border-border bg-background/95 p-4 backdrop-blur @[760px]:hidden">
+        <TradePanel market={m} compact />
       </div>
       </div>
     </div>
