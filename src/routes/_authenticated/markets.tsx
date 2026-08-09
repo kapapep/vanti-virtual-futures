@@ -80,7 +80,7 @@ function MarketsPage() {
           type="button"
           onClick={() => navigate({ search: (prev: MarketsSearch) => ({ ...prev, category: undefined }) })}
           className={cn(
-            "inline-flex min-h-11 shrink-0 items-center rounded-full border px-3.5 text-meta font-medium transition-colors duration-150 sm:min-h-8",
+            "inline-flex min-h-11 shrink-0 items-center rounded-full border px-3.5 text-xs font-medium transition-colors duration-150 sm:min-h-8",
             !category
               ? "border-accent-solid bg-accent-subtle text-accent-solid"
               : "border-border text-muted-foreground hover:text-foreground",
@@ -94,7 +94,7 @@ function MarketsPage() {
             type="button"
             onClick={() => navigate({ search: (prev: MarketsSearch) => ({ ...prev, category: c.slug }) })}
             className={cn(
-              "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-meta font-medium whitespace-nowrap transition-colors duration-150 sm:min-h-8",
+              "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-xs font-medium whitespace-nowrap transition-colors duration-150 sm:min-h-8",
               category === c.slug
                 ? "border-accent-solid bg-accent-subtle text-accent-solid"
                 : "border-border text-muted-foreground hover:text-foreground",
@@ -114,7 +114,7 @@ function MarketsPage() {
               type="button"
               onClick={() => navigate({ search: (prev: MarketsSearch) => ({ ...prev, sort: s.key }) })}
               className={cn(
-                "inline-flex min-h-11 shrink-0 items-center rounded-md px-2.5 text-meta font-semibold whitespace-nowrap transition-colors duration-150 sm:min-h-8",
+                "inline-flex min-h-11 shrink-0 items-center rounded-md px-2.5 text-xs font-semibold whitespace-nowrap transition-colors duration-150 sm:min-h-8",
                 sort === s.key
                   ? "bg-secondary text-foreground"
                   : "text-muted-foreground hover:text-foreground",
@@ -124,7 +124,9 @@ function MarketsPage() {
             </button>
           ))}
         </div>
-        <p className="num shrink-0 text-meta text-muted-foreground">{filtered.length} markets</p>
+        <p className="num hidden shrink-0 text-meta text-muted-foreground sm:block">
+          {filtered.length} markets
+        </p>
       </div>
       </div>
 
