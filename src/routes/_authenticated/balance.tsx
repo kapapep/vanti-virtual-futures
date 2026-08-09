@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { Minus, Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -41,6 +42,39 @@ export const Route = createFileRoute("/_authenticated/balance")({
 const QUICK_AMOUNTS = [100, 500, 1000, 5000] as const;
 
 type CashMode = "add" | "withdraw";
+
+/** Circular icon action with a caption below, sitting side by side. */
+function CircleAction({
+  label,
+  active,
+  onClick,
+  children,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <button
+        type="button"
+        onClick={onClick}
+        aria-pressed={active}
+        aria-label={label}
+        className={cn(
+          "grid size-14 place-items-center rounded-full border transition-colors",
+          active
+            ? "border-accent-solid bg-accent-solid text-accent-solid-foreground"
+            : "border-border bg-surface text-foreground hover:border-accent-solid hover:text-accent-solid",
+        )}
+      >
+        {children}
+      </button>
+      <span className="text-meta text-muted-foreground">{label}</span>
+    </div>
+  );
+}
 
 function BalancePage() {
   const { user } = useSession();
@@ -88,10 +122,10 @@ function BalancePage() {
         <div>
           <p className="text-meta font-medium uppercase text-muted-foreground">Available cash</p>
           {isPending ? (
-            <Skeleton className="mt-2 h-9 w-40" />
+            <Skeleton className="mt-2 h-7 w-32" />
           ) : (
             <AnimatedNumber
-              className="num mt-1 block text-display font-semibold text-foreground"
+              className="num mt-1 block text-xl text-foreground"
               value={profile?.balance ?? 0}
               format={formatBalance}
             />
@@ -99,23 +133,21 @@ function BalancePage() {
         </div>
 
         <div className="space-y-5 border-t border-border pt-5">
-          <div className="flex flex-col gap-2 @sm:flex-row">
-            <Button
-              className="h-11 flex-1"
-              variant={mode === "add" ? "default" : "outline"}
-              aria-pressed={mode === "add"}
+          <div className="flex items-start gap-6">
+            <CircleAction
+              label="Add cash"
+              active={mode === "add"}
               onClick={() => setMode(mode === "add" ? null : "add")}
             >
-              Add cash
-            </Button>
-            <Button
-              className="h-11 flex-1"
-              variant={mode === "withdraw" ? "default" : "outline"}
-              aria-pressed={mode === "withdraw"}
+              <Plus className="size-6" />
+            </CircleAction>
+            <CircleAction
+              label="Withdraw"
+              active={mode === "withdraw"}
               onClick={() => setMode(mode === "withdraw" ? null : "withdraw")}
             >
-              Withdraw cash
-            </Button>
+              <Minus className="size-6" />
+            </CircleAction>
           </div>
 
           {mode ? (

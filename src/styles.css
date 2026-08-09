@@ -15,6 +15,7 @@
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
   font-family: var(--font-mono);
+  font-weight: 600;
   letter-spacing: -0.01em;
 }
 
@@ -125,8 +126,8 @@
 /* Dark is the default palette (true-black OLED); `.light` switches. */
 :root {
   --radius: 6px;
-  --font-vanti-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-vanti-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  --font-vanti-sans: "Figtree", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-vanti-mono: "Figtree", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme: dark;
 
   /* Dark palette (default) */
@@ -228,7 +229,18 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-vanti-sans);
+    font-weight: 500;
     -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 800;
+    letter-spacing: -0.02em;
   }
 
   /* Numbers are tabular everywhere. */

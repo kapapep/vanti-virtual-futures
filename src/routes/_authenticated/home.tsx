@@ -1,17 +1,24 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Activity, TrendingDown, TrendingUp } from "lucide-react";
-import { useMemo } from "react";
+import { Activity, Plus, TrendingDown, TrendingUp } from "lucide-react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/vanti/empty-state";
 import { PostCard } from "@/components/vanti/post-card";
 import { PostComposer } from "@/components/vanti/post-composer";
 import { useSession } from "@/hooks/use-vanti-session";
-import { formatCents, formatDelta, formatRelativeTime } from "@/lib/format";
+import { formatCents, formatDelta } from "@/lib/format";
 import { marketsQuery, watchlistQuery, type Market } from "@/lib/markets";
 import {
   FEED_PAGE_SIZE,
@@ -32,13 +39,13 @@ export const Route = createFileRoute("/_authenticated/home")({
       {
         name: "description",
         content:
-          "Your Vanti home feed: posts from traders you follow, discussion on watched markets and live price moves.",
+          "Your Vanti home feed: For You covers trending and losing trades, Following shows the traders you back.",
       },
       { property: "og:title", content: "Home — Vanti Prediction Markets" },
       {
         property: "og:description",
         content:
-          "Your Vanti home feed: posts from traders you follow, discussion on watched markets and live price moves.",
+          "Your Vanti home feed: For You covers trending and losing trades, Following shows the traders you back.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -55,11 +62,13 @@ export const Route = createFileRoute("/_authenticated/home")({
 
 const MOVE_THRESHOLD = 0.05;
 
-/** A generated notice about a big price move on a market the viewer watches. */
-type PriceMoveItem = { kind: "move"; id: string; market: Market; at: number };
+type Tab = "for-you" | "following";
+
+/** A generated notice about a big price move. */
+type PriceMoveItem = { kind: "move"; id: string; market: Market; label: string; at: number };
 type FeedItem = { kind: "post"; post: FeedPost; at: number } | PriceMoveItem;
 
-function PriceMoveCard({ market }: { market: Market }) {
+function PriceMoveCard({ market, label }: { market: Market; label: string }) {
   const up = market.change24h >= 0;
   return (
     <article className="flex gap-3 rounded-lg border border-border bg-surface p-4">
@@ -67,9 +76,7 @@ function PriceMoveCard({ market }: { market: Market }) {
         <Activity className="size-4 text-accent-solid" />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-meta font-semibold uppercase text-muted-foreground">
-          Price move · watchlist
-        </p>
+        <p className="eyebrow text-meta text-muted-foreground">{label}</p>
         <Link
           to="/market/$marketId"
           params={{ marketId: market.id }}
@@ -80,7 +87,7 @@ function PriceMoveCard({ market }: { market: Market }) {
         <p className="mt-1 flex flex-wrap items-center gap-x-3 text-meta">
           <span
             className={cn(
-              "num inline-flex items-center gap-1 font-medium",
+              "num inline-flex items-center gap-1",
               up ? "text-positive" : "text-negative",
             )}
           >
@@ -126,7 +133,7 @@ function SuggestedAccounts({
     <section className="rounded-lg border border-border bg-card p-4">
       <h2 className="text-sm font-semibold text-foreground">Suggested traders</h2>
       <p className="mt-1 text-meta text-muted-foreground">
-        Follow a few accounts to personalise your feed.
+        Follow a few accounts to fill your Following feed.
       </p>
       <ul className="mt-3 divide-y divide-border">
         {(suggestions.data ?? []).map((account) => (
@@ -171,6 +178,9 @@ function SuggestedAccounts({
 function HomePage() {
   const { user } = useSession();
   const viewerId = user?.id;
+  const [tab, setTab] = useState<Tab>("for-you");
+  const [composerOpen, setComposerOpen] = useState(false);
+
   const following = useQuery(followingIdsQuery(viewerId));
   const watchlist = useQuery(watchlistQuery(viewerId));
   const markets = useQuery(marketsQuery);
@@ -178,23 +188,22 @@ function HomePage() {
   const followingIds = following.data ?? [];
   const watchedIds = watchlist.data ?? [];
   const ready = following.isSuccess && watchlist.isSuccess;
-  const personalised = followingIds.length > 0 || watchedIds.length > 0;
 
   const feed = useInfiniteQuery({
-    queryKey: ["feed", viewerId, personalised ? "following" : "for-you", followingIds.length, watchedIds.length],
+    queryKey: ["feed", viewerId, tab, followingIds.length, watchedIds.length],
     enabled: Boolean(viewerId) && ready,
     initialPageParam: 0,
     queryFn: async ({ pageParam }) => {
-      if (personalised) {
+      const offset = pageParam as number;
+      if (tab === "following") {
         return fetchFollowingFeed({
           viewerId,
           followingIds,
           watchedMarketIds: watchedIds,
-          offset: pageParam as number,
+          offset,
         });
       }
       const all = await fetchForYouFeed(viewerId);
-      const offset = pageParam as number;
       return all.slice(offset, offset + FEED_PAGE_SIZE);
     },
     getNextPageParam: (lastPage, allPages) =>
@@ -204,18 +213,29 @@ function HomePage() {
   const posts = useMemo(() => (feed.data?.pages ?? []).flat(), [feed.data]);
   const replies = useQuery(repliesQuery(posts.map((p) => p.id), viewerId));
 
+  /** For You surfaces the biggest movers overall; Following only watched markets. */
   const moveItems = useMemo<PriceMoveItem[]>(() => {
     const watched = new Set(watchedIds);
-    return (markets.data ?? [])
-      .filter((m) => watched.has(m.id) && Math.abs(m.change24h) >= MOVE_THRESHOLD)
-      .slice(0, 3)
-      .map((market) => ({
-        kind: "move" as const,
-        id: `move-${market.id}`,
-        market,
-        at: market.spark.length ? market.spark[market.spark.length - 1]!.t : Date.now(),
-      }));
-  }, [markets.data, watchedIds]);
+    const all = markets.data ?? [];
+    const source =
+      tab === "following"
+        ? all.filter((m) => watched.has(m.id) && Math.abs(m.change24h) >= MOVE_THRESHOLD)
+        : [...all]
+            .filter((m) => Math.abs(m.change24h) >= MOVE_THRESHOLD)
+            .sort((a, b) => Math.abs(b.change24h) - Math.abs(a.change24h));
+    return source.slice(0, 3).map((market) => ({
+      kind: "move" as const,
+      id: `move-${market.id}`,
+      market,
+      label:
+        tab === "following"
+          ? "Price move · watchlist"
+          : market.change24h >= 0
+            ? "Trending · winning trades"
+            : "Trending · losing trades",
+      at: market.spark.length ? market.spark[market.spark.length - 1]!.t : Date.now(),
+    }));
+  }, [markets.data, watchedIds, tab]);
 
   const items = useMemo<FeedItem[]>(() => {
     const postItems: FeedItem[] = posts.map((post) => ({
@@ -227,21 +247,42 @@ function HomePage() {
   }, [posts, moveItems]);
 
   const loading = !ready || (feed.isPending && posts.length === 0);
+  const showSuggestions = tab === "following" && ready && followingIds.length === 0;
 
   return (
     <div className="space-y-5">
-      <header className="space-y-1">
-        <h1 className="text-figure font-semibold text-foreground">Home</h1>
-        <p className="text-sm text-muted-foreground">
-          {personalised
-            ? "Posts from traders you follow and markets you watch."
-            : "For You — the most active discussion on Vanti right now."}
-        </p>
-      </header>
+      {/* TikTok-style centred feed switcher */}
+      <nav className="sticky top-14 z-10 -mx-4 flex items-center justify-center gap-6 border-b border-border bg-background/95 px-4 py-2 backdrop-blur lg:top-0 lg:mx-0 lg:rounded-lg lg:border">
+        {(
+          [
+            { id: "for-you" as Tab, label: "For You" },
+            { id: "following" as Tab, label: "Following" },
+          ]
+        ).map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => setTab(item.id)}
+            aria-current={tab === item.id}
+            className={cn(
+              "relative min-h-11 px-2 text-sm transition-colors",
+              tab === item.id ? "font-extrabold text-foreground" : "text-muted-foreground",
+            )}
+          >
+            {item.label}
+            <span
+              className={cn(
+                "absolute inset-x-1 bottom-1 h-0.5 rounded-full",
+                tab === item.id ? "bg-foreground" : "bg-transparent",
+              )}
+            />
+          </button>
+        ))}
+      </nav>
 
-      <PostComposer />
+      <h1 className="sr-only">Vanti home feed</h1>
 
-      {!personalised && ready ? (
+      {showSuggestions ? (
         <SuggestedAccounts viewerId={viewerId} followingIds={followingIds} />
       ) : null}
 
@@ -253,7 +294,11 @@ function HomePage() {
         </div>
       ) : items.length === 0 ? (
         <EmptyState
-          title="No posts yet. Follow a trader or watch a market to fill your feed."
+          title={
+            tab === "following"
+              ? "Follow a trader to see their posts here."
+              : "No trending posts yet. Be the first to post."
+          }
           action={
             <Button asChild size="sm">
               <Link to="/discover">Discover markets</Link>
@@ -264,7 +309,7 @@ function HomePage() {
         <div className="space-y-3">
           {items.map((item) =>
             item.kind === "move" ? (
-              <PriceMoveCard key={item.id} market={item.market} />
+              <PriceMoveCard key={item.id} market={item.market} label={item.label} />
             ) : (
               <PostCard
                 key={item.post.id}
@@ -288,10 +333,26 @@ function HomePage() {
         </div>
       ) : null}
 
-      <p className="pt-2 text-center text-meta text-muted-foreground">
-        Last updated <span className="num">{formatRelativeTime(new Date())}</span> · virtual money
-        only
-      </p>
+      {/* Floating composer trigger */}
+      <Dialog open={composerOpen} onOpenChange={setComposerOpen}>
+        <button
+          type="button"
+          onClick={() => setComposerOpen(true)}
+          aria-label="Write a post"
+          className="fixed bottom-20 right-4 z-30 grid size-14 place-items-center rounded-full bg-accent-solid text-accent-solid-foreground shadow-lg transition-transform hover:scale-105 lg:bottom-8 lg:right-8"
+        >
+          <Plus className="size-6" />
+        </button>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-left text-base">New post</DialogTitle>
+            <DialogDescription className="text-left text-meta">
+              Share your read on a market. Virtual money only.
+            </DialogDescription>
+          </DialogHeader>
+          <PostComposer compact onPosted={() => setComposerOpen(false)} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

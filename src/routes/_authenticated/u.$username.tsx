@@ -1,21 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
+import { EditProfileDialog } from "@/components/vanti/edit-profile-dialog";
 import { EmptyState } from "@/components/vanti/empty-state";
 import { ProfileSkeleton } from "@/components/vanti/skeletons";
 import { TradeHistoryList } from "@/components/vanti/trade-history-list";
@@ -40,7 +29,6 @@ import {
   isFollowingQuery,
   profileByUsernameQuery,
   setFollowing,
-  updateOwnProfile,
 } from "@/lib/social";
 import { cn } from "@/lib/utils";
 
@@ -140,6 +128,7 @@ function UserProfilePage() {
                 bio={profile.bio ?? ""}
                 avatarUrl={profile.avatarUrl ?? ""}
                 username={profile.username}
+                trigger={<Button variant="outline">Edit profile</Button>}
               />
             ) : (
               <Button
@@ -272,91 +261,5 @@ function Stat({
         </p>
       ) : null}
     </div>
-  );
-}
-
-function EditProfileDialog(props: {
-  userId: string;
-  username: string;
-  displayName: string;
-  bio: string;
-  avatarUrl: string;
-}) {
-  const queryClient = useQueryClient();
-  const [open, setOpen] = useState(false);
-  const [displayName, setDisplayName] = useState(props.displayName);
-  const [bio, setBio] = useState(props.bio);
-  const [avatarUrl, setAvatarUrl] = useState(props.avatarUrl);
-
-  useEffect(() => {
-    if (!open) return;
-    setDisplayName(props.displayName);
-    setBio(props.bio);
-    setAvatarUrl(props.avatarUrl);
-  }, [open, props.displayName, props.bio, props.avatarUrl]);
-
-  const save = useMutation({
-    mutationFn: () => updateOwnProfile({ userId: props.userId, displayName, bio, avatarUrl }),
-    onSuccess: () => {
-      toast.success("Profile updated");
-      setOpen(false);
-      void queryClient.invalidateQueries({ queryKey: ["public-profile", props.username] });
-      void queryClient.invalidateQueries({ queryKey: ["profile"] });
-    },
-    onError: () => toast.error("Couldn't save your profile. Try again."),
-  });
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline">Edit profile</Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit profile</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="displayName">Display name</Label>
-            <Input
-              id="displayName"
-              value={displayName}
-              maxLength={40}
-              onChange={(event) => setDisplayName(event.target.value)}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="bio">Bio</Label>
-            <Textarea
-              id="bio"
-              value={bio}
-              rows={3}
-              maxLength={240}
-              onChange={(event) => setBio(event.target.value)}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="avatarUrl">Avatar URL</Label>
-            <Input
-              id="avatarUrl"
-              value={avatarUrl}
-              placeholder="https://…"
-              onChange={(event) => setAvatarUrl(event.target.value)}
-            />
-          </div>
-          <p className="text-meta text-muted-foreground">
-            Username and balance can't be changed here.
-          </p>
-        </div>
-        <DialogFooter>
-          <Button variant="ghost" onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
-          <Button disabled={save.isPending} onClick={() => save.mutate()}>
-            {save.isPending ? "Saving…" : "Save changes"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   );
 }
