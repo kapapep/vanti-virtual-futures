@@ -8,6 +8,7 @@ import {
   LogOut,
   PieChart,
   Search,
+  Star,
   User,
   Users,
 } from "lucide-react";
