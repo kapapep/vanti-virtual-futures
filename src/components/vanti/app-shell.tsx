@@ -35,6 +35,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { GlobalSearch } from "@/components/vanti/global-search";
+import { HomeFeedTabs } from "@/components/vanti/home-feed-tabs";
 import { EditProfileDialog } from "@/components/vanti/edit-profile-dialog";
 import { VantiMark } from "@/components/vanti/vanti-mark";
 import { useProfile } from "@/hooks/use-vanti-session";
@@ -137,6 +138,7 @@ function AccountMenu() {
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [searchOpen, setSearchOpen] = useState(false);
+  const isHome = pathname === "/home";
 
   return (
     <div className="min-h-screen w-full bg-background">
@@ -175,10 +177,18 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Mobile top bar */}
-      <header className="sticky top-0 z-20 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border bg-background/90 px-4 py-3 backdrop-blur lg:hidden">
+      <header
+        className={cn(
+          "sticky top-0 z-20 grid items-center gap-2 bg-background/90 px-4 py-3 backdrop-blur lg:hidden",
+          isHome
+            ? "grid-cols-[auto_minmax(0,1fr)_auto]"
+            : "grid-cols-[minmax(0,1fr)_auto] border-b border-border",
+        )}
+      >
         <Link to="/home" className="flex min-w-0 items-center">
           <VantiMark size={36} title="Vanti" />
         </Link>
+        {isHome ? <HomeFeedTabs /> : null}
         <div className="flex shrink-0 items-center gap-2">
           <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
             <DialogTrigger asChild>
