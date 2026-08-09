@@ -74,13 +74,13 @@ function MarketsPage() {
         </p>
       </div>
 
-      <div className="sticky top-14 z-10 -mx-4 space-y-2 border-b border-border bg-background/95 px-4 pb-2 pt-2 backdrop-blur lg:top-0">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="sticky top-[57px] z-10 -mx-4 space-y-2 border-b border-border bg-background/95 px-4 pb-2 pt-2 backdrop-blur lg:top-0">
+      <div className="-mx-4 flex items-center gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden">
         <button
           type="button"
           onClick={() => navigate({ search: (prev: MarketsSearch) => ({ ...prev, category: undefined }) })}
           className={cn(
-            "inline-flex min-h-11 items-center rounded-full border px-3.5 text-meta font-medium transition-colors duration-150 sm:min-h-8",
+            "inline-flex min-h-11 shrink-0 items-center rounded-full border px-3.5 text-meta font-medium transition-colors duration-150 sm:min-h-8",
             !category
               ? "border-accent-solid bg-accent-subtle text-accent-solid"
               : "border-border text-muted-foreground hover:text-foreground",
@@ -94,7 +94,7 @@ function MarketsPage() {
             type="button"
             onClick={() => navigate({ search: (prev: MarketsSearch) => ({ ...prev, category: c.slug }) })}
             className={cn(
-              "inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3.5 text-meta font-medium transition-colors duration-150 sm:min-h-8",
+              "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-meta font-medium whitespace-nowrap transition-colors duration-150 sm:min-h-8",
               category === c.slug
                 ? "border-accent-solid bg-accent-subtle text-accent-solid"
                 : "border-border text-muted-foreground hover:text-foreground",
@@ -107,14 +107,14 @@ function MarketsPage() {
       </div>
 
       <div className="flex items-center justify-between gap-3 border-t border-border pt-2">
-        <div className="flex flex-wrap gap-1">
+        <div className="-mx-4 flex min-w-0 gap-1 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden">
           {SORTS.map((s) => (
             <button
               key={s.key}
               type="button"
               onClick={() => navigate({ search: (prev: MarketsSearch) => ({ ...prev, sort: s.key }) })}
               className={cn(
-                "inline-flex min-h-11 items-center rounded-md px-2.5 text-meta font-semibold transition-colors duration-150 sm:min-h-8",
+                "inline-flex min-h-11 shrink-0 items-center rounded-md px-2.5 text-meta font-semibold whitespace-nowrap transition-colors duration-150 sm:min-h-8",
                 sort === s.key
                   ? "bg-secondary text-foreground"
                   : "text-muted-foreground hover:text-foreground",
