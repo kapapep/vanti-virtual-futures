@@ -14,6 +14,23 @@
 @utility num {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
+  font-family: var(--font-mono);
+  letter-spacing: -0.01em;
+}
+
+/* Metadata / eyebrow text: monospaced, uppercase, tracked out. */
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Hairline separator, rendered at 0.5px where the display allows. */
+@utility hairline {
+  border-color: var(--hair);
+  border-style: solid;
+  border-width: 0.5px;
 }
 
 /*
@@ -81,7 +98,19 @@
   --color-negative-subtle: var(--negative-subtle);
   --color-negative-foreground: var(--negative-foreground);
   --color-surface: var(--surface);
+  --color-bg: var(--bg);
+  --color-elev: var(--elev);
+  --color-elev2: var(--elev2);
+  --color-hair: var(--hair);
+  --color-label: var(--label);
+  --color-label2: var(--label2);
+  --color-label3: var(--label3);
+  --color-tint: var(--tint);
+  --color-track: var(--track);
+  --color-yes: var(--yes);
+  --color-no: var(--no);
   --font-sans: var(--font-vanti-sans);
+  --font-mono: var(--font-vanti-mono);
   --text-display: 2.5rem;
   --text-display--line-height: 1.05;
   --text-display--letter-spacing: -0.03em;
