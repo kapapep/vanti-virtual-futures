@@ -4,6 +4,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/vanti/empty-state";
 import { MarketCard } from "@/components/vanti/market-card";
+import { MarketGridSkeleton } from "@/components/vanti/skeletons";
 import { useSession } from "@/hooks/use-vanti-session";
 import { marketsQuery, watchlistQuery } from "@/lib/markets";
 
@@ -40,7 +41,7 @@ function WatchlistPage() {
       </header>
 
       {isPending ? (
-        <EmptyState title="Loading your watchlist…" />
+        <MarketGridSkeleton count={3} />
       ) : watched.length ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {watched.map((market) => (
@@ -49,7 +50,7 @@ function WatchlistPage() {
         </div>
       ) : (
         <EmptyState
-          title="Save markets to track them here."
+          title="Track a market to see it here. Tap the star on any market to save it."
           action={
             <Button asChild size="sm">
               <Link to="/markets">Browse markets</Link>
