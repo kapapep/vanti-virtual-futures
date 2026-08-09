@@ -112,7 +112,7 @@ export function MarketAmbientBackground() {
         return (
           <div
             key={m.question}
-            className="absolute w-56 rounded-xl border border-border/70 bg-surface/55 p-3.5 shadow-sm"
+            className="absolute w-48 rounded-xl border border-border/50 bg-surface/40 p-3"
             style={{
               left: m.x,
               top: m.y,
