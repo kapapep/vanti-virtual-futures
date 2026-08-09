@@ -37,7 +37,6 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [busy, setBusy] = useState(false);
-  const [sentConfirmation, setSentConfirmation] = useState(false);
 
   useEffect(() => {
     void supabase.auth.getSession().then(({ data }) => {
