@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState } from "@/components/vanti/empty-state";
+import { AnimatedNumber } from "@/components/vanti/animated-number";
+import { PositionRowSkeleton } from "@/components/vanti/skeletons";
 import { EquityChart } from "@/components/vanti/equity-chart";
 import { PositionRow } from "@/components/vanti/position-row";
 import { TradeHistoryList } from "@/components/vanti/trade-history-list";
