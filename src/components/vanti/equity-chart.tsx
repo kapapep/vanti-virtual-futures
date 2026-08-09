@@ -13,6 +13,8 @@ export function EquityChart({ points }: { points: EquityPoint[] }) {
   const min = Math.min(...values, first);
   const max = Math.max(...values, first);
   const pad = Math.max(20, (max - min) * 0.12);
+  const spanMs = (points[points.length - 1]?.t ?? 0) - (points[0]?.t ?? 0);
+  const intraday = spanMs < 3 * 24 * 60 * 60 * 1000;
 
   return (
     <div className="h-56 w-full">
@@ -29,7 +31,9 @@ export function EquityChart({ points }: { points: EquityPoint[] }) {
             type="number"
             domain={["dataMin", "dataMax"]}
             tickFormatter={(t: number) =>
-              new Date(t).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+              intraday
+                ? new Date(t).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
+                : new Date(t).toLocaleDateString("en-US", { month: "short", day: "numeric" })
             }
             tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
             axisLine={false}
