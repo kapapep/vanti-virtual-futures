@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState, type ReactNode } from "react";
+import { ImagePlus } from "lucide-react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { fileToAvatarDataUrl } from "@/lib/image-file";
 import { updateOwnProfile } from "@/lib/social";
 
 export function EditProfileDialog({
@@ -46,6 +48,20 @@ export function EditProfileDialog({
   const [displayName, setDisplayName] = useState(initialDisplayName);
   const [bio, setBio] = useState(initialBio);
   const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl);
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [processing, setProcessing] = useState(false);
+
+  async function pickImage(file: File | undefined) {
+    if (!file) return;
+    setProcessing(true);
+    try {
+      setAvatarUrl(await fileToAvatarDataUrl(file));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Couldn't use that image.");
+    } finally {
+      setProcessing(false);
+    }
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -88,7 +104,30 @@ export function EditProfileDialog({
                 {(displayName || username).slice(0, 2).toUpperCase()}
               </div>
             )}
-            <p className="text-meta text-muted-foreground">@{username}</p>
+            <div className="min-w-0">
+              <p className="text-meta text-muted-foreground">@{username}</p>
+              <Button
+                type="button"
+                variant="outline"
+                className="mt-2 min-h-11"
+                disabled={processing}
+                onClick={() => fileInput.current?.click()}
+              >
+                <ImagePlus className="size-4" />
+                {processing ? "Processing…" : "Choose photo"}
+              </Button>
+              <input
+                ref={fileInput}
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                aria-label="Upload a profile picture from your device"
+                onChange={(event) => {
+                  void pickImage(event.target.files?.[0]);
+                  event.target.value = "";
+                }}
+              />
+            </div>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="displayName">Display name</Label>
@@ -100,13 +139,23 @@ export function EditProfileDialog({
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="avatarUrl">Profile picture URL</Label>
+            <Label htmlFor="avatarUrl">Or paste an image URL</Label>
             <Input
               id="avatarUrl"
-              value={avatarUrl}
+              value={avatarUrl.startsWith("data:") ? "" : avatarUrl}
               placeholder="https://…"
+              disabled={avatarUrl.startsWith("data:")}
               onChange={(event) => setAvatarUrl(event.target.value)}
             />
+            {avatarUrl.startsWith("data:") ? (
+              <button
+                type="button"
+                className="text-meta text-muted-foreground underline"
+                onClick={() => setAvatarUrl("")}
+              >
+                Remove chosen photo
+              </button>
+            ) : null}
           </div>
           {showBio ? (
             <div className="space-y-1.5">
