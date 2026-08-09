@@ -33,6 +33,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { GlobalSearch } from "@/components/vanti/global-search";
+import { AnimatedNumber } from "@/components/vanti/animated-number";
 import { ThemeToggle } from "@/components/vanti/theme-toggle";
 import { Wordmark } from "@/components/vanti/wordmark";
 import { useProfile } from "@/hooks/use-vanti-session";
@@ -65,9 +66,15 @@ function BalanceChip({ className }: { className?: string }) {
       className={cn("rounded-md border border-border bg-surface px-3 py-1.5 text-right", className)}
     >
       <p className="text-meta font-medium uppercase text-muted-foreground">Virtual balance</p>
-      <p className="num text-sm font-semibold text-foreground">
-        {isPending && !profile ? "—" : formatBalance(profile?.balance)}
-      </p>
+      {isPending && !profile ? (
+        <p className="num text-sm font-semibold text-foreground">—</p>
+      ) : (
+        <AnimatedNumber
+          className="num block text-sm font-semibold text-foreground"
+          value={profile?.balance ?? 0}
+          format={formatBalance}
+        />
+      )}
     </div>
   );
 }
@@ -89,7 +96,7 @@ function AccountMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className="rounded-full outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring"
+          className="grid size-11 place-items-center rounded-full"
           aria-label="Account menu"
         >
           <Avatar className="size-9 border border-border">
@@ -164,7 +171,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <BalanceChip />
           <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
             <DialogTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label="Search">
+              <Button variant="ghost" size="icon" className="size-11" aria-label="Search">
                 <Search className="size-4" />
               </Button>
             </DialogTrigger>
