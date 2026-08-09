@@ -74,7 +74,7 @@ export function TradePanel({
       : value <= 0
         ? "Enter an amount to trade."
         : value > balance
-          ? "Amount exceeds your available balance."
+          ? `Not enough balance. You have ${formatBalance(balance)} available.`
           : null;
 
   useEffect(() => {
@@ -165,7 +165,7 @@ export function TradePanel({
               type="button"
               onClick={() => setSide(s)}
               className={cn(
-                "rounded-md border px-3 py-2 text-sm font-semibold uppercase transition-colors duration-150",
+                "flex min-h-11 items-center justify-center gap-1 rounded-md border px-3 text-sm font-semibold uppercase transition-colors duration-150",
                 side === s
                   ? s === "yes"
                     ? "border-positive bg-positive-subtle text-positive"
@@ -193,11 +193,20 @@ export function TradePanel({
           />
           <div className="grid grid-cols-4 gap-2">
             {QUICK_FILL.map((q) => (
-              <Button key={q} variant="outline" size="sm" onClick={() => setAmount(String(q))}>
+              <Button
+                key={q}
+                variant="outline"
+                className="min-h-11"
+                onClick={() => setAmount(String(q))}
+              >
                 ${q}
               </Button>
             ))}
-            <Button variant="outline" size="sm" onClick={() => setAmount(balance.toFixed(2))}>
+            <Button
+              variant="outline"
+              className="min-h-11"
+              onClick={() => setAmount(balance.toFixed(2))}
+            >
               Max
             </Button>
           </div>
@@ -216,7 +225,7 @@ export function TradePanel({
 
         <Button
           className={cn(
-            "mt-3 w-full font-semibold",
+            "mt-3 min-h-12 w-full text-base font-semibold",
             side === "yes"
               ? "bg-positive text-positive-foreground hover:bg-positive/90"
               : "bg-negative text-negative-foreground hover:bg-negative/90",
@@ -240,7 +249,8 @@ export function TradePanel({
           <div className="mt-3 animate-in fade-in slide-in-from-bottom-1 duration-300 rounded-md border border-border bg-secondary p-3">
             <p className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
               <Check className="size-4 text-positive" />
-              {receipt.action === "buy" ? "Bought" : "Sold"} {receipt.side.toUpperCase()}
+              {receipt.action === "buy" ? "Bought" : "Sold"} {receipt.contracts.toFixed(2)}{" "}
+              {receipt.side.toUpperCase()} contracts
             </p>
             <div className="mt-2 space-y-1">
               <Row label="Contracts" value={receipt.contracts.toFixed(2)} />

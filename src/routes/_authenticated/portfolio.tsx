@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState } from "@/components/vanti/empty-state";
+import { AnimatedNumber } from "@/components/vanti/animated-number";
+import { PositionRowSkeleton } from "@/components/vanti/skeletons";
 import { EquityChart } from "@/components/vanti/equity-chart";
 import { PositionRow } from "@/components/vanti/position-row";
 import { TradeHistoryList } from "@/components/vanti/trade-history-list";
@@ -145,9 +147,11 @@ function PortfolioPage() {
             <h1 className="text-meta font-medium uppercase text-muted-foreground">
               Portfolio value
             </h1>
-            <p className="num mt-1 text-display font-semibold text-foreground">
-              {formatBalance(summary.portfolioValue)}
-            </p>
+            <AnimatedNumber
+              className="num mt-1 block text-display font-semibold text-foreground"
+              value={summary.portfolioValue}
+              format={formatBalance}
+            />
             <p
               className={cn(
                 "num mt-1 text-sm font-semibold",
@@ -165,7 +169,7 @@ function PortfolioPage() {
                 type="button"
                 onClick={() => setRange(option.key)}
                 className={cn(
-                  "num rounded px-2.5 py-1 text-meta font-semibold transition-colors",
+                  "num inline-flex min-h-11 items-center rounded px-2.5 text-meta font-semibold transition-colors duration-150 sm:min-h-8",
                   range === option.key
                     ? "bg-card text-foreground shadow-xs"
                     : "text-muted-foreground hover:text-foreground",
@@ -228,7 +232,11 @@ function PortfolioPage() {
           </div>
 
           {positionsPending ? (
-            <EmptyState title="Loading your positions…" />
+            <div className="@container divide-y divide-border rounded-lg border border-border bg-card">
+              {Array.from({ length: 3 }, (_, i) => (
+                <PositionRowSkeleton key={i} />
+              ))}
+            </div>
           ) : sortedPositions.length ? (
             <div className="@container divide-y divide-border rounded-lg border border-border bg-card">
               {sortedPositions.map((position) => (

@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { EmptyState } from "@/components/vanti/empty-state";
+import { ProfileSkeleton } from "@/components/vanti/skeletons";
 import { TradeHistoryList } from "@/components/vanti/trade-history-list";
 import { useSession } from "@/hooks/use-vanti-session";
 import {
@@ -88,7 +89,7 @@ function UserProfilePage() {
     onError: () => toast.error("Couldn't update follow. Try again."),
   });
 
-  if (isPending) return <EmptyState title="Loading trader profile…" />;
+  if (isPending) return <ProfileSkeleton />;
   if (isError || !profile)
     return <EmptyState title="No trader found with that username." />;
 

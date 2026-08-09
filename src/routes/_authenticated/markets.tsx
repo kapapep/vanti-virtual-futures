@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { CategoryIcon } from "@/components/vanti/category-icon";
 import { MarketCard } from "@/components/vanti/market-card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { MarketGridSkeleton } from "@/components/vanti/skeletons";
 import { categoriesQuery, marketsQuery, type Market } from "@/lib/markets";
 import { cn } from "@/lib/utils";
 
@@ -74,12 +74,13 @@ function MarketsPage() {
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="sticky top-[57px] z-10 -mx-4 space-y-2 border-b border-border bg-background px-4 pb-2 pt-2 lg:top-0">
+      <div className="-mx-4 flex items-center gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden">
         <button
           type="button"
           onClick={() => navigate({ search: (prev: MarketsSearch) => ({ ...prev, category: undefined }) })}
           className={cn(
-            "rounded-full border px-3 py-1.5 text-meta font-medium transition-colors",
+            "inline-flex min-h-11 shrink-0 items-center rounded-full border px-3.5 text-xs font-medium transition-colors duration-150 sm:min-h-8",
             !category
               ? "border-accent-solid bg-accent-subtle text-accent-solid"
               : "border-border text-muted-foreground hover:text-foreground",
@@ -93,7 +94,7 @@ function MarketsPage() {
             type="button"
             onClick={() => navigate({ search: (prev: MarketsSearch) => ({ ...prev, category: c.slug }) })}
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-meta font-medium transition-colors",
+              "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-xs font-medium whitespace-nowrap transition-colors duration-150 sm:min-h-8",
               category === c.slug
                 ? "border-accent-solid bg-accent-subtle text-accent-solid"
                 : "border-border text-muted-foreground hover:text-foreground",
@@ -105,15 +106,15 @@ function MarketsPage() {
         ))}
       </div>
 
-      <div className="flex items-center justify-between gap-3 border-y border-border py-2">
-        <div className="flex flex-wrap gap-1">
+      <div className="flex items-center justify-between gap-3 border-t border-border pt-2">
+        <div className="-mx-4 flex min-w-0 gap-1 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden">
           {SORTS.map((s) => (
             <button
               key={s.key}
               type="button"
               onClick={() => navigate({ search: (prev: MarketsSearch) => ({ ...prev, sort: s.key }) })}
               className={cn(
-                "rounded-md px-2.5 py-1 text-meta font-semibold transition-colors",
+                "inline-flex min-h-11 shrink-0 items-center rounded-md px-2.5 text-xs font-semibold whitespace-nowrap transition-colors duration-150 sm:min-h-8",
                 sort === s.key
                   ? "bg-secondary text-foreground"
                   : "text-muted-foreground hover:text-foreground",
@@ -123,19 +124,20 @@ function MarketsPage() {
             </button>
           ))}
         </div>
-        <p className="num shrink-0 text-meta text-muted-foreground">{filtered.length} markets</p>
+        <p className="num hidden shrink-0 text-meta text-muted-foreground sm:block">
+          {filtered.length} markets
+        </p>
+      </div>
       </div>
 
       {markets.isPending ? (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-52 w-full rounded-lg" />
-          ))}
-        </div>
+        <MarketGridSkeleton count={6} />
       ) : filtered.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-          No markets in this category yet.
-        </p>
+        <div className="rounded-lg border border-dashed border-border p-8 text-center">
+          <p className="text-sm text-muted-foreground">
+            No markets here yet. Pick another category to keep browsing.
+          </p>
+        </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.map((market) => (

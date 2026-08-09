@@ -33,6 +33,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { GlobalSearch } from "@/components/vanti/global-search";
+import { AnimatedNumber } from "@/components/vanti/animated-number";
 import { ThemeToggle } from "@/components/vanti/theme-toggle";
 import { Wordmark } from "@/components/vanti/wordmark";
 import { useProfile } from "@/hooks/use-vanti-session";
@@ -62,12 +63,23 @@ function BalanceChip({ className }: { className?: string }) {
 
   return (
     <div
-      className={cn("rounded-md border border-border bg-surface px-3 py-1.5 text-right", className)}
+      className={cn(
+        "shrink-0 rounded-md border border-border bg-surface px-2 py-1 text-right lg:px-3 lg:py-1.5",
+        className,
+      )}
     >
-      <p className="text-meta font-medium uppercase text-muted-foreground">Virtual balance</p>
-      <p className="num text-sm font-semibold text-foreground">
-        {isPending && !profile ? "—" : formatBalance(profile?.balance)}
+      <p className="hidden text-meta font-medium uppercase text-muted-foreground sm:block lg:block">
+        Virtual balance
       </p>
+      {isPending && !profile ? (
+        <p className="num text-sm font-semibold text-foreground">—</p>
+      ) : (
+        <AnimatedNumber
+          className="num block text-sm font-semibold text-foreground"
+          value={profile?.balance ?? 0}
+          format={formatBalance}
+        />
+      )}
     </div>
   );
 }
@@ -89,7 +101,7 @@ function AccountMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className="rounded-full outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring"
+          className="grid size-11 place-items-center rounded-full"
           aria-label="Account menu"
         >
           <Avatar className="size-9 border border-border">
@@ -127,6 +139,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Link to="/home" className="px-2">
           <Wordmark />
         </Link>
+        {/* Search stays in the chrome between lg and xl, where the right rail is hidden. */}
+        <div className="mt-4 xl:hidden">
+          <GlobalSearch />
+        </div>
         <nav className="mt-8 flex flex-col gap-1">
           {primaryNav.map((item) => {
             const active = pathname === item.to;
@@ -164,7 +180,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <BalanceChip />
           <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
             <DialogTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label="Search">
+              <Button variant="ghost" size="icon" className="size-11" aria-label="Search">
                 <Search className="size-4" />
               </Button>
             </DialogTrigger>
@@ -191,7 +207,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="hidden w-72 shrink-0 flex-col gap-4 xl:flex">
             <div className="flex items-center gap-2">
               <GlobalSearch className="flex-1" />
-              <Button variant="ghost" size="icon" aria-label="Notifications">
+              <Button variant="ghost" size="icon" className="size-11" aria-label="Notifications">
                 <Bell className="size-4" />
               </Button>
               <ThemeToggle />

@@ -4,6 +4,7 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CategoryIcon } from "@/components/vanti/category-icon";
 import { MarketCard } from "@/components/vanti/market-card";
+import { MarketGridSkeleton } from "@/components/vanti/skeletons";
 import { categoriesQuery, marketsQuery, type Market } from "@/lib/markets";
 
 export const Route = createFileRoute("/_authenticated/discover")({
@@ -76,9 +77,12 @@ function DiscoverPage() {
       </div>
 
       {markets.isPending ? (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-52 w-full rounded-lg" />
+        <div className="space-y-10">
+          {Array.from({ length: 2 }, (_, s) => (
+            <div key={s} className="space-y-4">
+              <Skeleton className="h-5 w-32" />
+              <MarketGridSkeleton count={3} />
+            </div>
           ))}
         </div>
       ) : (

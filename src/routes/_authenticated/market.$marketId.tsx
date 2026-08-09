@@ -10,6 +10,7 @@ import { PriceChart } from "@/components/vanti/price-chart";
 import { MarketDiscussion } from "@/components/vanti/market-discussion";
 import { ProbabilityBar } from "@/components/vanti/probability-bar";
 import { TradePanel } from "@/components/vanti/trade-panel";
+import { TradeDialog } from "@/components/vanti/trade-dialog";
 import { useSession } from "@/hooks/use-vanti-session";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -242,8 +243,26 @@ function MarketDetailPage() {
         </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-16 z-20 max-h-[62vh] overflow-y-auto border-t border-border bg-background/95 p-4 backdrop-blur @[600px]:hidden">
-        <TradePanel market={m} compact />
+      {/* Mobile: the primary trade action stays in thumb reach and opens the full panel. */}
+      <div className="fixed inset-x-0 bottom-16 z-20 grid grid-cols-2 gap-2 border-t border-border bg-background p-3 @[600px]:hidden">
+        <TradeDialog
+          market={m}
+          side="yes"
+          trigger={
+            <Button className="min-h-12 w-full bg-positive text-base font-semibold text-positive-foreground hover:bg-positive/90">
+              Buy YES <span className="num">{formatCents(m.yesPrice)}</span>
+            </Button>
+          }
+        />
+        <TradeDialog
+          market={m}
+          side="no"
+          trigger={
+            <Button className="min-h-12 w-full bg-negative text-base font-semibold text-negative-foreground hover:bg-negative/90">
+              Buy NO <span className="num">{formatCents(m.noPrice)}</span>
+            </Button>
+          }
+        />
       </div>
       </div>
     </div>
