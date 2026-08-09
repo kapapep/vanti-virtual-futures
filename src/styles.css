@@ -231,6 +231,18 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  /* Numbers are tabular everywhere. */
+  body {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Dark: surfaces are elevation, hairlines only separate.
+     Light: a card is a 1px hairline border on a transparent background. */
+  .light [data-slot="card"] {
+    background-color: transparent;
+    border: 1px solid var(--hair);
+  }
+
   /* Every interactive element keeps a visible keyboard focus ring. */
   a:focus-visible,
   button:focus-visible,
