@@ -1,10 +1,23 @@
 import { cn } from "@/lib/utils";
 
-export function Wordmark({ className }: { className?: string }) {
+const sizeClasses = {
+  sm: "text-sm font-medium tracking-[-0.03em]",
+  md: "text-[1.35rem] font-semibold tracking-[-0.04em]",
+  lg: "text-2xl font-semibold tracking-[-0.04em]",
+} as const;
+
+export function Wordmark({
+  className,
+  size = "md",
+}: {
+  className?: string;
+  size?: "sm" | "md" | "lg";
+}) {
   return (
     <span
       className={cn(
-        "text-[1.35rem] font-semibold tracking-[-0.04em] text-foreground select-none",
+        "text-foreground select-none",
+        sizeClasses[size],
         className,
       )}
     >
@@ -13,3 +26,4 @@ export function Wordmark({ className }: { className?: string }) {
     </span>
   );
 }
+
