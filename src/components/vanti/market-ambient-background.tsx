@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 
 const SEED_MARKETS = [
-  { question: "Will the Fed cut rates before September?", base: 63, x: "4%", y: "8%", delay: "0s", dur: "38s" },
-  { question: "Will the model ship this quarter?", base: 41, x: "72%", y: "12%", delay: "-9s", dur: "46s" },
-  { question: "Will inflation print below 3%?", base: 77, x: "6%", y: "72%", delay: "-18s", dur: "52s" },
-  { question: "Will the merger close in 2026?", base: 29, x: "74%", y: "68%", delay: "-27s", dur: "43s" },
+  { question: "Will the Fed cut rates before September?", base: 63, x: "3%", y: "10%", delay: "0s", dur: "38s" },
+  { question: "Will the model ship this quarter?", base: 41, x: "80%", y: "12%", delay: "-9s", dur: "46s" },
+  { question: "Will inflation print below 3%?", base: 77, x: "4%", y: "74%", delay: "-18s", dur: "52s" },
+  { question: "Will the merger close in 2026?", base: 29, x: "82%", y: "72%", delay: "-27s", dur: "43s" },
 ] as const;
 
 /** Deterministic pseudo-random walk so SSR and client render the same curve. */
