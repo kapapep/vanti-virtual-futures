@@ -4,6 +4,7 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CategoryIcon } from "@/components/vanti/category-icon";
 import { MarketCard } from "@/components/vanti/market-card";
+import { MarketGridSkeleton } from "@/components/vanti/skeletons";
 import { categoriesQuery, marketsQuery, type Market } from "@/lib/markets";
 
 export const Route = createFileRoute("/_authenticated/discover")({
