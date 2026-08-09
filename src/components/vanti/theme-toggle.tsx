@@ -26,7 +26,7 @@ export function ThemeToggle({ className }: { className?: string }) {
     <Button
       variant="ghost"
       size="icon"
-      className={className}
+      className={className ?? "size-11"}
       onClick={toggle}
       aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
     >

@@ -33,7 +33,7 @@ export function ProbabilityBar({
         aria-label={`YES ${formatCents(price)}, NO ${formatCents(1 - price)}`}
       >
         <div
-          className="h-full bg-positive transition-[width] duration-700 ease-out"
+          className="h-full bg-positive transition-[width] duration-300 ease-out"
           style={{ width: `${pct}%` }}
         />
       </div>
