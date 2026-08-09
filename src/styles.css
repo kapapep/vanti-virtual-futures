@@ -300,3 +300,9 @@
   animation-duration: 34s;
   animation-delay: -8s;
 }
+
+.vanti-curve-reverse {
+  animation-direction: reverse;
+  animation-duration: 52s;
+  animation-delay: -14s;
+}
