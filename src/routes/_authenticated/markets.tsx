@@ -74,7 +74,7 @@ function MarketsPage() {
         </p>
       </div>
 
-      <div className="sticky top-[57px] z-10 -mx-4 space-y-2 border-b border-border bg-background/95 px-4 pb-2 pt-2 backdrop-blur lg:top-0">
+      <div className="sticky top-[57px] z-10 -mx-4 space-y-2 border-b border-border bg-background px-4 pb-2 pt-2 lg:top-0">
       <div className="-mx-4 flex items-center gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden">
         <button
           type="button"
