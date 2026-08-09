@@ -208,7 +208,9 @@ export function buildSummary(input: {
     .reduce((sum, t) => sum + t.amount, 0);
   const realized = cashFlow + invested;
   const portfolioValue = input.balance + positionsValue;
-  const totalPnl = realized + unrealized;
+  // All-time return measured against the $10,000 virtual grant, so the number
+  // matches what a trader sees on their public profile.
+  const totalPnl = portfolioValue - STARTING_BALANCE;
 
   return {
     balance: input.balance,
