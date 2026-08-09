@@ -2,31 +2,7 @@
 @source "../src";
 @import "tw-animate-css";
 
-@custom-variant Dark (default): --bg 
-#000000 true black, OLED --elev 
-#1C1C1E raised surface --elev2 
-#2C2C2E tertiary surface --hair 
-#38383A separator, rendered at 0.5px --label 
-#FFFFFF --label2 rgba(235,235,245,.60) --label3 rgba(235,235,245,.30) --accent 
-#5C7BFF --tint 
-#26315E --track 
-#1F2438 --yes 
-#30D158 --no 
-#FF453A --radius 6px
-
-Light: --bg 
-#FFFFFF --elev 
-#FFFFFF --elev2 
-#F7F8FA --hair 
-#E7E9EF --label 
-#0B0D12 --label2 
-#5A6070 --label3 
-#8B92A3 --accent 
-#1C3AD6 --tint 
-#C7CFF2 --track 
-#E9ECF5 --yes 
-#12A150 --no 
-#E0393E dark (&:is(.dark *));
+@custom-variant dark (&:is(.dark *));
 
 /*
  * Vanti design system — intelligent, fast, premium fintech.
