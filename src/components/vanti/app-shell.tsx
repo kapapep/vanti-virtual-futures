@@ -33,12 +33,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { GlobalSearch } from "@/components/vanti/global-search";
-import { AnimatedNumber } from "@/components/vanti/animated-number";
 import { ThemeToggle } from "@/components/vanti/theme-toggle";
 import { Wordmark } from "@/components/vanti/wordmark";
 import { useProfile } from "@/hooks/use-vanti-session";
 import { supabase } from "@/integrations/supabase/client";
-import { formatBalance } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 const primaryNav = [
