@@ -6,6 +6,7 @@ import {
   Home,
   LineChart,
   LogOut,
+  Pencil,
   PieChart,
   Search,
   Star,
@@ -15,7 +16,7 @@ import {
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -34,7 +35,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { GlobalSearch } from "@/components/vanti/global-search";
-import { ThemeToggle } from "@/components/vanti/theme-toggle";
+import { EditProfileDialog } from "@/components/vanti/edit-profile-dialog";
 import { VantiMark } from "@/components/vanti/vanti-mark";
 import { useProfile } from "@/hooks/use-vanti-session";
 import { supabase } from "@/integrations/supabase/client";
@@ -63,7 +64,7 @@ const mobileNav = [
 function BalanceTabValue() {
   const { data: profile } = useProfile();
   return (
-    <span className="num text-sm font-semibold leading-5 text-foreground">
+    <span className="num text-xs leading-5 text-foreground">
       {profile ? formatBalance(profile.balance) : "—"}
     </span>
   );
@@ -73,6 +74,7 @@ function AccountMenu() {
   const { data: profile } = useProfile();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [editOpen, setEditOpen] = useState(false);
   const initials = (profile?.display_name ?? profile?.username ?? "V").slice(0, 2).toUpperCase();
 
   async function signOut() {
@@ -83,6 +85,7 @@ function AccountMenu() {
   }
 
   return (
+    <>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
@@ -90,6 +93,9 @@ function AccountMenu() {
           aria-label="Account menu"
         >
           <Avatar className="size-9 border border-border">
+            {profile?.avatar_url ? (
+              <AvatarImage src={profile.avatar_url} alt="Your profile picture" />
+            ) : null}
             <AvatarFallback className="bg-secondary text-xs font-medium">{initials}</AvatarFallback>
           </Avatar>
         </button>
@@ -105,11 +111,26 @@ function AccountMenu() {
         <DropdownMenuItem asChild>
           <Link to="/profile">Profile</Link>
         </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => setEditOpen(true)}>
+          <Pencil className="size-4" /> Edit profile
+        </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => void signOut()}>
           <LogOut className="size-4" /> Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+      {profile ? (
+        <EditProfileDialog
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          userId={profile.id}
+          username={profile.username}
+          displayName={profile.display_name ?? ""}
+          avatarUrl={profile.avatar_url ?? ""}
+          showBio={false}
+        />
+      ) : null}
+    </>
   );
 }
 
@@ -175,7 +196,6 @@ export function AppShell({ children }: { children: ReactNode }) {
               <GlobalSearch autoFocus onNavigate={() => setSearchOpen(false)} />
             </DialogContent>
           </Dialog>
-          <ThemeToggle />
           <AccountMenu />
         </div>
       </header>
@@ -191,7 +211,6 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Button variant="ghost" size="icon" className="size-11" aria-label="Notifications">
                 <Bell className="size-4" />
               </Button>
-              <ThemeToggle />
               <AccountMenu />
             </div>
           </div>
