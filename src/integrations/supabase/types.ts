@@ -372,7 +372,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      execute_trade: {
+        Args: {
+          p_action: string
+          p_amount: number
+          p_market_id: string
+          p_side: string
+        }
+        Returns: Json
+      }
+      resolve_market: {
+        Args: { p_market_id: string; p_outcome: string }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

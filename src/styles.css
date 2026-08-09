@@ -76,8 +76,10 @@
   --color-accent-subtle: var(--accent-subtle);
   --color-positive: var(--positive);
   --color-positive-subtle: var(--positive-subtle);
+  --color-positive-foreground: var(--positive-foreground);
   --color-negative: var(--negative);
   --color-negative-subtle: var(--negative-subtle);
+  --color-negative-foreground: var(--negative-foreground);
   --color-surface: var(--surface);
   --font-sans: var(--font-vanti-sans);
   --text-display: 2.5rem;
@@ -114,8 +116,10 @@
   --accent-subtle: oklch(0.96 0.02 258);
   --positive: oklch(0.53 0.12 152);
   --positive-subtle: oklch(0.96 0.03 152);
+  --positive-foreground: oklch(0.99 0.002 75);
   --negative: oklch(0.55 0.18 25);
   --negative-subtle: oklch(0.96 0.03 25);
+  --negative-foreground: oklch(0.99 0.002 75);
   --destructive: oklch(0.55 0.18 25);
   --destructive-foreground: oklch(0.99 0.002 75);
   --border: oklch(0.915 0.004 75);
@@ -157,8 +161,10 @@
   --accent-subtle: oklch(0.28 0.04 258);
   --positive: oklch(0.68 0.13 152);
   --positive-subtle: oklch(0.26 0.04 152);
+  --positive-foreground: oklch(0.17 0.01 152);
   --negative: oklch(0.66 0.17 25);
   --negative-subtle: oklch(0.26 0.05 25);
+  --negative-foreground: oklch(0.17 0.01 25);
   --destructive: oklch(0.66 0.17 25);
   --destructive-foreground: oklch(0.15 0.006 270);
   --border: oklch(0.29 0.006 270);
