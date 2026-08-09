@@ -57,8 +57,8 @@ export function MarketAmbientBackground() {
 
   const paths = useMemo(
     () => [
-      toPath(seededCurve(48, 20260809), 1200, 320),
-      toPath(seededCurve(48, 77771), 1200, 320),
+      toPath(seededCurve(96, 20260809), 1800, 320),
+      toPath(seededCurve(96, 77771), 1800, 320),
     ],
     [],
   );

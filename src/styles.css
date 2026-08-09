@@ -287,14 +287,13 @@
   100% { transform: translate3d(0, 0, 0) scale(1); }
 }
 
-@keyframes vanti-curve-draw {
-  0% { stroke-dasharray: 1600; stroke-dashoffset: 1600; }
-  60% { stroke-dasharray: 1600; stroke-dashoffset: 0; }
-  100% { stroke-dasharray: 1600; stroke-dashoffset: 0; }
+@keyframes vanti-curve-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-600px); }
 }
 
 .vanti-curve {
-  animation: vanti-curve-draw 22s ease-in-out infinite;
+  animation: vanti-curve-scroll 40s linear infinite;
 }
 
 .vanti-curve-slow {
