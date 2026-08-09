@@ -65,16 +65,17 @@ export function MarketAmbientBackground() {
 
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {/* Primary brand probability curve */}
       <svg
         viewBox="0 0 1200 320"
         preserveAspectRatio="none"
-        className="absolute inset-x-0 top-[8%] h-[62%] w-full text-accent-solid opacity-[0.12]"
+        className="absolute inset-x-0 top-[6%] h-[66%] w-full text-accent-solid/30"
       >
         <path
           d={paths[0]}
           fill="none"
           stroke="currentColor"
-          strokeWidth={2.5}
+          strokeWidth={3.5}
           strokeLinecap="round"
           className={reduced ? undefined : "vanti-curve"}
         />
@@ -82,10 +83,27 @@ export function MarketAmbientBackground() {
           d={paths[1]}
           fill="none"
           stroke="currentColor"
-          strokeWidth={1.5}
+          strokeWidth={2.5}
           strokeLinecap="round"
-          opacity={0.6}
+          opacity={0.7}
           className={reduced ? undefined : "vanti-curve vanti-curve-slow"}
+        />
+      </svg>
+
+      {/* Secondary echo curve for depth */}
+      <svg
+        viewBox="0 0 1200 320"
+        preserveAspectRatio="none"
+        className="absolute inset-x-0 top-[12%] h-[54%] w-full text-accent-subtle/20"
+      >
+        <path
+          d={paths[0]}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={4}
+          strokeLinecap="round"
+          opacity={0.5}
+          className={reduced ? undefined : "vanti-curve vanti-curve-reverse"}
         />
       </svg>
 
@@ -94,19 +112,19 @@ export function MarketAmbientBackground() {
         return (
           <div
             key={m.question}
-            className="absolute w-52 rounded-lg border border-border/40 bg-surface/30 p-3 opacity-[0.16]"
+            className="absolute w-56 rounded-xl border border-border/70 bg-surface/55 p-3.5 shadow-sm"
             style={{
               left: m.x,
               top: m.y,
               animation: reduced ? undefined : `vanti-drift ${m.dur} ease-in-out ${m.delay} infinite`,
             }}
           >
-            <p className="line-clamp-2 text-meta text-foreground">{m.question}</p>
+            <p className="line-clamp-2 text-sm text-foreground">{m.question}</p>
             <div className="mt-2 flex items-center justify-between">
-              <span className="num text-meta text-yes">YES {yes}%</span>
-              <span className="num text-meta text-no">NO {100 - yes}%</span>
+              <span className="num text-sm text-yes">YES {yes}%</span>
+              <span className="num text-sm text-no">NO {100 - yes}%</span>
             </div>
-            <div className="mt-2 flex h-[3px] w-full overflow-hidden rounded-full">
+            <div className="mt-2.5 flex h-[4px] w-full overflow-hidden rounded-full">
               <span className="bg-yes" style={{ width: `${yes}%` }} />
               <span className="flex-1 bg-no" />
             </div>
@@ -114,7 +132,7 @@ export function MarketAmbientBackground() {
         );
       })}
 
-      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
     </div>
   );
 }
