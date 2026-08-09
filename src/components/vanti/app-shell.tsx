@@ -111,7 +111,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <aside className="fixed inset-y-0 left-0 hidden w-60 flex-col border-r border-border bg-sidebar px-4 py-6 lg:flex">
         <Link to="/home" className="flex items-center gap-2 px-2">
           <VantiMark size={22} title="Vanti" />
-          <Wordmark />
+          <Wordmark size="sm" />
         </Link>
         {/* Search stays in the chrome between lg and xl, where the right rail is hidden. */}
         <div className="mt-4 xl:hidden">
@@ -146,7 +146,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-20 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border bg-background/90 px-4 py-3 backdrop-blur lg:hidden">
         <Link to="/home" className="flex min-w-0 items-center gap-2">
           <VantiMark size={22} title="Vanti" />
-          <Wordmark />
+          <Wordmark size="sm" />
         </Link>
         <div className="flex shrink-0 items-center gap-2">
           <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
