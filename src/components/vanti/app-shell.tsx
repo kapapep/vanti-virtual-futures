@@ -52,10 +52,7 @@ function BalanceChip({ className }: { className?: string }) {
 
   return (
     <div
-      className={cn(
-        "rounded-md border border-border bg-surface px-3 py-1.5 text-right",
-        className,
-      )}
+      className={cn("rounded-md border border-border bg-surface px-3 py-1.5 text-right", className)}
     >
       <p className="text-meta font-medium uppercase text-muted-foreground">Virtual balance</p>
       <p className="num text-sm font-semibold text-foreground">
@@ -86,9 +83,7 @@ function AccountMenu() {
           aria-label="Account menu"
         >
           <Avatar className="size-9 border border-border">
-            <AvatarFallback className="bg-secondary text-xs font-medium">
-              {initials}
-            </AvatarFallback>
+            <AvatarFallback className="bg-secondary text-xs font-medium">{initials}</AvatarFallback>
           </Avatar>
         </button>
       </DropdownMenuTrigger>
@@ -210,13 +205,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 }
 
-export function PageStub({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
+export function PageStub({ title, description }: { title: string; description: string }) {
   return (
     <section className="space-y-2">
       <h1 className="text-figure font-semibold text-foreground">{title}</h1>

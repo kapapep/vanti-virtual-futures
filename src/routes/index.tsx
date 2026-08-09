@@ -56,9 +56,7 @@ function Landing() {
           <Button asChild size="lg">
             <Link to="/auth">Claim $10,000.00 virtual</Link>
           </Button>
-          <span className="num text-meta text-muted-foreground">
-            Starting balance: $10,000.00
-          </span>
+          <span className="num text-meta text-muted-foreground">Starting balance: $10,000.00</span>
         </div>
 
         <dl className="mt-16 grid gap-4 sm:grid-cols-3">
