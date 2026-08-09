@@ -37,6 +37,7 @@ import { ThemeToggle } from "@/components/vanti/theme-toggle";
 import { VantiMark } from "@/components/vanti/vanti-mark";
 import { useProfile } from "@/hooks/use-vanti-session";
 import { supabase } from "@/integrations/supabase/client";
+import { formatBalance } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 const primaryNav = [
@@ -51,10 +52,20 @@ const primaryNav = [
 const mobileNav = [
   { label: "Home", to: "/home", icon: Home },
   { label: "Discover", to: "/discover", icon: Compass },
-  { label: "Trade", to: "/markets", icon: LineChart },
+  { label: "Balance", to: "/portfolio", balance: true },
   { label: "Portfolio", to: "/portfolio", icon: PieChart },
   { label: "Profile", to: "/profile", icon: User },
 ] as const;
+
+/** Live virtual balance, shown in the tab bar in place of an icon. */
+function BalanceTabValue() {
+  const { data: profile } = useProfile();
+  return (
+    <span className="num text-sm font-semibold leading-5 text-foreground">
+      {profile ? formatBalance(profile.balance) : "—"}
+    </span>
+  );
+}
 
 function AccountMenu() {
   const { data: profile } = useProfile();
@@ -198,7 +209,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 active ? "text-accent-solid" : "text-muted-foreground",
               )}
             >
-              <item.icon className="size-5" />
+              {"balance" in item ? <BalanceTabValue /> : <item.icon className="size-5" />}
               {item.label}
             </Link>
           );

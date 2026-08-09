@@ -35,6 +35,9 @@ export type PortfolioTrade = {
   price: number;
   total: number;
   createdAt: string;
+  /** Market status at read time, used to badge a settled prediction W or L. */
+  marketStatus: string;
+  marketOutcome: string | null;
 };
 
 export type PortfolioTransaction = {
@@ -104,7 +107,9 @@ export function tradeHistoryQuery(userId: string | undefined) {
     queryFn: async (): Promise<PortfolioTrade[]> => {
       const { data, error } = await supabase
         .from("trades")
-        .select("id, market_id, side, action, contracts, price, total, created_at, markets(question)")
+        .select(
+          "id, market_id, side, action, contracts, price, total, created_at, markets(question, status, outcome)",
+        )
         .eq("user_id", userId!)
         .order("created_at", { ascending: false })
         .limit(300);
@@ -119,6 +124,8 @@ export function tradeHistoryQuery(userId: string | undefined) {
         price: Number(row.price),
         total: Number(row.total),
         createdAt: row.created_at,
+        marketStatus: row.markets?.status ?? "active",
+        marketOutcome: row.markets?.outcome ?? null,
       }));
     },
   });
