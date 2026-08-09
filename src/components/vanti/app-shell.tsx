@@ -11,6 +11,7 @@ import {
   Star,
   User,
   Users,
+  Wallet,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
@@ -44,6 +45,7 @@ const primaryNav = [
   { label: "Home", to: "/home", icon: Home },
   { label: "Discover", to: "/discover", icon: Compass },
   { label: "Markets", to: "/markets", icon: LineChart },
+  { label: "Balance", to: "/balance", icon: Wallet },
   { label: "Portfolio", to: "/portfolio", icon: PieChart },
   { label: "Watchlist", to: "/watchlist", icon: Star },
   { label: "Following", to: "/following", icon: Users },
@@ -52,7 +54,7 @@ const primaryNav = [
 const mobileNav = [
   { label: "Home", to: "/home", icon: Home },
   { label: "Discover", to: "/discover", icon: Compass },
-  { label: "Balance", to: "/portfolio", balance: true },
+  { label: "Balance", to: "/balance", balance: true },
   { label: "Portfolio", to: "/portfolio", icon: PieChart },
   { label: "Profile", to: "/profile", icon: User },
 ] as const;
