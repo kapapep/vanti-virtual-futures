@@ -112,19 +112,19 @@ export function MarketAmbientBackground() {
         return (
           <div
             key={m.question}
-            className="absolute w-48 rounded-xl border border-border/50 bg-surface/40 p-3"
+            className="absolute w-44 rounded-lg border border-border/40 bg-surface/25 p-2.5 opacity-[0.35]"
             style={{
               left: m.x,
               top: m.y,
               animation: reduced ? undefined : `vanti-drift ${m.dur} ease-in-out ${m.delay} infinite`,
             }}
           >
-            <p className="line-clamp-2 text-sm text-foreground">{m.question}</p>
-            <div className="mt-2 flex items-center justify-between">
-              <span className="num text-sm text-yes">YES {yes}%</span>
-              <span className="num text-sm text-no">NO {100 - yes}%</span>
+            <p className="line-clamp-2 text-xs text-foreground">{m.question}</p>
+            <div className="mt-1.5 flex items-center justify-between">
+              <span className="num text-xs text-yes">YES {yes}%</span>
+              <span className="num text-xs text-no">NO {100 - yes}%</span>
             </div>
-            <div className="mt-2.5 flex h-[4px] w-full overflow-hidden rounded-full">
+            <div className="mt-2 flex h-[3px] w-full overflow-hidden rounded-full">
               <span className="bg-yes" style={{ width: `${yes}%` }} />
               <span className="flex-1 bg-no" />
             </div>
