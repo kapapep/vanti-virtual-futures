@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.add_virtual_cash(numeric) FROM anon;
