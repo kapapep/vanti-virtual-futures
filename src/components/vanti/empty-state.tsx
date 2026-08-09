@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { VantiMark } from "@/components/vanti/vanti-mark";
 import { cn } from "@/lib/utils";
 
 /** Consistent, copy-first empty state — never a blank screen. */
@@ -19,6 +20,7 @@ export function EmptyState({
         className,
       )}
     >
+      <VantiMark size={28} variant="current" className="mx-auto mb-3 text-label3" />
       <p className="text-sm text-muted-foreground">{title}</p>
       {action ? <div className="mt-4 flex justify-center">{action}</div> : null}
     </div>

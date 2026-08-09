@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Wordmark } from "@/components/vanti/wordmark";
+import { VantiMark } from "@/components/vanti/vanti-mark";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/auth")({
@@ -97,7 +98,8 @@ function AuthPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-4 py-12">
-      <Link to="/" className="mb-8">
+      <Link to="/" className="mb-8 flex flex-col items-center gap-3">
+        <VantiMark size={48} title="Vanti" />
         <Wordmark className="text-2xl" />
       </Link>
 
