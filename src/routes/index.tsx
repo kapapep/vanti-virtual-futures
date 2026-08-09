@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/vanti/theme-toggle";
 import { Wordmark } from "@/components/vanti/wordmark";
 
 export const Route = createFileRoute("/")({
@@ -30,7 +29,6 @@ function Landing() {
       <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-border px-6 py-4">
         <Wordmark />
         <div className="flex shrink-0 items-center gap-2">
-          <ThemeToggle />
           <Button asChild variant="ghost" size="sm">
             <Link to="/auth">Sign in</Link>
           </Button>
