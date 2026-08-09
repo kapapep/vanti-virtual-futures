@@ -33,12 +33,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { GlobalSearch } from "@/components/vanti/global-search";
-import { AnimatedNumber } from "@/components/vanti/animated-number";
 import { ThemeToggle } from "@/components/vanti/theme-toggle";
 import { Wordmark } from "@/components/vanti/wordmark";
 import { useProfile } from "@/hooks/use-vanti-session";
 import { supabase } from "@/integrations/supabase/client";
-import { formatBalance } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 const primaryNav = [
@@ -57,32 +55,6 @@ const mobileNav = [
   { label: "Portfolio", to: "/portfolio", icon: PieChart },
   { label: "Profile", to: "/profile", icon: User },
 ] as const;
-
-function BalanceChip({ className }: { className?: string }) {
-  const { data: profile, isPending } = useProfile();
-
-  return (
-    <div
-      className={cn(
-        "shrink-0 rounded-md border border-border bg-surface px-2 py-1 text-right lg:px-3 lg:py-1.5",
-        className,
-      )}
-    >
-      <p className="hidden text-meta font-medium uppercase text-muted-foreground sm:block lg:block">
-        Virtual balance
-      </p>
-      {isPending && !profile ? (
-        <p className="num text-sm font-semibold text-foreground">—</p>
-      ) : (
-        <AnimatedNumber
-          className="num block text-sm font-semibold text-foreground"
-          value={profile?.balance ?? 0}
-          format={formatBalance}
-        />
-      )}
-    </div>
-  );
-}
 
 function AccountMenu() {
   const { data: profile } = useProfile();
@@ -163,12 +135,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             );
           })}
         </nav>
-        <div className="mt-auto space-y-3">
-          <BalanceChip className="text-left" />
-          <p className="px-1 text-meta text-muted-foreground">
-            Virtual money only. No real funds, ever.
-          </p>
-        </div>
+        <p className="mt-auto px-1 text-meta text-muted-foreground">
+          Virtual money only. No real funds, ever.
+        </p>
       </aside>
 
       {/* Mobile top bar */}
@@ -177,7 +146,6 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Wordmark />
         </Link>
         <div className="flex shrink-0 items-center gap-2">
-          <BalanceChip />
           <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
             <DialogTrigger asChild>
               <Button variant="ghost" size="icon" className="size-11" aria-label="Search">
@@ -213,7 +181,6 @@ export function AppShell({ children }: { children: ReactNode }) {
               <ThemeToggle />
               <AccountMenu />
             </div>
-            <BalanceChip className="text-left" />
           </div>
         </div>
       </div>
