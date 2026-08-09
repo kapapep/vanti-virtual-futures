@@ -21,11 +21,25 @@ export function TradeHistoryList({
 
   return (
     <div className="divide-y divide-border rounded-lg border border-border bg-card">
-      {trades.map((trade) => (
+      {trades.map((trade) => {
+        const settled = trade.marketStatus === "resolved" && trade.marketOutcome;
+        const won = settled ? trade.side === trade.marketOutcome : null;
+        return (
         <div
           key={trade.id}
-          className="flex flex-col gap-2 px-4 py-3 @md:flex-row @md:items-center @md:justify-between"
+          className="relative flex flex-col gap-2 px-4 py-3 @md:flex-row @md:items-center @md:justify-between"
         >
+          {won !== null ? (
+            <span
+              aria-label={won ? "Won prediction" : "Lost prediction"}
+              className={cn(
+                "absolute right-1.5 top-1.5 grid size-4 place-items-center rounded-sm text-[10px] font-bold leading-none",
+                won ? "bg-positive/15 text-positive" : "bg-negative/15 text-negative",
+              )}
+            >
+              {won ? "W" : "L"}
+            </span>
+          ) : null}
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <span
@@ -77,7 +91,8 @@ export function TradeHistoryList({
             </div>
           </div>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
