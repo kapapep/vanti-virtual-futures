@@ -104,15 +104,10 @@ function BalancePage() {
 
   return (
     <div className="@container space-y-8">
-      <div className="space-y-1">
-        <h1 className="text-figure font-semibold text-foreground">Balance</h1>
-        <p className="text-sm text-muted-foreground">
-          Virtual cash only — Vanti never handles real money.
-        </p>
-      </div>
+      <h1 className="text-figure font-semibold text-foreground">Balance</h1>
 
       <section className="space-y-5 rounded-lg border border-border bg-card p-5 @md:p-6">
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
+        <div className="space-y-4">
           <div className="min-w-0">
             <p className="whitespace-nowrap text-meta font-medium uppercase text-muted-foreground">
               Available cash
@@ -127,7 +122,7 @@ function BalancePage() {
               />
             )}
           </div>
-          <div className="flex shrink-0 flex-wrap justify-end gap-2">
+          <div className="flex flex-wrap gap-2">
             <PillAction
               label="Add cash"
               active={mode === "add"}
