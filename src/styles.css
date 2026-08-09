@@ -14,6 +14,23 @@
 @utility num {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
+  font-family: var(--font-mono);
+  letter-spacing: -0.01em;
+}
+
+/* Metadata / eyebrow text: monospaced, uppercase, tracked out. */
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Hairline separator, rendered at 0.5px where the display allows. */
+@utility hairline {
+  border-color: var(--hair);
+  border-style: solid;
+  border-width: 0.5px;
 }
 
 /*
@@ -81,7 +98,19 @@
   --color-negative-subtle: var(--negative-subtle);
   --color-negative-foreground: var(--negative-foreground);
   --color-surface: var(--surface);
+  --color-bg: var(--bg);
+  --color-elev: var(--elev);
+  --color-elev2: var(--elev2);
+  --color-hair: var(--hair);
+  --color-label: var(--label);
+  --color-label2: var(--label2);
+  --color-label3: var(--label3);
+  --color-tint: var(--tint);
+  --color-track: var(--track);
+  --color-yes: var(--yes);
+  --color-no: var(--no);
   --font-sans: var(--font-vanti-sans);
+  --font-mono: var(--font-vanti-mono);
   --text-display: 2.5rem;
   --text-display--line-height: 1.05;
   --text-display--letter-spacing: -0.03em;
@@ -93,96 +122,101 @@
   --text-meta--letter-spacing: 0.01em;
 }
 
+/* Dark is the default palette (true-black OLED); `.light` switches. */
 :root {
-  --radius: 0.5rem;
+  --radius: 6px;
   --font-vanti-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --background: oklch(1 0 0);
-  --surface: oklch(0.985 0.002 75);
-  --foreground: oklch(0.19 0.008 270);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.19 0.008 270);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.19 0.008 270);
-  --primary: oklch(0.19 0.008 270);
-  --primary-foreground: oklch(0.99 0.002 75);
-  --secondary: oklch(0.968 0.003 75);
-  --secondary-foreground: oklch(0.24 0.008 270);
-  --muted: oklch(0.968 0.003 75);
-  --muted-foreground: oklch(0.55 0.008 270);
-  --accent: oklch(0.962 0.004 75);
-  --accent-foreground: oklch(0.24 0.008 270);
-  --accent-solid: oklch(0.5 0.13 258);
-  --accent-solid-foreground: oklch(0.99 0.002 75);
-  --accent-subtle: oklch(0.96 0.02 258);
-  --positive: oklch(0.53 0.12 152);
-  --positive-subtle: oklch(0.96 0.03 152);
-  --positive-foreground: oklch(0.99 0.002 75);
-  --negative: oklch(0.55 0.18 25);
-  --negative-subtle: oklch(0.96 0.03 25);
-  --negative-foreground: oklch(0.99 0.002 75);
-  --destructive: oklch(0.55 0.18 25);
-  --destructive-foreground: oklch(0.99 0.002 75);
-  --border: oklch(0.915 0.004 75);
-  --input: oklch(0.9 0.004 75);
-  --ring: oklch(0.5 0.13 258);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0.002 75);
-  --sidebar-foreground: oklch(0.19 0.008 270);
-  --sidebar-primary: oklch(0.5 0.13 258);
-  --sidebar-primary-foreground: oklch(0.99 0.002 75);
-  --sidebar-accent: oklch(0.955 0.004 75);
-  --sidebar-accent-foreground: oklch(0.19 0.008 270);
-  --sidebar-border: oklch(0.915 0.004 75);
-  --sidebar-ring: oklch(0.5 0.13 258);
+  --font-vanti-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme: dark;
+
+  /* Dark palette (default) */
+  --bg: #000000;
+  --elev: #1c1c1e;
+  --elev2: #2c2c2e;
+  --hair: #38383a;
+  --label: #ffffff;
+  --label2: rgba(235, 235, 245, 0.6);
+  --label3: rgba(235, 235, 245, 0.3);
+  --accent-brand: #5c7bff;
+  --tint: #26315e;
+  --track: #1f2438;
+  --yes: #30d158;
+  --no: #ff453a;
+
+  /* Semantic mapping — existing components reference these keys. */
+  --background: var(--bg);
+  --surface: var(--elev);
+  --foreground: var(--label);
+  --card: var(--elev);
+  --card-foreground: var(--label);
+  --popover: var(--elev);
+  --popover-foreground: var(--label);
+  --primary: var(--label);
+  --primary-foreground: var(--bg);
+  --secondary: var(--elev2);
+  --secondary-foreground: var(--label);
+  --muted: var(--elev2);
+  --muted-foreground: var(--label2);
+  --accent: var(--elev2);
+  --accent-foreground: var(--label);
+  --accent-solid: var(--accent-brand);
+  --accent-solid-foreground: #ffffff;
+  --accent-subtle: var(--tint);
+  --positive: var(--yes);
+  --positive-subtle: color-mix(in oklab, var(--yes) 18%, var(--bg));
+  --positive-foreground: var(--bg);
+  --negative: var(--no);
+  --negative-subtle: color-mix(in oklab, var(--no) 18%, var(--bg));
+  --negative-foreground: var(--bg);
+  --destructive: var(--no);
+  --destructive-foreground: var(--bg);
+  --border: var(--hair);
+  --input: var(--hair);
+  --ring: var(--accent-brand);
+  --chart-1: var(--accent-brand);
+  --chart-2: var(--yes);
+  --chart-3: var(--no);
+  --chart-4: var(--label2);
+  --chart-5: var(--tint);
+  --sidebar: var(--bg);
+  --sidebar-foreground: var(--label);
+  --sidebar-primary: var(--accent-brand);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--elev);
+  --sidebar-accent-foreground: var(--label);
+  --sidebar-border: var(--hair);
+  --sidebar-ring: var(--accent-brand);
 }
 
+.light {
+  color-scheme: light;
+  --bg: #ffffff;
+  --elev: #ffffff;
+  --elev2: #f7f8fa;
+  --hair: #e7e9ef;
+  --label: #0b0d12;
+  --label2: #5a6070;
+  --label3: #8b92a3;
+  --accent-brand: #1c3ad6;
+  --tint: #c7cff2;
+  --track: #e9ecf5;
+  --yes: #12a150;
+  --no: #e0393e;
+
+  --surface: var(--elev2);
+  --primary-foreground: #ffffff;
+  --positive-subtle: color-mix(in oklab, var(--yes) 12%, var(--bg));
+  --positive-foreground: #ffffff;
+  --negative-subtle: color-mix(in oklab, var(--no) 12%, var(--bg));
+  --negative-foreground: #ffffff;
+  --destructive-foreground: #ffffff;
+  --sidebar: var(--elev2);
+  --sidebar-accent: var(--elev2);
+}
+
+/* `.dark` remains valid and simply re-asserts the default palette. */
 .dark {
-  --background: oklch(0.165 0.006 270);
-  --surface: oklch(0.195 0.006 270);
-  --foreground: oklch(0.97 0.002 75);
-  --card: oklch(0.195 0.006 270);
-  --card-foreground: oklch(0.97 0.002 75);
-  --popover: oklch(0.195 0.006 270);
-  --popover-foreground: oklch(0.97 0.002 75);
-  --primary: oklch(0.97 0.002 75);
-  --primary-foreground: oklch(0.195 0.006 270);
-  --secondary: oklch(0.245 0.006 270);
-  --secondary-foreground: oklch(0.97 0.002 75);
-  --muted: oklch(0.245 0.006 270);
-  --muted-foreground: oklch(0.68 0.006 270);
-  --accent: oklch(0.245 0.006 270);
-  --accent-foreground: oklch(0.97 0.002 75);
-  --accent-solid: oklch(0.62 0.13 258);
-  --accent-solid-foreground: oklch(0.15 0.006 270);
-  --accent-subtle: oklch(0.28 0.04 258);
-  --positive: oklch(0.68 0.13 152);
-  --positive-subtle: oklch(0.26 0.04 152);
-  --positive-foreground: oklch(0.17 0.01 152);
-  --negative: oklch(0.66 0.17 25);
-  --negative-subtle: oklch(0.26 0.05 25);
-  --negative-foreground: oklch(0.17 0.01 25);
-  --destructive: oklch(0.66 0.17 25);
-  --destructive-foreground: oklch(0.15 0.006 270);
-  --border: oklch(0.29 0.006 270);
-  --input: oklch(0.32 0.006 270);
-  --ring: oklch(0.62 0.13 258);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.185 0.006 270);
-  --sidebar-foreground: oklch(0.97 0.002 75);
-  --sidebar-primary: oklch(0.62 0.13 258);
-  --sidebar-primary-foreground: oklch(0.15 0.006 270);
-  --sidebar-accent: oklch(0.245 0.006 270);
-  --sidebar-accent-foreground: oklch(0.97 0.002 75);
-  --sidebar-border: oklch(0.29 0.006 270);
-  --sidebar-ring: oklch(0.62 0.13 258);
+  color-scheme: dark;
 }
 
 @layer base {
@@ -195,6 +229,18 @@
     color: var(--color-foreground);
     font-family: var(--font-vanti-sans);
     -webkit-font-smoothing: antialiased;
+  }
+
+  /* Numbers are tabular everywhere. */
+  body {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Dark: surfaces are elevation, hairlines only separate.
+     Light: a card is a 1px hairline border on a transparent background. */
+  .light [data-slot="card"] {
+    background-color: transparent;
+    border: 1px solid var(--hair);
   }
 
   /* Every interactive element keeps a visible keyboard focus ring. */
