@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CategoryIcon } from "@/components/vanti/category-icon";
 import { PriceChart } from "@/components/vanti/price-chart";
+import { MarketDiscussion } from "@/components/vanti/market-discussion";
 import { ProbabilityBar } from "@/components/vanti/probability-bar";
 import { TradePanel } from "@/components/vanti/trade-panel";
 import { useSession } from "@/hooks/use-vanti-session";
@@ -230,6 +231,8 @@ function MarketDetailPage() {
               </ul>
             )}
           </div>
+
+          <MarketDiscussion marketId={m.id} />
         </div>
 
         <div className="order-2 hidden @[760px]:block @[1060px]:order-3">

@@ -68,6 +68,39 @@ export type Database = {
           },
         ]
       }
+      likes: {
+        Row: {
+          created_at: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       market_price_history: {
         Row: {
           id: string
@@ -205,6 +238,55 @@ export type Database = {
           },
         ]
       }
+      posts: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          market_id: string | null
+          parent_id: string | null
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          market_id?: string | null
+          parent_id?: string | null
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          market_id?: string | null
+          parent_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "markets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -237,6 +319,39 @@ export type Database = {
           username?: string
         }
         Relationships: []
+      }
+      reposts: {
+        Row: {
+          created_at: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reposts_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reposts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trades: {
         Row: {

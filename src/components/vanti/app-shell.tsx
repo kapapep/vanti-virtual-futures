@@ -12,11 +12,18 @@ import {
   User,
   Users,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +32,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { GlobalSearch } from "@/components/vanti/global-search";
 import { ThemeToggle } from "@/components/vanti/theme-toggle";
 import { Wordmark } from "@/components/vanti/wordmark";
 import { useProfile } from "@/hooks/use-vanti-session";
@@ -110,6 +118,7 @@ function AccountMenu() {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [searchOpen, setSearchOpen] = useState(false);
 
   return (
     <div className="min-h-screen w-full bg-background">
@@ -153,6 +162,22 @@ export function AppShell({ children }: { children: ReactNode }) {
         </Link>
         <div className="flex shrink-0 items-center gap-2">
           <BalanceChip />
+          <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="Search">
+                <Search className="size-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="top-24 translate-y-0 sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-left text-sm">Search Vanti</DialogTitle>
+                <DialogDescription className="text-left text-meta">
+                  Find markets by question or traders by username.
+                </DialogDescription>
+              </DialogHeader>
+              <GlobalSearch autoFocus onNavigate={() => setSearchOpen(false)} />
+            </DialogContent>
+          </Dialog>
           <ThemeToggle />
           <AccountMenu />
         </div>
@@ -165,14 +190,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           {/* Desktop right rail */}
           <div className="hidden w-72 shrink-0 flex-col gap-4 xl:flex">
             <div className="flex items-center gap-2">
-              <div className="relative min-w-0 flex-1">
-                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Search markets"
-                  className="h-9 bg-surface pl-9 text-sm"
-                  aria-label="Search markets"
-                />
-              </div>
+              <GlobalSearch className="flex-1" />
               <Button variant="ghost" size="icon" aria-label="Notifications">
                 <Bell className="size-4" />
               </Button>
