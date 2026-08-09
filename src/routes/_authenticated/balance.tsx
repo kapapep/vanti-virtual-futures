@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Minus, Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -43,36 +42,30 @@ const QUICK_AMOUNTS = [100, 500, 1000, 5000] as const;
 
 type CashMode = "add" | "withdraw";
 
-/** Circular icon action with a caption below, sitting side by side. */
-function CircleAction({
+/** Pill button whose label is the action itself. */
+function PillAction({
   label,
   active,
   onClick,
-  children,
 }: {
   label: string;
   active: boolean;
   onClick: () => void;
-  children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center gap-2">
-      <button
-        type="button"
-        onClick={onClick}
-        aria-pressed={active}
-        aria-label={label}
-        className={cn(
-          "grid size-14 place-items-center rounded-full border transition-colors",
-          active
-            ? "border-accent-solid bg-accent-solid text-accent-solid-foreground"
-            : "border-border bg-surface text-foreground hover:border-accent-solid hover:text-accent-solid",
-        )}
-      >
-        {children}
-      </button>
-      <span className="text-meta text-muted-foreground">{label}</span>
-    </div>
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        "inline-flex min-h-11 items-center rounded-full border px-5 text-sm font-semibold transition-colors",
+        active
+          ? "border-accent-solid bg-accent-solid text-accent-solid-foreground"
+          : "border-border bg-surface text-foreground hover:border-accent-solid hover:text-accent-solid",
+      )}
+    >
+      {label}
+    </button>
   );
 }
 
