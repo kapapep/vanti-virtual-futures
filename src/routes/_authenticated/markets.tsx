@@ -15,6 +15,7 @@ const SORTS = [
 ] as const;
 
 type SortKey = (typeof SORTS)[number]["key"];
+type MarketsSearch = { category: string | undefined; sort: SortKey };
 
 function sortMarkets(markets: Market[], sort: SortKey) {
   const list = [...markets];
@@ -76,7 +77,7 @@ function MarketsPage() {
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          onClick={() => navigate({ search: (prev) => ({ ...prev, category: undefined }) })}
+          onClick={() => navigate({ search: (prev: MarketsSearch) => ({ ...prev, category: undefined }) })}
           className={cn(
             "rounded-full border px-3 py-1.5 text-meta font-medium transition-colors",
             !category
@@ -90,7 +91,7 @@ function MarketsPage() {
           <button
             key={c.id}
             type="button"
-            onClick={() => navigate({ search: (prev) => ({ ...prev, category: c.slug }) })}
+            onClick={() => navigate({ search: (prev: MarketsSearch) => ({ ...prev, category: c.slug }) })}
             className={cn(
               "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-meta font-medium transition-colors",
               category === c.slug
@@ -110,7 +111,7 @@ function MarketsPage() {
             <button
               key={s.key}
               type="button"
-              onClick={() => navigate({ search: (prev) => ({ ...prev, sort: s.key }) })}
+              onClick={() => navigate({ search: (prev: MarketsSearch) => ({ ...prev, sort: s.key }) })}
               className={cn(
                 "rounded-md px-2.5 py-1 text-meta font-semibold transition-colors",
                 sort === s.key
