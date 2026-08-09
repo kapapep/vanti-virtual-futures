@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 
 const QUICK_FILL = [10, 50, 100];
 
-function Row({ label, value, className }: { label: string; value: string; className?: string }) {
+function Row({ label, value, className }: { label: string; value: string; className?: string | undefined }) {
   return (
     <div className="flex items-center justify-between gap-2 text-sm">
       <span className="text-muted-foreground">{label}</span>
