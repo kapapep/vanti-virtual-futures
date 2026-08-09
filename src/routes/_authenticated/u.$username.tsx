@@ -1,21 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
+import { EditProfileDialog } from "@/components/vanti/edit-profile-dialog";
 import { EmptyState } from "@/components/vanti/empty-state";
 import { ProfileSkeleton } from "@/components/vanti/skeletons";
 import { TradeHistoryList } from "@/components/vanti/trade-history-list";
@@ -40,7 +29,6 @@ import {
   isFollowingQuery,
   profileByUsernameQuery,
   setFollowing,
-  updateOwnProfile,
 } from "@/lib/social";
 import { cn } from "@/lib/utils";
 
@@ -140,6 +128,7 @@ function UserProfilePage() {
                 bio={profile.bio ?? ""}
                 avatarUrl={profile.avatarUrl ?? ""}
                 username={profile.username}
+                trigger={<Button variant="outline">Edit profile</Button>}
               />
             ) : (
               <Button
