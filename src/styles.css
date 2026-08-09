@@ -279,3 +279,25 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Ambient landing background: drifting market cards and drawing probability curves. */
+@keyframes vanti-drift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(18px, -22px, 0) scale(1.03); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes vanti-curve-draw {
+  0% { stroke-dasharray: 1600; stroke-dashoffset: 1600; }
+  60% { stroke-dasharray: 1600; stroke-dashoffset: 0; }
+  100% { stroke-dasharray: 1600; stroke-dashoffset: 0; }
+}
+
+.vanti-curve {
+  animation: vanti-curve-draw 22s ease-in-out infinite;
+}
+
+.vanti-curve-slow {
+  animation-duration: 34s;
+  animation-delay: -8s;
+}
