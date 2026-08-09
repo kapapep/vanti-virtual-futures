@@ -15,7 +15,7 @@ const SORTS = [
 ] as const;
 
 type SortKey = (typeof SORTS)[number]["key"];
-type MarketsSearch = { category: string | undefined; sort: SortKey };
+type MarketsSearch = { category?: string | undefined; sort?: SortKey | undefined };
 
 function sortMarkets(markets: Market[], sort: SortKey) {
   const list = [...markets];
@@ -32,7 +32,7 @@ function sortMarkets(markets: Market[], sort: SortKey) {
 }
 
 export const Route = createFileRoute("/_authenticated/markets")({
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (search: Record<string, unknown>): MarketsSearch => ({
     category: typeof search["category"] === "string" ? (search["category"] as string) : undefined,
     sort: SORTS.some((s) => s.key === search["sort"]) ? (search["sort"] as SortKey) : ("volume" as SortKey),
   }),
@@ -53,7 +53,7 @@ export const Route = createFileRoute("/_authenticated/markets")({
 });
 
 function MarketsPage() {
-  const { category, sort } = Route.useSearch();
+  const { category, sort = "volume" } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const markets = useQuery(marketsQuery);
   const categories = useQuery(categoriesQuery);

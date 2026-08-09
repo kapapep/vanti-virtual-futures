@@ -28,13 +28,21 @@ function Row({ label, value, className }: { label: string; value: string; classN
   );
 }
 
-export function TradePanel({ market, compact = false }: { market: Market; compact?: boolean }) {
+export function TradePanel({
+  market,
+  compact = false,
+  initialSide = "yes",
+}: {
+  market: Market;
+  compact?: boolean;
+  initialSide?: TradeSide;
+}) {
   const { user } = useSession();
   const profile = useProfile();
   const queryClient = useQueryClient();
   const positions = useQuery(marketPositionsQuery(market.id, user?.id));
 
-  const [side, setSide] = useState<TradeSide>("yes");
+  const [side, setSide] = useState<TradeSide>(initialSide);
   const [amount, setAmount] = useState("");
   const [receipt, setReceipt] = useState<(TradeResult & { side: TradeSide; action: string }) | null>(
     null,
