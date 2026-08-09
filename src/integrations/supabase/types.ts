@@ -501,6 +501,7 @@ export type Database = {
         Args: { p_market_id: string; p_outcome: string }
         Returns: Json
       }
+      withdraw_virtual_cash: { Args: { p_amount: number }; Returns: Json }
     }
     Enums: {
       [_ in never]: never
