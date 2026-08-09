@@ -160,8 +160,8 @@ function MarketDetailPage() {
         <ProbabilityBar price={m.yesPrice} height={12} showLabels />
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[260px_1fr_300px]">
-        <aside className="order-2 space-y-4 lg:order-1">
+      <div className="grid gap-6 lg:grid-cols-[1fr_280px] xl:grid-cols-[220px_1fr_280px]">
+        <aside className="order-3 space-y-4 lg:col-span-2 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 lg:space-y-0 xl:order-1 xl:col-span-1 xl:block xl:space-y-4">
           <div className="rounded-lg border border-border bg-card p-4">
             <h2 className="text-meta font-semibold uppercase text-muted-foreground">Market info</h2>
             <dl className="mt-3 space-y-2 text-sm">
@@ -195,7 +195,7 @@ function MarketDetailPage() {
           ) : null}
         </aside>
 
-        <div className="order-1 min-w-0 space-y-6 lg:order-2">
+        <div className="order-1 min-w-0 space-y-6 xl:order-2">
           <div className="rounded-lg border border-border bg-card p-4">
             <PriceChart points={m.spark} />
           </div>
@@ -241,7 +241,7 @@ function MarketDetailPage() {
           </div>
         </div>
 
-        <div className="order-3 hidden lg:block">
+        <div className="order-2 hidden lg:block xl:order-3">
           <div className="lg:sticky lg:top-6">
             <TradePanelSlot />
           </div>
