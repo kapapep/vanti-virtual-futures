@@ -160,8 +160,9 @@ function MarketDetailPage() {
         <ProbabilityBar price={m.yesPrice} height={12} showLabels />
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_280px] xl:grid-cols-[220px_1fr_280px]">
-        <aside className="order-3 space-y-4 lg:col-span-2 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 lg:space-y-0 xl:order-1 xl:col-span-1 xl:block xl:space-y-4">
+      <div className="@container">
+      <div className="grid gap-6 @[760px]:grid-cols-[1fr_280px] @[1060px]:grid-cols-[220px_1fr_300px]">
+        <aside className="order-3 space-y-4 @[760px]:col-span-2 @[760px]:grid @[760px]:grid-cols-2 @[760px]:items-start @[760px]:gap-4 @[760px]:space-y-0 @[1060px]:order-1 @[1060px]:col-span-1 @[1060px]:block @[1060px]:space-y-4">
           <div className="rounded-lg border border-border bg-card p-4">
             <h2 className="text-meta font-semibold uppercase text-muted-foreground">Market info</h2>
             <dl className="mt-3 space-y-2 text-sm">
@@ -195,7 +196,7 @@ function MarketDetailPage() {
           ) : null}
         </aside>
 
-        <div className="order-1 min-w-0 space-y-6 xl:order-2">
+        <div className="order-1 min-w-0 space-y-6 @[1060px]:order-2">
           <div className="rounded-lg border border-border bg-card p-4">
             <PriceChart points={m.spark} />
           </div>
@@ -241,15 +242,16 @@ function MarketDetailPage() {
           </div>
         </div>
 
-        <div className="order-2 hidden lg:block xl:order-3">
-          <div className="lg:sticky lg:top-6">
+        <div className="order-2 hidden @[760px]:block @[1060px]:order-3">
+          <div className="sticky top-6">
             <TradePanelSlot />
           </div>
         </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-16 z-20 border-t border-border bg-background/95 p-4 backdrop-blur lg:hidden">
+      <div className="fixed inset-x-0 bottom-16 z-20 border-t border-border bg-background/95 p-4 backdrop-blur @[760px]:hidden">
         <TradePanelSlot />
+      </div>
       </div>
     </div>
   );
