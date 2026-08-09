@@ -134,6 +134,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Link to="/home" className="px-2">
           <Wordmark />
         </Link>
+        {/* Search stays in the chrome between lg and xl, where the right rail is hidden. */}
+        <div className="mt-4 xl:hidden">
+          <GlobalSearch />
+        </div>
         <nav className="mt-8 flex flex-col gap-1">
           {primaryNav.map((item) => {
             const active = pathname === item.to;
@@ -198,7 +202,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="hidden w-72 shrink-0 flex-col gap-4 xl:flex">
             <div className="flex items-center gap-2">
               <GlobalSearch className="flex-1" />
-              <Button variant="ghost" size="icon" aria-label="Notifications">
+              <Button variant="ghost" size="icon" className="size-11" aria-label="Notifications">
                 <Bell className="size-4" />
               </Button>
               <ThemeToggle />
