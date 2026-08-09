@@ -37,7 +37,6 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [busy, setBusy] = useState(false);
-  const [sentConfirmation, setSentConfirmation] = useState(false);
 
   useEffect(() => {
     void supabase.auth.getSession().then(({ data }) => {
@@ -76,8 +75,7 @@ function AuthPage() {
         });
         if (error) throw error;
         if (!data.session) {
-          setSentConfirmation(true);
-          return;
+          throw new Error("Sign-up succeeded but no session was returned. Please try signing in.");
         }
         toast.success("Welcome to Vanti — $10,000.00 virtual balance granted.");
         navigate({ to: "/home", replace: true });
@@ -104,90 +102,70 @@ function AuthPage() {
       </Link>
 
       <div className="w-full max-w-sm rounded-lg border border-border bg-card p-6 shadow-sm">
-        {sentConfirmation ? (
-          <div className="space-y-3 text-center">
-            <h1 className="text-lg font-semibold text-foreground">Confirm your email</h1>
-            <p className="text-sm text-muted-foreground">
-              We sent a confirmation link to <span className="font-medium">{email}</span>. Open it
-              to activate your account and claim your $10,000.00 virtual balance.
-            </p>
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => {
-                setSentConfirmation(false);
-                setMode("login");
-              }}
-            >
-              Back to sign in
+        <>
+          <h1 className="text-lg font-semibold text-foreground">
+            {mode === "login" ? "Sign in to Vanti" : "Create your account"}
+          </h1>
+          <p className="mt-1 text-meta text-muted-foreground">
+            Every account starts with a <span className="num">$10,000.00</span> virtual balance.
+            Virtual money only — no deposits, ever.
+          </p>
+
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+            {mode === "signup" && (
+              <div className="space-y-1.5">
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="marketmaker_01"
+                  autoComplete="username"
+                  required
+                />
+                <p className="text-meta text-muted-foreground">
+                  3–20 characters. Letters, numbers and underscores.
+                </p>
+              </div>
+            )}
+            <div className="space-y-1.5">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+                required
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete={mode === "login" ? "current-password" : "new-password"}
+                minLength={6}
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={busy}>
+              {busy ? "Working…" : mode === "login" ? "Sign in" : "Create account"}
             </Button>
-          </div>
-        ) : (
-          <>
-            <h1 className="text-lg font-semibold text-foreground">
-              {mode === "login" ? "Sign in to Vanti" : "Create your account"}
-            </h1>
-            <p className="mt-1 text-meta text-muted-foreground">
-              Every account starts with a <span className="num">$10,000.00</span> virtual balance.
-              Virtual money only — no deposits, ever.
-            </p>
+          </form>
 
-            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-              {mode === "signup" && (
-                <div className="space-y-1.5">
-                  <Label htmlFor="username">Username</Label>
-                  <Input
-                    id="username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="marketmaker_01"
-                    autoComplete="username"
-                    required
-                  />
-                  <p className="text-meta text-muted-foreground">
-                    3–20 characters. Letters, numbers and underscores.
-                  </p>
-                </div>
-              )}
-              <div className="space-y-1.5">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  autoComplete="email"
-                  required
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoComplete={mode === "login" ? "current-password" : "new-password"}
-                  minLength={6}
-                  required
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={busy}>
-                {busy ? "Working…" : mode === "login" ? "Sign in" : "Create account"}
-              </Button>
-            </form>
-
-            <button
-              type="button"
-              onClick={() => setMode(mode === "login" ? "signup" : "login")}
-              className="mt-4 w-full text-center text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {mode === "login"
-                ? "New to Vanti? Create an account"
-                : "Already have an account? Sign in"}
-            </button>
-          </>
-        )}
+          <button
+            type="button"
+            onClick={() => setMode(mode === "login" ? "signup" : "login")}
+            className="mt-4 w-full text-center text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {mode === "login"
+              ? "New to Vanti? Create an account"
+              : "Already have an account? Sign in"}
+          </button>
+        </>
       </div>
     </div>
   );
