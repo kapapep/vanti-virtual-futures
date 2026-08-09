@@ -152,8 +152,8 @@ function MarketDetailPage() {
       </header>
 
       <div className="@container">
-      <div className="grid gap-6 @[760px]:grid-cols-[1fr_280px] @[1060px]:grid-cols-[220px_1fr_300px]">
-        <aside className="order-3 space-y-4 @[760px]:col-span-2 @[760px]:grid @[760px]:grid-cols-2 @[760px]:items-start @[760px]:gap-4 @[760px]:space-y-0 @[1060px]:order-1 @[1060px]:col-span-1 @[1060px]:block @[1060px]:space-y-4">
+      <div className="grid gap-6 @[600px]:grid-cols-[1fr_280px] @[900px]:grid-cols-[220px_1fr_300px]">
+        <aside className="order-3 space-y-4 @[600px]:col-span-2 @[600px]:grid @[600px]:grid-cols-2 @[600px]:items-start @[600px]:gap-4 @[600px]:space-y-0 @[900px]:order-1 @[900px]:col-span-1 @[900px]:block @[900px]:space-y-4">
           <div className="rounded-lg border border-border bg-card p-4">
             <h2 className="text-meta font-semibold uppercase text-muted-foreground">Market info</h2>
             <dl className="mt-3 space-y-2 text-sm">
@@ -187,7 +187,7 @@ function MarketDetailPage() {
           ) : null}
         </aside>
 
-        <div className="order-1 min-w-0 space-y-6 @[1060px]:order-2">
+        <div className="order-1 min-w-0 space-y-6 @[900px]:order-2">
           <div className="rounded-lg border border-border bg-card p-4">
             <PriceChart points={m.spark} />
           </div>
@@ -235,14 +235,14 @@ function MarketDetailPage() {
           <MarketDiscussion marketId={m.id} />
         </div>
 
-        <div className="order-2 hidden @[760px]:block @[1060px]:order-3">
+        <div className="order-2 hidden @[600px]:block @[900px]:order-3">
           <div className="sticky top-6">
             <TradePanel market={m} />
           </div>
         </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-16 z-20 max-h-[62vh] overflow-y-auto border-t border-border bg-background/95 p-4 backdrop-blur @[760px]:hidden">
+      <div className="fixed inset-x-0 bottom-16 z-20 max-h-[62vh] overflow-y-auto border-t border-border bg-background/95 p-4 backdrop-blur @[600px]:hidden">
         <TradePanel market={m} compact />
       </div>
       </div>
