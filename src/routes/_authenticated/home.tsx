@@ -33,6 +33,9 @@ import { setFollowing } from "@/lib/social";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/home")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    tab: search.tab === "following" ? ("following" as const) : ("for-you" as const),
+  }),
   head: () => ({
     meta: [
       { title: "Home — Vanti Prediction Markets" },
@@ -177,9 +180,11 @@ function SuggestedAccounts({
 
 function HomePage() {
   const { user } = useSession();
+  const navigate = Route.useNavigate();
+  const { tab } = Route.useSearch();
   const viewerId = user?.id;
-  const [tab, setTab] = useState<Tab>("for-you");
   const [composerOpen, setComposerOpen] = useState(false);
+  const setTab = (next: Tab) => void navigate({ search: { tab: next }, replace: true });
 
   const following = useQuery(followingIdsQuery(viewerId));
   const watchlist = useQuery(watchlistQuery(viewerId));
@@ -251,8 +256,8 @@ function HomePage() {
 
   return (
     <div className="space-y-5">
-      {/* TikTok-style centred feed switcher, flush against the top chrome */}
-      <nav className="sticky top-14 z-10 -mx-4 -mt-6 flex items-center justify-center gap-6 bg-background/95 px-4 pb-1 pt-0.5 backdrop-blur lg:top-0 lg:-mt-6 lg:mx-0">
+      {/* Mobile switcher lives in the top bar; desktop keeps it above the feed. */}
+      <nav className="sticky top-0 z-10 -mt-6 hidden items-center justify-center gap-6 bg-background/95 pb-1 pt-0.5 backdrop-blur lg:flex">
         {(
           [
             { id: "for-you" as Tab, label: "For You" },
