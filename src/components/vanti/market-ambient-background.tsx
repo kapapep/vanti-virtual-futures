@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
+import { cn } from "@/lib/utils";
+
 const SEED_MARKETS = [
   { question: "Will the Fed cut rates before September?", base: 63, x: "2%", y: "10%", delay: "0s", dur: "38s" },
   { question: "Will the model ship this quarter?", base: 41, x: "84%", y: "12%", delay: "-9s", dur: "46s" },
