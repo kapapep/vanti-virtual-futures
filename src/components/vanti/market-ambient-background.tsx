@@ -182,7 +182,7 @@ export function MarketAmbientBackground() {
           <div
             key={m.question}
             className={cn(
-              "absolute w-44 rounded-lg border border-border/50 bg-surface/40 p-2.5 opacity-[0.45]",
+              "absolute hidden w-44 rounded-lg border border-border/50 bg-surface/40 p-2.5 opacity-[0.45] sm:block",
               i >= SEED_MARKETS.length && "hidden xl:block",
             )}
             style={{
