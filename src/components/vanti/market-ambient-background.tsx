@@ -132,6 +132,7 @@ export function MarketAmbientBackground() {
         );
       })}
 
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_38%,var(--background)_0%,transparent_55%)] opacity-50" />
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
     </div>
   );
