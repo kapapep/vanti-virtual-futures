@@ -14,7 +14,359 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      categories: {
+        Row: {
+          icon: string | null
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          icon?: string | null
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          icon?: string | null
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      follows: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "follows_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follows_following_id_fkey"
+            columns: ["following_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      market_price_history: {
+        Row: {
+          id: string
+          market_id: string
+          recorded_at: string
+          yes_price: number
+        }
+        Insert: {
+          id?: string
+          market_id: string
+          recorded_at?: string
+          yes_price: number
+        }
+        Update: {
+          id?: string
+          market_id?: string
+          recorded_at?: string
+          yes_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_price_history_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "markets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      markets: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          outcome: string | null
+          question: string
+          resolution_criteria: string | null
+          resolution_date: string
+          resolution_source: string | null
+          status: string
+          trader_count: number
+          volume: number
+          yes_price: number
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          outcome?: string | null
+          question: string
+          resolution_criteria?: string | null
+          resolution_date: string
+          resolution_source?: string | null
+          status?: string
+          trader_count?: number
+          volume?: number
+          yes_price?: number
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          outcome?: string | null
+          question?: string
+          resolution_criteria?: string | null
+          resolution_date?: string
+          resolution_source?: string | null
+          status?: string
+          trader_count?: number
+          volume?: number
+          yes_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "markets_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "markets_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      positions: {
+        Row: {
+          avg_price: number
+          contracts: number
+          id: string
+          market_id: string
+          side: string
+          user_id: string
+        }
+        Insert: {
+          avg_price: number
+          contracts?: number
+          id?: string
+          market_id: string
+          side: string
+          user_id: string
+        }
+        Update: {
+          avg_price?: number
+          contracts?: number
+          id?: string
+          market_id?: string
+          side?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "positions_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "markets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "positions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          balance: number
+          bio: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          is_admin: boolean
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          balance?: number
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          is_admin?: boolean
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          balance?: number
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          is_admin?: boolean
+          username?: string
+        }
+        Relationships: []
+      }
+      trades: {
+        Row: {
+          action: string
+          contracts: number
+          created_at: string
+          id: string
+          market_id: string
+          price: number
+          side: string
+          total: number
+          user_id: string
+        }
+        Insert: {
+          action: string
+          contracts: number
+          created_at?: string
+          id?: string
+          market_id: string
+          price: number
+          side: string
+          total: number
+          user_id: string
+        }
+        Update: {
+          action?: string
+          contracts?: number
+          created_at?: string
+          id?: string
+          market_id?: string
+          price?: number
+          side?: string
+          total?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trades_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "markets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trades_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          amount: number
+          balance_after: number
+          created_at: string
+          id: string
+          trade_id: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          balance_after: number
+          created_at?: string
+          id?: string
+          trade_id?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number
+          created_at?: string
+          id?: string
+          trade_id?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "trades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      watchlist: {
+        Row: {
+          created_at: string
+          market_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          market_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          market_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "watchlist_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "markets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "watchlist_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
