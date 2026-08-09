@@ -4,6 +4,7 @@ const CASH_ERRORS: Record<string, string> = {
   NOT_AUTHENTICATED: "Sign in to add virtual cash.",
   INVALID_AMOUNT: "Enter an amount between $1 and $10,000.",
   DAILY_LIMIT_REACHED: "You've added the $10,000 daily maximum of virtual cash.",
+  INSUFFICIENT_BALANCE: "You don't have that much available cash.",
   PROFILE_NOT_FOUND: "We couldn't load your account.",
 };
 
@@ -23,6 +24,16 @@ export function cashErrorMessage(error: unknown): string {
   return "Something went wrong adding virtual cash.";
 }
 
+/** Removes virtual practice cash from the signed-in trader's balance. */
+export async function withdrawVirtualCash(
+  amount: number,
+): Promise<{ balance: number; amount: number }> {
+  const { data, error } = await supabase.rpc("withdraw_virtual_cash", { p_amount: amount });
+  if (error) throw error;
+  const result = data as { balance: number; amount: number };
+  return { balance: Number(result.balance), amount: Number(result.amount) };
+}
+
 /** Human label for a ledger entry type. */
 export function transactionLabel(type: string): string {
   switch (type) {
@@ -30,6 +41,8 @@ export function transactionLabel(type: string): string {
       return "Signup grant";
     case "virtual_topup":
       return "Added virtual cash";
+    case "virtual_withdrawal":
+      return "Withdrew virtual cash";
     case "trade_buy":
       return "Bought contracts";
     case "trade_sell":
