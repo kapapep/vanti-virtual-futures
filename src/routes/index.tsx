@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
-import { Wordmark } from "@/components/vanti/wordmark";
+import { MarketAmbientBackground } from "@/components/vanti/market-ambient-background";
+import { VantiMark } from "@/components/vanti/vanti-mark";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -27,7 +28,10 @@ function Landing() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-border px-6 py-4">
-        <Wordmark />
+        <Link to="/" className="flex items-center" aria-label="Vanti">
+          <VantiMark size={22} title="Vanti" className="md:hidden" />
+          <VantiMark size={28} title="Vanti" className="hidden md:block" />
+        </Link>
         <div className="flex shrink-0 items-center gap-2">
           <Button asChild variant="ghost" size="sm">
             <Link to="/auth">Sign in</Link>
@@ -38,7 +42,9 @@ function Landing() {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-6 py-20">
+      <main className="relative flex flex-1 flex-col justify-center overflow-hidden">
+        <MarketAmbientBackground />
+        <div className="relative mx-auto flex w-full max-w-3xl flex-col px-6 py-20">
         <p className="text-meta font-medium uppercase text-accent-solid">
           Virtual money only — no deposits, no withdrawals
         </p>
@@ -69,6 +75,7 @@ function Landing() {
             </div>
           ))}
         </dl>
+        </div>
       </main>
 
       <footer className="border-t border-border px-6 py-6 text-meta text-muted-foreground">
