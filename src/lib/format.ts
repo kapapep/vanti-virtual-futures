@@ -52,3 +52,37 @@ export function formatDate(value: string | Date): string {
   const date = typeof value === "string" ? new Date(value) : value;
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
+
+/** Formats a signed dollar amount, e.g. -42.5 -> "−$42.50". */
+export function formatSignedBalance(value: number): string {
+  const sign = value > 0 ? "+" : value < 0 ? "−" : "";
+  return `${sign}${currency.format(Math.abs(value))}`;
+}
+
+/** Formats a signed ratio as a percentage, e.g. 0.1234 -> "+12.34%". */
+export function formatSignedPercent(value: number): string {
+  const sign = value > 0 ? "+" : value < 0 ? "−" : "";
+  return `${sign}${(Math.abs(value) * 100).toFixed(2)}%`;
+}
+
+/** Formats a 0–1 ratio as a whole percentage, e.g. 0.62 -> "62%". */
+export function formatPercent(value: number): string {
+  return `${Math.round(value * 100)}%`;
+}
+
+/** Formats a contract count, e.g. 1234.5 -> "1,234.5". */
+export function formatContracts(value: number): string {
+  return new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(value);
+}
+
+/** Date and time, e.g. "Aug 9, 2026, 2:04 PM". */
+export function formatDateTime(value: string | Date): string {
+  const date = typeof value === "string" ? new Date(value) : value;
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
