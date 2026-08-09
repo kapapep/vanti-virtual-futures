@@ -106,8 +106,8 @@ function BalancePage() {
     <div className="@container space-y-8">
       <h1 className="text-figure font-semibold text-foreground">Balance</h1>
 
-      <section className="space-y-5 rounded-lg border border-border bg-card p-5 @md:p-6">
-        <div className="space-y-4">
+      <section className="space-y-5">
+        <div className="flex flex-col gap-4">
           <div className="min-w-0">
             <p className="whitespace-nowrap text-meta font-medium uppercase text-muted-foreground">
               Available cash
@@ -116,7 +116,7 @@ function BalancePage() {
               <Skeleton className="mt-2 h-7 w-32" />
             ) : (
               <AnimatedNumber
-                className="num mt-1 block text-xl text-foreground"
+                className="num mt-1 block text-2xl text-foreground"
                 value={profile?.balance ?? 0}
                 format={formatBalance}
               />
