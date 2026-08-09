@@ -68,13 +68,13 @@ export function MarketAmbientBackground() {
       <svg
         viewBox="0 0 1200 320"
         preserveAspectRatio="none"
-        className="absolute inset-x-0 bottom-0 h-[70%] w-full text-accent-solid opacity-[0.12]"
+        className="absolute inset-x-0 top-[8%] h-[62%] w-full text-accent-solid opacity-[0.12]"
       >
         <path
           d={paths[0]}
           fill="none"
           stroke="currentColor"
-          strokeWidth={2}
+          strokeWidth={2.5}
           strokeLinecap="round"
           className={reduced ? undefined : "vanti-curve"}
         />
@@ -114,7 +114,7 @@ export function MarketAmbientBackground() {
         );
       })}
 
-      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/85 to-background/40" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
     </div>
   );
 }
