@@ -34,7 +34,7 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/home")({
   validateSearch: (search: Record<string, unknown>) => ({
-    tab: search.tab === "following" ? ("following" as const) : ("for-you" as const),
+    tab: search['tab'] === "following" ? ("following" as const) : ("for-you" as const),
   }),
   head: () => ({
     meta: [
