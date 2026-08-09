@@ -251,8 +251,8 @@ function HomePage() {
 
   return (
     <div className="space-y-5">
-      {/* TikTok-style centred feed switcher */}
-      <nav className="sticky top-14 z-10 -mx-4 flex items-center justify-center gap-6 border-b border-border bg-background/95 px-4 py-2 backdrop-blur lg:top-0 lg:mx-0 lg:rounded-lg lg:border">
+      {/* TikTok-style centred feed switcher, flush against the top chrome */}
+      <nav className="sticky top-14 z-10 -mx-4 -mt-6 flex items-center justify-center gap-6 bg-background/95 px-4 pb-1 pt-0.5 backdrop-blur lg:top-0 lg:-mt-6 lg:mx-0">
         {(
           [
             { id: "for-you" as Tab, label: "For You" },

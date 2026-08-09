@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Minus, Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -43,36 +42,30 @@ const QUICK_AMOUNTS = [100, 500, 1000, 5000] as const;
 
 type CashMode = "add" | "withdraw";
 
-/** Circular icon action with a caption below, sitting side by side. */
-function CircleAction({
+/** Pill button whose label is the action itself. */
+function PillAction({
   label,
   active,
   onClick,
-  children,
 }: {
   label: string;
   active: boolean;
   onClick: () => void;
-  children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center gap-2">
-      <button
-        type="button"
-        onClick={onClick}
-        aria-pressed={active}
-        aria-label={label}
-        className={cn(
-          "grid size-14 place-items-center rounded-full border transition-colors",
-          active
-            ? "border-accent-solid bg-accent-solid text-accent-solid-foreground"
-            : "border-border bg-surface text-foreground hover:border-accent-solid hover:text-accent-solid",
-        )}
-      >
-        {children}
-      </button>
-      <span className="text-meta text-muted-foreground">{label}</span>
-    </div>
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        "inline-flex min-h-11 items-center rounded-full border px-5 text-sm font-semibold transition-colors",
+        active
+          ? "border-accent-solid bg-accent-solid text-accent-solid-foreground"
+          : "border-border bg-surface text-foreground hover:border-accent-solid hover:text-accent-solid",
+      )}
+    >
+      {label}
+    </button>
   );
 }
 
@@ -118,38 +111,37 @@ function BalancePage() {
         </p>
       </div>
 
-      <section className="space-y-6 rounded-lg border border-border bg-card p-5 @md:p-6">
-        <div>
-          <p className="text-meta font-medium uppercase text-muted-foreground">Available cash</p>
-          {isPending ? (
-            <Skeleton className="mt-2 h-7 w-32" />
-          ) : (
-            <AnimatedNumber
-              className="num mt-1 block text-xl text-foreground"
-              value={profile?.balance ?? 0}
-              format={formatBalance}
-            />
-          )}
-        </div>
-
-        <div className="space-y-5 border-t border-border pt-5">
-          <div className="flex items-start gap-6">
-            <CircleAction
+      <section className="space-y-5 rounded-lg border border-border bg-card p-5 @md:p-6">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
+          <div className="min-w-0">
+            <p className="whitespace-nowrap text-meta font-medium uppercase text-muted-foreground">
+              Available cash
+            </p>
+            {isPending ? (
+              <Skeleton className="mt-2 h-7 w-32" />
+            ) : (
+              <AnimatedNumber
+                className="num mt-1 block text-xl text-foreground"
+                value={profile?.balance ?? 0}
+                format={formatBalance}
+              />
+            )}
+          </div>
+          <div className="flex shrink-0 flex-wrap justify-end gap-2">
+            <PillAction
               label="Add cash"
               active={mode === "add"}
               onClick={() => setMode(mode === "add" ? null : "add")}
-            >
-              <Plus className="size-6" />
-            </CircleAction>
-            <CircleAction
+            />
+            <PillAction
               label="Withdraw"
               active={mode === "withdraw"}
               onClick={() => setMode(mode === "withdraw" ? null : "withdraw")}
-            >
-              <Minus className="size-6" />
-            </CircleAction>
+            />
           </div>
+        </div>
 
+        <div className="space-y-5">
           {mode ? (
             <div className="space-y-3">
               <Label
