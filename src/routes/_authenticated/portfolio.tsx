@@ -13,32 +13,17 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState } from "@/components/vanti/empty-state";
-import { AnimatedNumber } from "@/components/vanti/animated-number";
 import { PositionRowSkeleton } from "@/components/vanti/skeletons";
-import { EquityChart } from "@/components/vanti/equity-chart";
 import { PositionRow } from "@/components/vanti/position-row";
 import { TradeHistoryList } from "@/components/vanti/trade-history-list";
-import { useProfile, useSession } from "@/hooks/use-vanti-session";
+import { useSession } from "@/hooks/use-vanti-session";
+import { formatBalance } from "@/lib/format";
 import {
-  formatBalance,
-  formatPercent,
-  formatSignedBalance,
-  formatSignedPercent,
-} from "@/lib/format";
-import {
-  buildEquityCurve,
-  buildSummary,
-  EQUITY_RANGES,
   positionsQuery,
-  resolvedResultsQuery,
-  sliceEquity,
   tradeHistoryQuery,
-  transactionsQuery,
-  type EquityRangeKey,
   type PortfolioPosition,
 } from "@/lib/portfolio";
 import { executeTrade, tradeErrorMessage } from "@/lib/trade";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/portfolio")({
   head: () => ({
@@ -46,12 +31,12 @@ export const Route = createFileRoute("/_authenticated/portfolio")({
       { title: "Portfolio — Vanti" },
       {
         name: "description",
-        content: "Your Vanti positions, profit and loss, and full virtual trade history.",
+        content: "Your open Vanti positions and full virtual trade history.",
       },
       { property: "og:title", content: "Portfolio — Vanti" },
       {
         property: "og:description",
-        content: "Your Vanti positions, profit and loss, and full virtual trade history.",
+        content: "Your open Vanti positions and full virtual trade history.",
       },
     ],
   }),
@@ -65,29 +50,16 @@ function PortfolioPage() {
   const userId = user?.id;
   const queryClient = useQueryClient();
 
-  const { data: profile } = useProfile();
   const { data: positions = [], isPending: positionsPending } = useQuery(positionsQuery(userId));
   const { data: trades = [] } = useQuery(tradeHistoryQuery(userId));
-  const { data: transactions = [] } = useQuery(transactionsQuery(userId));
-  const { data: resolved = { wins: 0, total: 0 } } = useQuery(resolvedResultsQuery(userId));
 
-  const [range, setRange] = useState<EquityRangeKey>("1W");
   const [sort, setSort] = useState<PositionSort>("pnl");
   const [marketFilter, setMarketFilter] = useState("all");
   const [sideFilter, setSideFilter] = useState("all");
 
-  const summary = useMemo(
-    () => buildSummary({ balance: profile?.balance ?? 0, positions, transactions, resolved }),
-    [profile?.balance, positions, transactions, resolved],
-  );
-
-  const curve = useMemo(
-    () =>
-      sliceEquity(
-        buildEquityCurve({ transactions, trades, portfolioValue: summary.portfolioValue }),
-        range,
-      ),
-    [transactions, trades, summary.portfolioValue, range],
+  const positionsValue = useMemo(
+    () => positions.reduce((sum, p) => sum + p.value, 0),
+    [positions],
   );
 
   const sortedPositions = useMemo(() => {
@@ -137,76 +109,14 @@ function PortfolioPage() {
     onError: (error) => toast.error(tradeErrorMessage(error)),
   });
 
-  const up = summary.totalPnl >= 0;
-
   return (
     <div className="@container space-y-8">
-      <section className="space-y-6 rounded-lg border border-border bg-card p-5 @md:p-6">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="text-meta font-medium uppercase text-muted-foreground">
-              Portfolio value
-            </h1>
-            <AnimatedNumber
-              className="num mt-1 block text-display font-semibold text-foreground"
-              value={summary.portfolioValue}
-              format={formatBalance}
-            />
-            <p
-              className={cn(
-                "num mt-1 text-sm font-semibold",
-                up ? "text-positive" : "text-negative",
-              )}
-            >
-              {formatSignedBalance(summary.totalPnl)} ({formatSignedPercent(summary.totalPnlPct)})
-              <span className="ml-2 font-normal text-muted-foreground">all time</span>
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-1 rounded-md border border-border bg-surface p-1">
-            {EQUITY_RANGES.map((option) => (
-              <button
-                key={option.key}
-                type="button"
-                onClick={() => setRange(option.key)}
-                className={cn(
-                  "num inline-flex min-h-11 items-center rounded px-2.5 text-meta font-semibold transition-colors duration-150 sm:min-h-8",
-                  range === option.key
-                    ? "bg-card text-foreground shadow-xs"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {option.key}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <EquityChart points={curve} />
-
-        <div className="grid grid-cols-2 gap-4 border-t border-border pt-5 @md:grid-cols-3 @xl:grid-cols-5">
-          <Summary label="Available" value={formatBalance(summary.balance)} />
-          <Summary label="Invested" value={formatBalance(summary.invested)} />
-          <Summary
-            label="Unrealized P&L"
-            value={formatSignedBalance(summary.unrealized)}
-            tone={summary.unrealized >= 0 ? "positive" : "negative"}
-          />
-          <Summary
-            label="Realized P&L"
-            value={formatSignedBalance(summary.realized)}
-            tone={summary.realized >= 0 ? "positive" : "negative"}
-          />
-          <Summary
-            label="Win rate"
-            value={summary.winRate === null ? "—" : formatPercent(summary.winRate)}
-            hint={
-              summary.resolvedCount
-                ? `${summary.wins} of ${summary.resolvedCount} resolved`
-                : "No resolved markets yet"
-            }
-          />
-        </div>
-      </section>
+      <div className="space-y-1">
+        <h1 className="text-figure font-semibold text-foreground">Portfolio</h1>
+        <p className="text-sm text-muted-foreground">
+          Your open positions and every virtual trade you have made.
+        </p>
+      </div>
 
       <Tabs defaultValue="positions" className="space-y-4">
         <TabsList>
@@ -217,7 +127,7 @@ function PortfolioPage() {
         <TabsContent value="positions" className="space-y-4">
           <div className="flex items-center justify-between gap-3">
             <p className="num text-meta text-muted-foreground">
-              {positions.length} open · {formatBalance(summary.positionsValue)} at market
+              {positions.length} open · {formatBalance(positionsValue)} at market
             </p>
             <Select value={sort} onValueChange={(v) => setSort(v as PositionSort)}>
               <SelectTrigger className="h-9 w-44" aria-label="Sort positions">
