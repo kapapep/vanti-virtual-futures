@@ -100,7 +100,7 @@ function AuthPage() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-4 py-12">
       <Link to="/" className="mb-8 flex flex-col items-center gap-3">
         <VantiMark size={48} title="Vanti" />
-        <Wordmark className="text-2xl" />
+        <Wordmark size="lg" />
       </Link>
 
       <div className="w-full max-w-sm rounded-lg border border-border bg-card p-6 shadow-sm">
