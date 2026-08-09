@@ -41,7 +41,7 @@ function AuthPage() {
 
   useEffect(() => {
     void supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/home", replace: true });
+      if (data.session) navigate({ to: "/home", search: { tab: "for-you" }, replace: true });
     });
   }, [navigate]);
 
@@ -79,7 +79,7 @@ function AuthPage() {
           throw new Error("Sign-up succeeded but no session was returned. Please try signing in.");
         }
         toast.success("Welcome to Vanti — $10,000.00 virtual balance granted.");
-        navigate({ to: "/home", replace: true });
+        navigate({ to: "/home", search: { tab: "for-you" }, replace: true });
         return;
       }
 
@@ -88,7 +88,7 @@ function AuthPage() {
         password,
       });
       if (error) throw error;
-      navigate({ to: "/home", replace: true });
+      navigate({ to: "/home", search: { tab: "for-you" }, replace: true });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Something went wrong.");
     } finally {

@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 
 const SEED_MARKETS = [
-  { question: "Will the Fed cut rates before September?", base: 63, x: "6%", y: "12%", delay: "0s", dur: "38s" },
-  { question: "Will the model ship this quarter?", base: 41, x: "58%", y: "26%", delay: "-9s", dur: "46s" },
-  { question: "Will inflation print below 3%?", base: 77, x: "22%", y: "62%", delay: "-18s", dur: "52s" },
-  { question: "Will the merger close in 2026?", base: 29, x: "70%", y: "74%", delay: "-27s", dur: "43s" },
+  { question: "Will the Fed cut rates before September?", base: 63, x: "2%", y: "10%", delay: "0s", dur: "38s" },
+  { question: "Will the model ship this quarter?", base: 41, x: "84%", y: "12%", delay: "-9s", dur: "46s" },
+  { question: "Will inflation print below 3%?", base: 77, x: "3%", y: "74%", delay: "-18s", dur: "52s" },
+  { question: "Will the merger close in 2026?", base: 29, x: "85%", y: "72%", delay: "-27s", dur: "43s" },
 ] as const;
 
 /** Deterministic pseudo-random walk so SSR and client render the same curve. */
@@ -65,16 +65,17 @@ export function MarketAmbientBackground() {
 
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {/* Primary brand probability curve */}
       <svg
         viewBox="0 0 1200 320"
         preserveAspectRatio="none"
-        className="absolute inset-x-0 top-[8%] h-[62%] w-full text-accent-solid opacity-[0.12]"
+        className="absolute inset-x-0 top-[6%] h-[66%] w-full text-accent-solid/30"
       >
         <path
           d={paths[0]}
           fill="none"
           stroke="currentColor"
-          strokeWidth={2.5}
+          strokeWidth={3.5}
           strokeLinecap="round"
           className={reduced ? undefined : "vanti-curve"}
         />
@@ -82,10 +83,27 @@ export function MarketAmbientBackground() {
           d={paths[1]}
           fill="none"
           stroke="currentColor"
-          strokeWidth={1.5}
+          strokeWidth={2.5}
           strokeLinecap="round"
-          opacity={0.6}
+          opacity={0.7}
           className={reduced ? undefined : "vanti-curve vanti-curve-slow"}
+        />
+      </svg>
+
+      {/* Secondary echo curve for depth */}
+      <svg
+        viewBox="0 0 1200 320"
+        preserveAspectRatio="none"
+        className="absolute inset-x-0 top-[12%] h-[54%] w-full text-accent-subtle/20"
+      >
+        <path
+          d={paths[0]}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={4}
+          strokeLinecap="round"
+          opacity={0.5}
+          className={reduced ? undefined : "vanti-curve vanti-curve-reverse"}
         />
       </svg>
 
@@ -94,17 +112,17 @@ export function MarketAmbientBackground() {
         return (
           <div
             key={m.question}
-            className="absolute w-52 rounded-lg border border-border/40 bg-surface/30 p-3 opacity-[0.16]"
+            className="absolute w-44 rounded-lg border border-border/40 bg-surface/25 p-2.5 opacity-[0.35]"
             style={{
               left: m.x,
               top: m.y,
               animation: reduced ? undefined : `vanti-drift ${m.dur} ease-in-out ${m.delay} infinite`,
             }}
           >
-            <p className="line-clamp-2 text-meta text-foreground">{m.question}</p>
-            <div className="mt-2 flex items-center justify-between">
-              <span className="num text-meta text-yes">YES {yes}%</span>
-              <span className="num text-meta text-no">NO {100 - yes}%</span>
+            <p className="line-clamp-2 text-xs text-foreground">{m.question}</p>
+            <div className="mt-1.5 flex items-center justify-between">
+              <span className="num text-xs text-yes">YES {yes}%</span>
+              <span className="num text-xs text-no">NO {100 - yes}%</span>
             </div>
             <div className="mt-2 flex h-[3px] w-full overflow-hidden rounded-full">
               <span className="bg-yes" style={{ width: `${yes}%` }} />
@@ -114,7 +132,14 @@ export function MarketAmbientBackground() {
         );
       })}
 
-      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
+      <div
+        className="absolute inset-0 opacity-60"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 38%, var(--background) 0%, var(--background) 25%, transparent 60%)",
+        }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
     </div>
   );
 }

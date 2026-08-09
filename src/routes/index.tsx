@@ -44,18 +44,24 @@ function Landing() {
 
       <main className="relative flex flex-1 flex-col justify-center overflow-hidden">
         <MarketAmbientBackground />
-        <div className="relative mx-auto flex w-full max-w-3xl flex-col px-6 py-20">
-        <p className="text-meta font-medium uppercase text-accent-solid">
-          Virtual money only — no deposits, no withdrawals
-        </p>
-        <h1 className="mt-4 text-display font-semibold text-foreground">
-          Price the future. Risk nothing real.
-        </h1>
-        <p className="mt-4 max-w-xl text-base text-muted-foreground">
-          Vanti is a prediction market for people who like being right. Trade YES and NO on real
-          questions, watch probabilities move in real time, and build a track record — all with a
-          virtual balance.
-        </p>
+        <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-col px-6 py-20">
+          <p className="text-meta font-medium uppercase text-accent-solid">
+            Virtual money only — no deposits, no withdrawals
+          </p>
+          <h1
+            className="mt-4 text-display font-semibold text-foreground"
+            style={{ textShadow: "0 1px 24px var(--background)" }}
+          >
+            Price the future. Risk nothing real.
+          </h1>
+          <p
+            className="mt-4 max-w-xl text-base text-muted-foreground"
+            style={{ textShadow: "0 1px 16px var(--background)" }}
+          >
+            Vanti is a prediction market for people who like being right. Trade YES and NO on real
+            questions, watch probabilities move in real time, and build a track record — all with a
+            virtual balance.
+          </p>
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <Button asChild size="lg">
             <Link to="/auth">Claim $10,000.00 virtual</Link>
