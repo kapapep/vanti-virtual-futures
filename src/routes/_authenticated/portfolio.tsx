@@ -209,30 +209,3 @@ function PortfolioPage() {
     </div>
   );
 }
-
-function Summary({
-  label,
-  value,
-  tone,
-  hint,
-}: {
-  label: string;
-  value: string;
-  tone?: "positive" | "negative";
-  hint?: string;
-}) {
-  return (
-    <div>
-      <p className="text-meta font-medium uppercase text-muted-foreground">{label}</p>
-      <p
-        className={cn(
-          "num mt-1 text-lg font-semibold",
-          tone === "positive" ? "text-positive" : tone === "negative" ? "text-negative" : "text-foreground",
-        )}
-      >
-        {value}
-      </p>
-      {hint ? <p className="text-meta text-muted-foreground">{hint}</p> : null}
-    </div>
-  );
-}
