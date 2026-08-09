@@ -51,7 +51,7 @@ export function PositionRow({
 
   return (
     <div className="px-4 py-4">
-      <div className="flex flex-col gap-3 @lg:flex-row @lg:items-center @lg:gap-4">
+      <div className="flex flex-col gap-3 @3xl:flex-row @3xl:items-center @3xl:gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span
@@ -77,7 +77,7 @@ export function PositionRow({
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 gap-x-6 gap-y-2 @md:grid-cols-4 @lg:w-[26rem] @lg:shrink-0">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-2 @md:grid-cols-4 @3xl:w-[24rem] @3xl:shrink-0">
           <Stat label="Contracts" value={formatContracts(position.contracts)} />
           <Stat label="Avg" value={formatCents(position.avgPrice)} />
           <Stat label="Current" value={formatCents(position.currentPrice)} />
@@ -94,8 +94,8 @@ export function PositionRow({
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-3 @lg:w-32 @lg:shrink-0 @lg:justify-end">
-          <p className="num text-sm font-semibold text-foreground @lg:hidden">
+        <div className="flex items-center justify-between gap-3 @3xl:w-24 @3xl:shrink-0 @3xl:justify-end">
+          <p className="num text-sm font-semibold text-foreground @3xl:hidden">
             {formatBalance(position.value)}
           </p>
           <Button
