@@ -26,9 +26,15 @@ export function MarketCardSkeleton() {
   );
 }
 
-export function MarketGridSkeleton({ count = 6 }: { count?: number }) {
+export function MarketGridSkeleton({
+  count = 6,
+  className = "sm:grid-cols-2 xl:grid-cols-3",
+}: {
+  count?: number;
+  className?: string;
+}) {
   return (
-    <div className="grid gap-4 @2xl:grid-cols-2 @5xl:grid-cols-3">
+    <div className={`grid gap-4 ${className}`}>
       {Array.from({ length: count }, (_, i) => (
         <MarketCardSkeleton key={i} />
       ))}
