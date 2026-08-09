@@ -26,68 +26,69 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-border px-6 py-4">
-        <Link to="/" className="flex items-center" aria-label="Vanti">
-          <VantiMark size={22} title="Vanti" className="md:hidden" />
-          <VantiMark size={28} title="Vanti" className="hidden md:block" />
+    <div className="relative flex min-h-[100svh] flex-col overflow-hidden bg-background">
+      <MarketAmbientBackground />
+
+      {/* Top bar: logo centered on mobile, sign-in tucked right */}
+      <header className="relative z-10 grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 pt-5 sm:px-6 sm:pt-6">
+        <span aria-hidden />
+        <Link to="/" className="flex items-center justify-center" aria-label="Vanti">
+          <VantiMark size={44} title="Vanti" className="sm:hidden" />
+          <VantiMark size={32} title="Vanti" className="hidden sm:block" />
         </Link>
-        <div className="flex shrink-0 items-center gap-2">
-          <Button asChild variant="ghost" size="sm">
+        <div className="flex justify-end">
+          <Button asChild variant="ghost" size="sm" className="h-11 px-3">
             <Link to="/auth">Sign in</Link>
-          </Button>
-          <Button asChild size="sm">
-            <Link to="/auth">Get started</Link>
           </Button>
         </div>
       </header>
 
-      <main className="relative flex flex-1 flex-col justify-center overflow-hidden">
-        <MarketAmbientBackground />
-        <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-col px-6 py-20">
-          <p className="text-meta font-medium uppercase text-accent-solid">
-            Virtual money only — no deposits, no withdrawals
-          </p>
-          <h1
-            className="mt-4 text-display font-semibold text-foreground"
-            style={{ textShadow: "0 1px 24px var(--background)" }}
-          >
-            Price the future. Risk nothing real.
-          </h1>
-          <p
-            className="mt-4 max-w-xl text-base text-muted-foreground"
-            style={{ textShadow: "0 1px 16px var(--background)" }}
-          >
-            Vanti is a prediction market for people who like being right. Trade YES and NO on real
-            questions, watch probabilities move in real time, and build a track record — all with a
-            virtual balance.
-          </p>
-        <div className="mt-8 flex flex-wrap items-center gap-3">
-          <Button asChild size="lg">
-            <Link to="/auth">Claim $10,000.00 virtual</Link>
-          </Button>
-          <span className="num text-meta text-muted-foreground">Starting balance: $10,000.00</span>
-        </div>
+      <main className="relative z-10 flex flex-1 flex-col justify-center px-5 py-10 text-center sm:mx-auto sm:w-full sm:max-w-xl sm:px-6 sm:py-16">
+        <p className="eyebrow text-accent-solid">Virtual money only</p>
+        <h1
+          className="mt-3 text-[2rem] font-extrabold leading-[1.05] tracking-[-0.02em] text-foreground sm:text-display"
+          style={{ textShadow: "0 1px 24px var(--background)" }}
+        >
+          Price the future.
+          <br />
+          Risk nothing real.
+        </h1>
+        <p
+          className="mx-auto mt-4 max-w-sm text-sm text-muted-foreground sm:text-base"
+          style={{ textShadow: "0 1px 16px var(--background)" }}
+        >
+          Trade YES and NO on real questions, watch probabilities move, and build a track record —
+          all with a virtual balance.
+        </p>
 
-        <dl className="mt-16 grid gap-4 sm:grid-cols-3">
+        <ul className="mx-auto mt-8 flex w-full max-w-sm flex-col gap-2 text-left">
           {[
-            { term: "YES", detail: "Buy when you think it happens." },
-            { term: "NO", detail: "Buy when you think it doesn't." },
-            { term: "Track record", detail: "Every trade is logged to your portfolio." },
+            { term: "Buy YES", detail: "When you think it happens." },
+            { term: "Buy NO", detail: "When you think it doesn't." },
+            { term: "Track record", detail: "Every trade lands in your portfolio." },
           ].map((item) => (
-            <div key={item.term} className="rounded-lg border border-border bg-surface p-4">
-              <dt className="text-sm font-medium text-foreground">{item.term}</dt>
-              <dd className="mt-1 text-meta text-muted-foreground">{item.detail}</dd>
-            </div>
+            <li
+              key={item.term}
+              className="flex items-baseline justify-between gap-3 rounded-lg border border-border bg-surface/70 px-4 py-3 backdrop-blur"
+            >
+              <span className="text-sm font-semibold text-foreground">{item.term}</span>
+              <span className="text-meta text-muted-foreground">{item.detail}</span>
+            </li>
           ))}
-        </dl>
-        </div>
+        </ul>
       </main>
 
-      <footer className="border-t border-border px-6 py-6 text-meta text-muted-foreground">
-        Vanti uses virtual money for entertainment and skill-building. It is not a gambling or
-        financial service.
-      </footer>
+      {/* Sticky app-style bottom action */}
+      <div className="sticky bottom-0 z-10 border-t border-border bg-background/90 px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 backdrop-blur sm:border-0 sm:bg-transparent sm:backdrop-blur-none">
+        <div className="mx-auto w-full max-w-sm">
+          <Button asChild size="lg" className="h-12 w-full text-base">
+            <Link to="/auth">Get started — $10,000.00 virtual</Link>
+          </Button>
+          <p className="mt-3 text-center text-meta text-muted-foreground">
+            No deposits, no withdrawals. Not a gambling or financial service.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
