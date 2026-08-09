@@ -1,21 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { CategoryIcon } from "@/components/vanti/category-icon";
-import { MarketCard } from "@/components/vanti/market-card";
+import { TradableMarketCard } from "@/components/vanti/tradable-market-card";
 import { MarketGridSkeleton } from "@/components/vanti/skeletons";
 import { categoriesQuery, marketsQuery, type Market } from "@/lib/markets";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/discover")({
   head: () => ({
     meta: [
-      { title: "Discover — Vanti" },
-      { name: "description", content: "Browse Vanti categories and trending virtual markets." },
-      { property: "og:title", content: "Discover — Vanti" },
+      { title: "Discover & Trade — Vanti" },
+      {
+        name: "description",
+        content: "Browse Vanti categories and trade trending virtual markets in one place.",
+      },
+      { property: "og:title", content: "Discover & Trade — Vanti" },
       {
         property: "og:description",
-        content: "Browse Vanti categories and trending virtual markets.",
+        content: "Browse Vanti categories and trade trending virtual markets in one place.",
       },
     ],
   }),
@@ -45,7 +50,7 @@ function Section({
       </div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {markets.map((m) => (
-          <MarketCard key={m.id} market={m} />
+          <TradableMarketCard key={m.id} market={m} />
         ))}
       </div>
     </section>
@@ -55,8 +60,11 @@ function Section({
 function DiscoverPage() {
   const markets = useQuery(marketsQuery);
   const categories = useQuery(categoriesQuery);
+  const [category, setCategory] = useState<string | null>(null);
   const all = markets.data ?? [];
-  const active = all.filter((m) => m.status === "active");
+  const active = all.filter(
+    (m) => m.status === "active" && (!category || m.category?.slug === category),
+  );
 
   const trending = [...active].sort((a, b) => b.volume - a.volume).slice(0, 3);
   const popular = [...active].sort((a, b) => b.traderCount - a.traderCount).slice(0, 3);
@@ -70,11 +78,44 @@ function DiscoverPage() {
   return (
     <div className="space-y-10">
       <div className="space-y-1">
-        <h1 className="text-figure font-semibold text-foreground">Discover</h1>
+        <h1 className="text-figure font-semibold text-foreground">Discover & Trade</h1>
         <p className="text-sm text-muted-foreground">
-          Trending questions, the most-traded markets and everything closing soon.
+          Find a question, then buy YES or NO right from the card.
         </p>
       </div>
+
+      <section className="-mx-4 overflow-x-auto px-4 lg:mx-0 lg:px-0">
+        <div className="flex w-max gap-2">
+          <button
+            type="button"
+            onClick={() => setCategory(null)}
+            className={cn(
+              "inline-flex min-h-11 items-center rounded-full border px-4 text-sm font-medium transition-colors",
+              category === null
+                ? "border-accent-solid bg-accent-subtle text-accent-solid"
+                : "border-border text-muted-foreground hover:text-foreground",
+            )}
+          >
+            All
+          </button>
+          {(categories.data ?? []).map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => setCategory(c.slug === category ? null : c.slug)}
+              className={cn(
+                "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-colors",
+                category === c.slug
+                  ? "border-accent-solid bg-accent-subtle text-accent-solid"
+                  : "border-border text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <CategoryIcon name={c.icon} className="size-3.5" />
+              {c.name}
+            </button>
+          ))}
+        </div>
+      </section>
 
       {markets.isPending ? (
         <div className="space-y-10">
@@ -97,27 +138,6 @@ function DiscoverPage() {
           />
         </>
       )}
-
-      <section className="space-y-4">
-        <h2 className="text-base font-semibold text-foreground">Categories</h2>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {(categories.data ?? []).map((c) => {
-            const count = all.filter((m) => m.category?.slug === c.slug).length;
-            return (
-              <Link
-                key={c.id}
-                to="/markets"
-                search={{ category: c.slug, sort: "volume" as const }}
-                className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4 transition-colors hover:border-accent-solid/50"
-              >
-                <CategoryIcon name={c.icon} className="size-4 text-accent-solid" />
-                <span className="text-sm font-medium text-foreground">{c.name}</span>
-                <span className="num text-meta text-muted-foreground">{count} markets</span>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
     </div>
   );
 }
