@@ -10,6 +10,7 @@ import { PriceChart } from "@/components/vanti/price-chart";
 import { MarketDiscussion } from "@/components/vanti/market-discussion";
 import { ProbabilityBar } from "@/components/vanti/probability-bar";
 import { TradePanel } from "@/components/vanti/trade-panel";
+import { TradeDialog } from "@/components/vanti/trade-dialog";
 import { useSession } from "@/hooks/use-vanti-session";
 import { supabase } from "@/integrations/supabase/client";
 import {
