@@ -160,6 +160,25 @@ export function PostCard({
           {post.body}
         </p>
 
+        {post.imageUrl ? (
+          <img
+            src={post.imageUrl}
+            alt={`Image posted by @${post.author.username}`}
+            loading="lazy"
+            className="mt-3 max-h-[28rem] w-full rounded-lg border border-border object-cover"
+          />
+        ) : null}
+
+        {post.audioUrl ? (
+          <audio
+            src={post.audioUrl}
+            controls
+            preload="none"
+            className="mt-3 h-11 w-full"
+            aria-label={`Voice note from @${post.author.username}`}
+          />
+        ) : null}
+
         {post.marketId && !hideMarket ? (
           <div className="mt-3">
             <MarketEmbed marketId={post.marketId} />
