@@ -41,7 +41,7 @@ export function followStatsQuery(profileId: string | undefined) {
     queryKey: ["follow-stats", profileId],
     enabled: Boolean(profileId),
     queryFn: async (): Promise<{ followers: number; following: number }> => {
-      const [followers, following] = await Promise.all([
+      const [followers, following, profile] = await Promise.all([
         supabase
           .from("follows")
           .select("follower_id", { count: "exact", head: true })
@@ -50,10 +50,19 @@ export function followStatsQuery(profileId: string | undefined) {
           .from("follows")
           .select("following_id", { count: "exact", head: true })
           .eq("follower_id", profileId!),
+        supabase
+          .from("profiles")
+          .select("follower_count_display")
+          .eq("id", profileId!)
+          .maybeSingle(),
       ]);
       if (followers.error) throw followers.error;
       if (following.error) throw following.error;
-      return { followers: followers.count ?? 0, following: following.count ?? 0 };
+      const override = profile.data?.follower_count_display;
+      return {
+        followers: override != null ? Number(override) : (followers.count ?? 0),
+        following: following.count ?? 0,
+      };
     },
   });
 }
