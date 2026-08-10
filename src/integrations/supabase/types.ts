@@ -240,25 +240,31 @@ export type Database = {
       }
       posts: {
         Row: {
+          audio_url: string | null
           body: string
           created_at: string
           id: string
+          image_url: string | null
           market_id: string | null
           parent_id: string | null
           user_id: string
         }
         Insert: {
+          audio_url?: string | null
           body: string
           created_at?: string
           id?: string
+          image_url?: string | null
           market_id?: string | null
           parent_id?: string | null
           user_id: string
         }
         Update: {
+          audio_url?: string | null
           body?: string
           created_at?: string
           id?: string
+          image_url?: string | null
           market_id?: string | null
           parent_id?: string | null
           user_id?: string
@@ -295,8 +301,10 @@ export type Database = {
           created_at: string
           display_name: string | null
           follower_count_display: number | null
+          hide_following: boolean
           id: string
           is_admin: boolean
+          suspended_until: string | null
           username: string
         }
         Insert: {
@@ -306,8 +314,10 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           follower_count_display?: number | null
+          hide_following?: boolean
           id: string
           is_admin?: boolean
+          suspended_until?: string | null
           username: string
         }
         Update: {
@@ -317,8 +327,10 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           follower_count_display?: number | null
+          hide_following?: boolean
           id?: string
           is_admin?: boolean
+          suspended_until?: string | null
           username?: string
         }
         Relationships: []
@@ -500,6 +512,7 @@ export type Database = {
         }
         Returns: Json
       }
+      record_explicit_violation: { Args: { p_reason?: string }; Returns: Json }
       resolve_market: {
         Args: { p_market_id: string; p_outcome: string }
         Returns: Json

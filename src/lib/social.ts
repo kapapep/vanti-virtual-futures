@@ -10,6 +10,7 @@ export type PublicProfile = {
   avatarUrl: string | null;
   balance: number;
   createdAt: string;
+  hideFollowing: boolean;
 };
 
 export function profileByUsernameQuery(username: string) {
@@ -18,7 +19,7 @@ export function profileByUsernameQuery(username: string) {
     queryFn: async (): Promise<PublicProfile> => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, username, display_name, bio, avatar_url, balance, created_at")
+        .select("id, username, display_name, bio, avatar_url, balance, created_at, hide_following")
         .eq("username", username.toLowerCase())
         .maybeSingle();
       if (error) throw error;
@@ -31,6 +32,7 @@ export function profileByUsernameQuery(username: string) {
         avatarUrl: data.avatar_url,
         balance: Number(data.balance),
         createdAt: data.created_at,
+        hideFollowing: Boolean(data.hide_following),
       };
     },
   });
@@ -104,11 +106,62 @@ export async function setFollowing(input: {
   if (error) throw error;
 }
 
+export type FollowListKind = "followers" | "following";
+
+export type FollowListEntry = {
+  id: string;
+  username: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  bio: string | null;
+};
+
+/** Followers are always public; a following list can be hidden by its owner. */
+export function followListQuery(profileId: string | undefined, kind: FollowListKind) {
+  return queryOptions({
+    queryKey: ["follow-list", profileId, kind],
+    enabled: Boolean(profileId),
+    queryFn: async (): Promise<FollowListEntry[]> => {
+      const column = kind === "followers" ? "following_id" : "follower_id";
+      const joined =
+        kind === "followers"
+          ? "profiles!follows_follower_id_fkey(id, username, display_name, avatar_url, bio)"
+          : "profiles!follows_following_id_fkey(id, username, display_name, avatar_url, bio)";
+      const { data, error } = await supabase
+        .from("follows")
+        .select(joined)
+        .eq(column, profileId!)
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (error) throw error;
+      type Row = {
+        profiles: {
+          id: string;
+          username: string;
+          display_name: string | null;
+          avatar_url: string | null;
+          bio: string | null;
+        } | null;
+      };
+      return ((data ?? []) as unknown as Row[])
+        .filter((row) => row.profiles)
+        .map((row) => ({
+          id: row.profiles!.id,
+          username: row.profiles!.username,
+          displayName: row.profiles!.display_name,
+          avatarUrl: row.profiles!.avatar_url,
+          bio: row.profiles!.bio,
+        }));
+    },
+  });
+}
+
 export async function updateOwnProfile(input: {
   userId: string;
   displayName: string;
   bio: string;
   avatarUrl: string;
+  hideFollowing?: boolean;
 }) {
   const { error } = await supabase
     .from("profiles")
@@ -116,6 +169,7 @@ export async function updateOwnProfile(input: {
       display_name: input.displayName.trim() || null,
       bio: input.bio.trim() || null,
       avatar_url: input.avatarUrl.trim() || null,
+      ...(input.hideFollowing === undefined ? {} : { hide_following: input.hideFollowing }),
     })
     .eq("id", input.userId);
   if (error) throw error;

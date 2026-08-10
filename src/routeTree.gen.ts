@@ -20,6 +20,7 @@ import { Route as AuthenticatedMarketsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedPortfolioRouteImport } from './routes/_authenticated/portfolio'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedWatchlistRouteImport } from './routes/_authenticated/watchlist'
+import { Route as AuthenticatedConnectionsUsernameRouteImport } from './routes/_authenticated/connections.$username'
 import { Route as AuthenticatedMarketMarketIdRouteImport } from './routes/_authenticated/market.$marketId'
 import { Route as AuthenticatedUUsernameRouteImport } from './routes/_authenticated/u.$username'
 
@@ -77,6 +78,12 @@ const AuthenticatedWatchlistRoute = AuthenticatedWatchlistRouteImport.update({
   path: '/watchlist',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedConnectionsUsernameRoute =
+  AuthenticatedConnectionsUsernameRouteImport.update({
+    id: '/connections/$username',
+    path: '/connections/$username',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMarketMarketIdRoute =
   AuthenticatedMarketMarketIdRouteImport.update({
     id: '/market/$marketId',
@@ -100,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/portfolio': typeof AuthenticatedPortfolioRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/watchlist': typeof AuthenticatedWatchlistRoute
+  '/connections/$username': typeof AuthenticatedConnectionsUsernameRoute
   '/market/$marketId': typeof AuthenticatedMarketMarketIdRoute
   '/u/$username': typeof AuthenticatedUUsernameRoute
 }
@@ -114,6 +122,7 @@ export interface FileRoutesByTo {
   '/portfolio': typeof AuthenticatedPortfolioRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/watchlist': typeof AuthenticatedWatchlistRoute
+  '/connections/$username': typeof AuthenticatedConnectionsUsernameRoute
   '/market/$marketId': typeof AuthenticatedMarketMarketIdRoute
   '/u/$username': typeof AuthenticatedUUsernameRoute
 }
@@ -130,6 +139,7 @@ export interface FileRoutesById {
   '/_authenticated/portfolio': typeof AuthenticatedPortfolioRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/watchlist': typeof AuthenticatedWatchlistRoute
+  '/_authenticated/connections/$username': typeof AuthenticatedConnectionsUsernameRoute
   '/_authenticated/market/$marketId': typeof AuthenticatedMarketMarketIdRoute
   '/_authenticated/u/$username': typeof AuthenticatedUUsernameRoute
 }
@@ -146,6 +156,7 @@ export interface FileRouteTypes {
     | '/portfolio'
     | '/profile'
     | '/watchlist'
+    | '/connections/$username'
     | '/market/$marketId'
     | '/u/$username'
   fileRoutesByTo: FileRoutesByTo
@@ -160,6 +171,7 @@ export interface FileRouteTypes {
     | '/portfolio'
     | '/profile'
     | '/watchlist'
+    | '/connections/$username'
     | '/market/$marketId'
     | '/u/$username'
   id:
@@ -175,6 +187,7 @@ export interface FileRouteTypes {
     | '/_authenticated/portfolio'
     | '/_authenticated/profile'
     | '/_authenticated/watchlist'
+    | '/_authenticated/connections/$username'
     | '/_authenticated/market/$marketId'
     | '/_authenticated/u/$username'
   fileRoutesById: FileRoutesById
@@ -264,6 +277,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWatchlistRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/connections/$username': {
+      id: '/_authenticated/connections/$username'
+      path: '/connections/$username'
+      fullPath: '/connections/$username'
+      preLoaderRoute: typeof AuthenticatedConnectionsUsernameRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/market/$marketId': {
       id: '/_authenticated/market/$marketId'
       path: '/market/$marketId'
@@ -290,6 +310,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPortfolioRoute: typeof AuthenticatedPortfolioRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedWatchlistRoute: typeof AuthenticatedWatchlistRoute
+  AuthenticatedConnectionsUsernameRoute: typeof AuthenticatedConnectionsUsernameRoute
   AuthenticatedMarketMarketIdRoute: typeof AuthenticatedMarketMarketIdRoute
   AuthenticatedUUsernameRoute: typeof AuthenticatedUUsernameRoute
 }
@@ -303,6 +324,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPortfolioRoute: AuthenticatedPortfolioRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedWatchlistRoute: AuthenticatedWatchlistRoute,
+  AuthenticatedConnectionsUsernameRoute: AuthenticatedConnectionsUsernameRoute,
   AuthenticatedMarketMarketIdRoute: AuthenticatedMarketMarketIdRoute,
   AuthenticatedUUsernameRoute: AuthenticatedUUsernameRoute,
 }

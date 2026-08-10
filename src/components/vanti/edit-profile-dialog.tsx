@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { fileToAvatarDataUrl } from "@/lib/image-file";
 import { updateOwnProfile } from "@/lib/social";
@@ -25,6 +26,7 @@ export function EditProfileDialog({
   displayName: initialDisplayName,
   bio: initialBio = "",
   avatarUrl: initialAvatarUrl,
+  hideFollowing: initialHideFollowing = false,
   showBio = true,
   trigger,
   open: controlledOpen,
@@ -35,6 +37,7 @@ export function EditProfileDialog({
   displayName: string;
   bio?: string;
   avatarUrl: string;
+  hideFollowing?: boolean;
   showBio?: boolean;
   trigger?: ReactNode;
   open?: boolean;
@@ -48,6 +51,7 @@ export function EditProfileDialog({
   const [displayName, setDisplayName] = useState(initialDisplayName);
   const [bio, setBio] = useState(initialBio);
   const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl);
+  const [hideFollowing, setHideFollowing] = useState(initialHideFollowing);
   const fileInput = useRef<HTMLInputElement>(null);
   const [processing, setProcessing] = useState(false);
 
@@ -68,10 +72,11 @@ export function EditProfileDialog({
     setDisplayName(initialDisplayName);
     setBio(initialBio);
     setAvatarUrl(initialAvatarUrl);
-  }, [open, initialDisplayName, initialBio, initialAvatarUrl]);
+    setHideFollowing(initialHideFollowing);
+  }, [open, initialDisplayName, initialBio, initialAvatarUrl, initialHideFollowing]);
 
   const save = useMutation({
-    mutationFn: () => updateOwnProfile({ userId, displayName, bio, avatarUrl }),
+    mutationFn: () => updateOwnProfile({ userId, displayName, bio, avatarUrl, hideFollowing }),
     onSuccess: () => {
       toast.success("Profile updated");
       setOpen(false);
@@ -169,6 +174,17 @@ export function EditProfileDialog({
               />
             </div>
           ) : null}
+          <div className="flex items-start justify-between gap-3 rounded-lg border border-border bg-surface p-3">
+            <div className="space-y-0.5">
+              <Label htmlFor="hideFollowing" className="text-sm">
+                Hide who I follow
+              </Label>
+              <p className="text-meta text-muted-foreground">
+                Your following list stays private. Your followers are always public.
+              </p>
+            </div>
+            <Switch id="hideFollowing" checked={hideFollowing} onCheckedChange={setHideFollowing} />
+          </div>
           <p className="text-meta text-muted-foreground">
             Username and balance can't be changed here.
           </p>

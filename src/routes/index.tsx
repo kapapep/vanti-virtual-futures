@@ -32,10 +32,7 @@ function Landing() {
       {/* Top bar: logo centered on mobile, sign-in tucked right */}
       <header className="relative z-10 grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 pt-5 sm:px-6 sm:pt-6">
         <span aria-hidden />
-        <Link to="/" className="flex items-center justify-center" aria-label="Vanti">
-          <VantiMark size={64} title="Vanti" className="sm:hidden" />
-          <VantiMark size={56} title="Vanti" className="hidden sm:block" />
-        </Link>
+        <span aria-hidden />
         <div className="flex justify-end">
           <Button asChild variant="ghost" size="sm" className="h-11 px-3">
             <Link to="/auth">Sign in</Link>
@@ -44,7 +41,10 @@ function Landing() {
       </header>
 
       <main className="relative z-10 flex flex-1 flex-col justify-center px-5 py-10 text-center sm:mx-auto sm:w-full sm:max-w-xl sm:px-6 sm:py-16">
-        <p className="eyebrow text-accent-solid">Virtual money only</p>
+        <div className="flex flex-col items-center gap-1">
+          <VantiMark size={72} title="Vanti" />
+          <p className="text-lg font-extrabold tracking-[-0.02em] text-foreground">Vanti</p>
+        </div>
         <h1
           className="mt-3 text-[2rem] font-extrabold leading-[1.05] tracking-[-0.02em] text-foreground sm:text-display"
           style={{ textShadow: "0 1px 24px var(--background)" }}

@@ -120,8 +120,22 @@ function UserProfilePage() {
           )}
           <div className="grid flex-1 grid-cols-3 gap-2 text-center">
             <Count label="Posts" value={formatCount(posts.length)} />
-            <Count label="Followers" value={formatCount(stats?.followers ?? 0)} />
-            <Count label="Following" value={formatCount(stats?.following ?? 0)} />
+            <Link
+              to="/connections/$username"
+              params={{ username: profile.username }}
+              search={{ tab: "followers" as const }}
+              className="rounded-md transition-colors hover:bg-secondary"
+            >
+              <Count label="Followers" value={formatCount(stats?.followers ?? 0)} />
+            </Link>
+            <Link
+              to="/connections/$username"
+              params={{ username: profile.username }}
+              search={{ tab: "following" as const }}
+              className="rounded-md transition-colors hover:bg-secondary"
+            >
+              <Count label="Following" value={formatCount(stats?.following ?? 0)} />
+            </Link>
           </div>
         </div>
 
@@ -145,6 +159,7 @@ function UserProfilePage() {
               bio={profile.bio ?? ""}
               avatarUrl={profile.avatarUrl ?? ""}
               username={profile.username}
+              hideFollowing={profile.hideFollowing}
               trigger={
                 <Button variant="outline" className="h-11 flex-1">
                   Edit profile

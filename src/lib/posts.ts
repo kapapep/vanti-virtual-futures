@@ -15,6 +15,8 @@ export type FeedPost = {
   createdAt: string;
   marketId: string | null;
   parentId: string | null;
+  imageUrl: string | null;
+  audioUrl: string | null;
   author: PostAuthor;
   likeCount: number;
   repostCount: number;
@@ -24,7 +26,7 @@ export type FeedPost = {
 };
 
 const POST_SELECT =
-  "id, body, created_at, market_id, parent_id, profiles!posts_user_id_fkey(id, username, display_name, avatar_url)";
+  "id, body, created_at, market_id, parent_id, image_url, audio_url, profiles!posts_user_id_fkey(id, username, display_name, avatar_url)";
 
 type PostRow = {
   id: string;
@@ -32,6 +34,8 @@ type PostRow = {
   created_at: string;
   market_id: string | null;
   parent_id: string | null;
+  image_url: string | null;
+  audio_url: string | null;
   profiles: {
     id: string;
     username: string;
@@ -80,6 +84,8 @@ async function hydrate(rows: PostRow[], viewerId: string | undefined): Promise<F
       createdAt: row.created_at,
       marketId: row.market_id,
       parentId: row.parent_id,
+      imageUrl: row.image_url,
+      audioUrl: row.audio_url,
       author: {
         id: row.profiles!.id,
         username: row.profiles!.username,
@@ -251,17 +257,27 @@ export async function createPost(input: {
   body: string;
   marketId?: string | null;
   parentId?: string | null;
+  imageUrl?: string | null;
+  audioUrl?: string | null;
 }) {
   const body = input.body.trim();
-  if (!body) throw new Error("Write something first.");
+  const hasMedia = Boolean(input.imageUrl || input.audioUrl);
+  if (!body && !hasMedia) throw new Error("Write something first.");
   if (body.length > 500) throw new Error("Posts are limited to 500 characters.");
   const { error } = await supabase.from("posts").insert({
     user_id: input.userId,
     body,
     market_id: input.marketId ?? null,
     parent_id: input.parentId ?? null,
+    image_url: input.imageUrl ?? null,
+    audio_url: input.audioUrl ?? null,
   });
-  if (error) throw error;
+  if (error) {
+    if (error.message.includes("ACCOUNT_SUSPENDED")) {
+      throw new Error("Your account is suspended for 7 days for violating the posting rules.");
+    }
+    throw error;
+  }
 }
 
 export async function deletePost(postId: string) {
