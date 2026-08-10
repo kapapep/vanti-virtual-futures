@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, ChevronDown, X } from "lucide-react";
-import { useState } from "react";
+import { Check, ChevronDown, ImagePlus, X } from "lucide-react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { useProfile, useSession } from "@/hooks/use-vanti-session";
+import { supabase } from "@/integrations/supabase/client";
+import { AudioRecorder, type RecordedAudio } from "@/components/vanti/audio-recorder";
 import { formatCents } from "@/lib/format";
 import { marketsQuery } from "@/lib/markets";
+import { fileToPostImageDataUrl } from "@/lib/media-file";
+import { moderatePostMedia } from "@/lib/moderation.functions";
 import { createPost } from "@/lib/posts";
 import { cn } from "@/lib/utils";
 
@@ -107,21 +111,66 @@ export function PostComposer({
   const queryClient = useQueryClient();
   const [body, setBody] = useState("");
   const [attached, setAttached] = useState<string | null>(marketId ?? null);
+  const [image, setImage] = useState<string | null>(null);
+  const [audio, setAudio] = useState<RecordedAudio | null>(null);
+  const [preparing, setPreparing] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
+
+  const suspendedUntil = profile?.suspended_until ?? null;
+  const suspended = Boolean(suspendedUntil && new Date(suspendedUntil).getTime() > Date.now());
 
   const remaining = MAX_LENGTH - body.length;
+
+  async function pickImage(file: File | undefined) {
+    if (!file) return;
+    setPreparing(true);
+    try {
+      setImage(await fileToPostImageDataUrl(file));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Couldn't use that image.");
+    } finally {
+      setPreparing(false);
+      if (fileInput.current) fileInput.current.value = "";
+    }
+  }
 
   const submit = useMutation({
     mutationFn: async () => {
       if (!user) throw new Error("Sign in to post.");
+      if (suspended) throw new Error("Your account is suspended. You can't post right now.");
+
+      if (image || audio) {
+        const verdict = await moderatePostMedia({
+          data: {
+            body,
+            ...(image ? { imageDataUrl: image } : {}),
+            ...(audio ? { audioDataUrl: audio.dataUrl, audioFormat: audio.format } : {}),
+          },
+        });
+        if (verdict.explicit) {
+          await supabase.rpc("record_explicit_violation", { p_reason: "explicit_content" });
+          void queryClient.invalidateQueries({ queryKey: ["profile"] });
+          setImage(null);
+          setAudio(null);
+          throw new Error(
+            "That media breaks the explicit-content rule. Your account is suspended for 7 days.",
+          );
+        }
+      }
+
       await createPost({
         userId: user.id,
         body,
         marketId: lockedMarket ? (marketId ?? null) : attached,
         parentId: parentId ?? null,
+        imageUrl: image,
+        audioUrl: audio?.dataUrl ?? null,
       });
     },
     onSuccess: () => {
       setBody("");
+      setImage(null);
+      setAudio(null);
       if (!lockedMarket) setAttached(null);
       void queryClient.invalidateQueries({ queryKey: ["feed"] });
       void queryClient.invalidateQueries({ queryKey: ["market-posts"] });
@@ -133,7 +182,13 @@ export function PostComposer({
     onError: (error: Error) => toast.error(error.message),
   });
 
-  const disabled = submit.isPending || body.trim().length === 0 || remaining < 0;
+  const hasMedia = Boolean(image || audio);
+  const disabled =
+    submit.isPending ||
+    preparing ||
+    suspended ||
+    (body.trim().length === 0 && !hasMedia) ||
+    remaining < 0;
 
   return (
     <div
@@ -142,16 +197,72 @@ export function PostComposer({
         compact && "border-0 bg-transparent p-0",
       )}
     >
+      {suspended ? (
+        <p className="mb-2 rounded-md border border-border bg-surface px-3 py-2 text-meta text-negative">
+          Posting is suspended until{" "}
+          <span className="num">{new Date(suspendedUntil!).toLocaleDateString()}</span> for breaking
+          the explicit-content rule.
+        </p>
+      ) : null}
       <Textarea
         value={body}
         onChange={(e) => setBody(e.target.value.slice(0, MAX_LENGTH + 40))}
         placeholder={placeholder}
         rows={compact ? 2 : 3}
         className="resize-none text-sm"
+        disabled={suspended}
         aria-label={parentId ? "Write a reply" : "Write a post"}
       />
+
+      {image ? (
+        <div className="relative mt-2">
+          <img
+            src={image}
+            alt="Attached image preview"
+            className="max-h-64 w-full rounded-lg border border-border object-cover"
+          />
+          <Button
+            variant="secondary"
+            size="icon"
+            aria-label="Remove image"
+            className="absolute right-2 top-2"
+            onClick={() => setImage(null)}
+          >
+            <X className="size-4" />
+          </Button>
+        </div>
+      ) : null}
+
+      {audio ? (
+        <div className="mt-2">
+          <AudioRecorder value={audio} onChange={setAudio} />
+        </div>
+      ) : null}
+
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-        {lockedMarket || parentId ? <span /> : <MarketPicker value={attached} onChange={setAttached} />}
+        <div className="flex items-center gap-1">
+          {lockedMarket || parentId ? null : (
+            <MarketPicker value={attached} onChange={setAttached} />
+          )}
+          <input
+            ref={fileInput}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => void pickImage(e.target.files?.[0])}
+          />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-11"
+            aria-label="Add an image"
+            disabled={suspended || preparing}
+            onClick={() => fileInput.current?.click()}
+          >
+            <ImagePlus className="size-4" />
+          </Button>
+          {audio ? null : <AudioRecorder value={null} onChange={setAudio} />}
+        </div>
         <div className="ml-auto flex items-center gap-3">
           <span
             className={cn(
@@ -162,7 +273,7 @@ export function PostComposer({
             {remaining}
           </span>
           <Button size="sm" disabled={disabled} onClick={() => submit.mutate()}>
-            {submit.isPending ? "Posting…" : parentId ? "Reply" : "Post"}
+            {submit.isPending ? "Checking…" : parentId ? "Reply" : "Post"}
           </Button>
         </div>
       </div>
@@ -170,7 +281,8 @@ export function PostComposer({
         <p className="mt-2 text-meta text-muted-foreground">Sign in to join the conversation.</p>
       ) : (
         <p className="mt-2 text-meta text-muted-foreground">
-          Posting as @{profile?.username ?? "…"}
+          Posting as @{profile?.username ?? "…"} · Images and 10s voice notes are screened for
+          explicit content.
         </p>
       )}
     </div>
