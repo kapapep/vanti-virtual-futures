@@ -158,7 +158,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Link
                 key={item.to}
                 to={item.to}
-                search={item.to === "/home" ? { tab: "for-you" } : undefined}
+                search={item.to === "/home" ? { tab: "for-you" } : {}}
                 className={cn(
                   "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                   active
@@ -236,7 +236,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Link
               key={item.label}
               to={item.to}
-              search={item.to === "/home" ? { tab: "for-you" } : undefined}
+              search={item.to === "/home" ? { tab: "for-you" } : {}}
               className={cn(
                 "flex flex-col items-center gap-1 py-2.5 text-meta font-medium transition-colors",
                 active ? "text-accent-solid" : "text-muted-foreground",
