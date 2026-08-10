@@ -114,8 +114,8 @@ function UserProfilePage() {
                 <p className="mt-2 max-w-prose text-sm text-foreground">{profile.bio}</p>
               ) : null}
               <p className="num mt-2 text-meta text-muted-foreground">
-                Joined {formatDate(profile.createdAt)} · {stats?.followers ?? 0} followers ·{" "}
-                {stats?.following ?? 0} following
+                Joined {formatDate(profile.createdAt)} · {formatCount(stats?.followers ?? 0)}{" "}
+                followers · {formatCount(stats?.following ?? 0)} following
               </p>
             </div>
           </div>
