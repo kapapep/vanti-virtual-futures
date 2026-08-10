@@ -41,12 +41,12 @@ function Landing() {
       </header>
 
       <main className="relative z-10 flex flex-1 flex-col justify-center px-5 py-10 text-center sm:mx-auto sm:w-full sm:max-w-xl sm:px-6 sm:py-16">
-        <div className="flex flex-col items-center gap-1">
+        <div className="flex flex-col items-center gap-2">
           <VantiMark size={72} title="Vanti" />
-          <p className="text-lg font-extrabold tracking-[-0.02em] text-foreground">Vanti</p>
+          <p className="text-[1.75rem] font-extrabold tracking-[-0.02em] text-foreground">Vanti</p>
         </div>
         <h1
-          className="mt-3 text-[2rem] font-extrabold leading-[1.05] tracking-[-0.02em] text-foreground sm:text-display"
+          className="mt-6 text-[2rem] font-extrabold leading-[1.05] tracking-[-0.02em] text-foreground sm:text-display"
           style={{ textShadow: "0 1px 24px var(--background)" }}
         >
           Price the future.
