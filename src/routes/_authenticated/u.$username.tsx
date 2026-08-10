@@ -1,11 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Grid3x3, LineChart, Layers } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EditProfileDialog } from "@/components/vanti/edit-profile-dialog";
 import { EmptyState } from "@/components/vanti/empty-state";
+import { PostCard } from "@/components/vanti/post-card";
+import { ProfileActionsMenu } from "@/components/vanti/profile-actions-menu";
 import { ProfileSkeleton } from "@/components/vanti/skeletons";
 import { TradeHistoryList } from "@/components/vanti/trade-history-list";
 import { useSession } from "@/hooks/use-vanti-session";
@@ -25,6 +28,7 @@ import {
   STARTING_BALANCE,
   tradeHistoryQuery,
 } from "@/lib/portfolio";
+import { userPostsQuery } from "@/lib/posts";
 import {
   followStatsQuery,
   isFollowingQuery,
@@ -66,6 +70,7 @@ function UserProfilePage() {
   const { data: positions = [] } = useQuery(positionsQuery(profile?.id));
   const { data: trades = [] } = useQuery(tradeHistoryQuery(profile?.id));
   const { data: resolved = { wins: 0, total: 0 } } = useQuery(resolvedResultsQuery(profile?.id));
+  const { data: posts = [] } = useQuery(userPostsQuery(profile?.id, user?.id));
 
   const follow = useMutation({
     mutationFn: (next: boolean) =>
@@ -79,8 +84,7 @@ function UserProfilePage() {
   });
 
   if (isPending) return <ProfileSkeleton />;
-  if (isError || !profile)
-    return <EmptyState title="No trader found with that username." />;
+  if (isError || !profile) return <EmptyState title="No trader found with that username." />;
 
   const isOwn = user?.id === profile.id;
   const positionsValue = positions.reduce((sum, p) => sum + p.value, 0);
@@ -90,81 +94,128 @@ function UserProfilePage() {
   const initials = (profile.displayName ?? profile.username).slice(0, 2).toUpperCase();
 
   return (
-    <div className="@container space-y-8">
-      <section className="rounded-lg border border-border bg-card p-5 @md:p-6">
-        <div className="flex flex-col gap-5 @md:flex-row @md:items-start @md:justify-between">
-          <div className="flex items-start gap-4">
-            {profile.avatarUrl ? (
-              <img
-                src={profile.avatarUrl}
-                alt={`${profile.displayName ?? profile.username} avatar`}
-                className="size-16 rounded-full border border-border object-cover"
-                loading="lazy"
-              />
-            ) : (
-              <div className="flex size-16 items-center justify-center rounded-full border border-border bg-surface text-lg font-semibold text-muted-foreground">
-                {initials}
-              </div>
-            )}
-            <div className="min-w-0">
-              <h1 className="text-figure font-semibold text-foreground">
-                {profile.displayName ?? profile.username}
-              </h1>
-              <p className="text-sm text-muted-foreground">@{profile.username}</p>
-              {profile.bio ? (
-                <p className="mt-2 max-w-prose text-sm text-foreground">{profile.bio}</p>
-              ) : null}
-              <p className="num mt-2 text-meta text-muted-foreground">
-                Joined {formatDate(profile.createdAt)} · {formatCount(stats?.followers ?? 0)}{" "}
-                followers · {formatCount(stats?.following ?? 0)} following
-              </p>
-            </div>
-          </div>
+    <div className="@container space-y-6">
+      {/* Username row with overflow menu — Instagram-style header */}
+      <div className="-mt-2 flex items-center justify-between gap-2">
+        <h1 className="min-w-0 truncate text-base font-extrabold tracking-tight text-foreground">
+          @{profile.username}
+        </h1>
+        <ProfileActionsMenu username={profile.username} isOwn={isOwn} />
+      </div>
 
-          <div className="shrink-0">
-            {isOwn ? (
-              <EditProfileDialog
-                userId={profile.id}
-                displayName={profile.displayName ?? ""}
-                bio={profile.bio ?? ""}
-                avatarUrl={profile.avatarUrl ?? ""}
-                username={profile.username}
-                trigger={<Button variant="outline">Edit profile</Button>}
-              />
-            ) : (
-              <Button
-                variant={following ? "outline" : "default"}
-                disabled={follow.isPending || !user}
-                onClick={() => follow.mutate(!following)}
-              >
-                {following ? "Following" : "Follow"}
-              </Button>
-            )}
+      {/* Avatar + counts */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-6 @md:gap-10">
+          {profile.avatarUrl ? (
+            <img
+              src={profile.avatarUrl}
+              alt={`${profile.displayName ?? profile.username} avatar`}
+              className="size-20 shrink-0 rounded-full border border-border object-cover @md:size-28"
+              loading="lazy"
+            />
+          ) : (
+            <div className="flex size-20 shrink-0 items-center justify-center rounded-full border border-border bg-surface text-xl font-semibold text-muted-foreground @md:size-28">
+              {initials}
+            </div>
+          )}
+          <div className="grid flex-1 grid-cols-3 gap-2 text-center">
+            <Count label="Posts" value={formatCount(posts.length)} />
+            <Count label="Followers" value={formatCount(stats?.followers ?? 0)} />
+            <Count label="Following" value={formatCount(stats?.following ?? 0)} />
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-2 gap-4 border-t border-border pt-5 @md:grid-cols-4">
-          <Stat label="Portfolio value" value={formatBalance(portfolioValue)} />
-          <Stat
-            label="Total P&L"
-            value={formatSignedBalance(totalPnl)}
-            sub={formatSignedPercent(totalPnl / STARTING_BALANCE)}
-            tone={totalPnl >= 0 ? "positive" : "negative"}
-          />
-          <Stat
-            label="Win rate"
-            value={winRate === null ? "—" : formatPercent(winRate)}
-            sub={resolved.total ? `${resolved.wins}/${resolved.total} resolved` : "No resolutions"}
-          />
-          <Stat label="Open positions" value={String(positions.length)} />
+        <div className="space-y-1">
+          <p className="text-sm font-bold text-foreground">
+            {profile.displayName ?? profile.username}
+          </p>
+          {profile.bio ? (
+            <p className="max-w-prose whitespace-pre-line text-sm text-foreground">{profile.bio}</p>
+          ) : null}
+          <p className="num text-meta text-muted-foreground">
+            Joined {formatDate(profile.createdAt)}
+          </p>
+        </div>
+
+        <div className="flex gap-2">
+          {isOwn ? (
+            <EditProfileDialog
+              userId={profile.id}
+              displayName={profile.displayName ?? ""}
+              bio={profile.bio ?? ""}
+              avatarUrl={profile.avatarUrl ?? ""}
+              username={profile.username}
+              trigger={
+                <Button variant="outline" className="h-11 flex-1">
+                  Edit profile
+                </Button>
+              }
+            />
+          ) : (
+            <Button
+              variant={following ? "outline" : "default"}
+              className="h-11 flex-1"
+              disabled={follow.isPending || !user}
+              onClick={() => follow.mutate(!following)}
+            >
+              {following ? "Following" : "Follow"}
+            </Button>
+          )}
+          <Button variant="outline" className="h-11 flex-1" asChild>
+            <Link to="/markets">{isOwn ? "Find markets" : "View markets"}</Link>
+          </Button>
         </div>
       </section>
 
-      <Tabs defaultValue="trades" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="trades">Trades</TabsTrigger>
-          <TabsTrigger value="positions">Positions</TabsTrigger>
+      {/* Performance strip */}
+      <section className="grid grid-cols-2 gap-4 rounded-lg border border-border bg-card p-4 @md:grid-cols-4">
+        <Stat label="Portfolio value" value={formatBalance(portfolioValue)} />
+        <Stat
+          label="Total P&L"
+          value={formatSignedBalance(totalPnl)}
+          sub={formatSignedPercent(totalPnl / STARTING_BALANCE)}
+          tone={totalPnl >= 0 ? "positive" : "negative"}
+        />
+        <Stat
+          label="Win rate"
+          value={winRate === null ? "—" : formatPercent(winRate)}
+          sub={resolved.total ? `${resolved.wins}/${resolved.total} resolved` : "No resolutions"}
+        />
+        <Stat label="Open positions" value={String(positions.length)} />
+      </section>
+
+      {/* Icon tabs — TikTok/Instagram style */}
+      <Tabs defaultValue="posts" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="posts" aria-label="Posts">
+            <Grid3x3 className="size-4" />
+          </TabsTrigger>
+          <TabsTrigger value="trades" aria-label="Trades">
+            <LineChart className="size-4" />
+          </TabsTrigger>
+          <TabsTrigger value="positions" aria-label="Positions">
+            <Layers className="size-4" />
+          </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="posts" className="@container">
+          {posts.length ? (
+            <div className="divide-y divide-border rounded-lg border border-border bg-card">
+              {posts.map((post) => (
+                <PostCard key={post.id} post={post} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              title={
+                isOwn
+                  ? "You haven't posted yet. Share a take on a market."
+                  : `@${profile.username} hasn't posted yet.`
+              }
+            />
+          )}
+        </TabsContent>
+
         <TabsContent value="trades" className="@container">
           <TradeHistoryList
             trades={trades}
@@ -175,6 +226,7 @@ function UserProfilePage() {
             }
           />
         </TabsContent>
+
         <TabsContent value="positions">
           {positions.length ? (
             <div className="divide-y divide-border rounded-lg border border-border bg-card">
@@ -217,6 +269,15 @@ function UserProfilePage() {
           )}
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+function Count({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="num text-base font-bold text-foreground @md:text-lg">{value}</p>
+      <p className="text-meta text-muted-foreground">{label}</p>
     </div>
   );
 }
