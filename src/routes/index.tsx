@@ -32,10 +32,7 @@ function Landing() {
       {/* Top bar: logo centered on mobile, sign-in tucked right */}
       <header className="relative z-10 grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 pt-5 sm:px-6 sm:pt-6">
         <span aria-hidden />
-        <Link to="/" className="flex items-center justify-center" aria-label="Vanti">
-          <VantiMark size={64} title="Vanti" className="sm:hidden" />
-          <VantiMark size={56} title="Vanti" className="hidden sm:block" />
-        </Link>
+        <span aria-hidden />
         <div className="flex justify-end">
           <Button asChild variant="ghost" size="sm" className="h-11 px-3">
             <Link to="/auth">Sign in</Link>
