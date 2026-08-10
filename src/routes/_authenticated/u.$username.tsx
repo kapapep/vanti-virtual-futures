@@ -13,6 +13,7 @@ import {
   formatBalance,
   formatCents,
   formatContracts,
+  formatCount,
   formatDate,
   formatPercent,
   formatSignedBalance,
