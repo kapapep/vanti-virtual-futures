@@ -234,10 +234,8 @@ function HomePage() {
       market,
       label:
         tab === "following"
-          ? "Price move · watchlist"
-          : market.change24h >= 0
-            ? "Trending · winning trades"
-            : "Trending · losing trades",
+          ? TREND_LABEL.WATCHLIST_MOVE
+          : trendLabel(market.change24h),
       at: market.spark.length ? market.spark[market.spark.length - 1]!.t : Date.now(),
     }));
   }, [markets.data, watchedIds, tab]);
