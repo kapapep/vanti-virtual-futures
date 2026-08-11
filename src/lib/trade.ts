@@ -67,6 +67,29 @@ export async function executeTrade(input: {
   });
   if (error) throw new Error(tradeErrorMessage(error));
 
+  return parseTradeResult(data);
+}
+
+/**
+ * Closes (part of) a position. The client only sends market, side and contract
+ * quantity — the execution price is resolved server-side from the side being
+ * sold, and the server rejects quantities above the user's real holdings.
+ */
+export async function sellPosition(input: {
+  marketId: string;
+  side: TradeSide;
+  contracts: number;
+}): Promise<TradeResult> {
+  const { data, error } = await supabase.rpc("sell_position", {
+    p_market_id: input.marketId,
+    p_side: input.side,
+    p_contracts: input.contracts,
+  });
+  if (error) throw new Error(tradeErrorMessage(error));
+  return parseTradeResult(data);
+}
+
+function parseTradeResult(data: unknown): TradeResult {
   const raw = data as {
     balance: number | string;
     price: number | string;
