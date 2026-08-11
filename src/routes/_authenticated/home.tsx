@@ -19,6 +19,7 @@ import { PostCard } from "@/components/vanti/post-card";
 import { PostComposer } from "@/components/vanti/post-composer";
 import { useSession } from "@/hooks/use-vanti-session";
 import { formatCents, formatDelta } from "@/lib/format";
+import { TREND_LABEL, trendLabel } from "@/lib/market-trend";
 import { marketsQuery, watchlistQuery, type Market } from "@/lib/markets";
 import {
   FEED_PAGE_SIZE,
@@ -42,13 +43,13 @@ export const Route = createFileRoute("/_authenticated/home")({
       {
         name: "description",
         content:
-          "Your Vanti home feed: For You covers trending and losing trades, Following shows the traders you back.",
+          "Your Vanti home feed: For You covers trending markets and big price moves, Following shows the traders you back.",
       },
       { property: "og:title", content: "Home — Vanti Prediction Markets" },
       {
         property: "og:description",
         content:
-          "Your Vanti home feed: For You covers trending and losing trades, Following shows the traders you back.",
+          "Your Vanti home feed: For You covers trending markets and big price moves, Following shows the traders you back.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
