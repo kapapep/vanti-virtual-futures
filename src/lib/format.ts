@@ -1,11 +1,16 @@
-const currency = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
+/** Prefix for Vanti's virtual currency. Never a real-money symbol. */
+export const VIRTUAL_CURRENCY_SYMBOL = "V";
+
+const decimal = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
 
-/** Formats a virtual-money amount, e.g. 10000 -> "$10,000.00". */
+const currency = {
+  format: (value: number) => `${VIRTUAL_CURRENCY_SYMBOL}${decimal.format(value)}`,
+};
+
+/** Formats a virtual-currency amount, e.g. 10000 -> "V10,000.00". */
 export function formatBalance(value: number | string | null | undefined): string {
   const amount = typeof value === "string" ? Number(value) : (value ?? 0);
   return currency.format(Number.isFinite(amount) ? amount : 0);
@@ -28,10 +33,10 @@ const compact = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 1,
 });
 
-/** Formats a virtual volume compactly, e.g. 340000 -> "$340K". */
+/** Formats a virtual volume compactly, e.g. 340000 -> "V340K". */
 export function formatVolume(value: number | string | null | undefined): string {
   const amount = typeof value === "string" ? Number(value) : (value ?? 0);
-  return `$${compact.format(Number.isFinite(amount) ? amount : 0)}`;
+  return `${VIRTUAL_CURRENCY_SYMBOL}${compact.format(Number.isFinite(amount) ? amount : 0)}`;
 }
 
 /** Formats a whole count compactly, e.g. 2140 -> "2.1K". */
@@ -53,7 +58,7 @@ export function formatDate(value: string | Date): string {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-/** Formats a signed dollar amount, e.g. -42.5 -> "−$42.50". */
+/** Formats a signed virtual amount, e.g. -42.5 -> "−V42.50". */
 export function formatSignedBalance(value: number): string {
   const sign = value > 0 ? "+" : value < 0 ? "−" : "";
   return `${sign}${currency.format(Math.abs(value))}`;
