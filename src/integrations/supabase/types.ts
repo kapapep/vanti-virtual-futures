@@ -513,6 +513,7 @@ export type Database = {
         Returns: Json
       }
       record_explicit_violation: { Args: { p_reason?: string }; Returns: Json }
+      reset_virtual_balance: { Args: never; Returns: Json }
       resolve_market: {
         Args: { p_market_id: string; p_outcome: string }
         Returns: Json
