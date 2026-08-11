@@ -37,6 +37,7 @@ const TRADE_ERRORS: Record<string, string> = {
   PROFILE_NOT_FOUND: "We couldn't load your account.",
   INSUFFICIENT_BALANCE: "Insufficient balance for this trade.",
   NO_POSITION: "You don't hold any contracts on that side.",
+  EXCEEDS_POSITION: "You can't sell more contracts than you hold.",
 };
 
 /** Turns a raw Postgres error into a readable, user-facing message. */
@@ -66,6 +67,29 @@ export async function executeTrade(input: {
   });
   if (error) throw new Error(tradeErrorMessage(error));
 
+  return parseTradeResult(data);
+}
+
+/**
+ * Closes (part of) a position. The client only sends market, side and contract
+ * quantity — the execution price is resolved server-side from the side being
+ * sold, and the server rejects quantities above the user's real holdings.
+ */
+export async function sellPosition(input: {
+  marketId: string;
+  side: TradeSide;
+  contracts: number;
+}): Promise<TradeResult> {
+  const { data, error } = await supabase.rpc("sell_position", {
+    p_market_id: input.marketId,
+    p_side: input.side,
+    p_contracts: input.contracts,
+  });
+  if (error) throw new Error(tradeErrorMessage(error));
+  return parseTradeResult(data);
+}
+
+function parseTradeResult(data: unknown): TradeResult {
   const raw = data as {
     balance: number | string;
     price: number | string;
@@ -97,6 +121,7 @@ export function marketPositionsQuery(marketId: string, userId: string | undefine
         .from("positions")
         .select("id, market_id, side, contracts, avg_price")
         .eq("market_id", marketId)
+        .eq("user_id", userId!)
         .gt("contracts", 0);
       if (error) throw error;
       return (data ?? []).map((row) => ({

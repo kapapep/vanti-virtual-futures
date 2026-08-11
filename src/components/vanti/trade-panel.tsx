@@ -11,6 +11,7 @@ import type { Market } from "@/lib/markets";
 import {
   executeTrade,
   marketPositionsQuery,
+  sellPosition,
   tradeErrorMessage,
   type TradeResult,
   type TradeSide,
@@ -84,10 +85,9 @@ export function TradePanel({
   }, [receipt]);
 
   const trade = useMutation({
-    mutationFn: (action: "buy" | "sell") =>
-      executeTrade({ marketId: market.id, side, action, amount: value }),
-    onSuccess: (result, action) => {
-      setReceipt({ ...result, side, action });
+    mutationFn: () => executeTrade({ marketId: market.id, side, action: "buy", amount: value }),
+    onSuccess: (result) => {
+      setReceipt({ ...result, side, action: "buy" });
       setAmount("");
       void queryClient.invalidateQueries({ queryKey: ["profile"] });
       void queryClient.invalidateQueries({ queryKey: ["positions"] });
@@ -101,12 +101,10 @@ export function TradePanel({
   const sellAll = useMutation({
     mutationFn: (sellSide: TradeSide) => {
       const pos = openPositions.find((p) => p.side === sellSide);
-      const sellPrice = sellSide === "yes" ? market.yesPrice : market.noPrice;
-      return executeTrade({
+      return sellPosition({
         marketId: market.id,
         side: sellSide,
-        action: "sell",
-        amount: (pos?.contracts ?? 0) * sellPrice,
+        contracts: pos?.contracts ?? 0,
       });
     },
     onSuccess: (result, sellSide) => {
@@ -231,7 +229,7 @@ export function TradePanel({
               : "bg-negative text-negative-foreground hover:bg-negative/90",
           )}
           disabled={Boolean(blocked) || busy}
-          onClick={() => trade.mutate("buy")}
+          onClick={() => trade.mutate()}
         >
           {busy ? "Placing…" : side === "yes" ? "Buy YES" : "Buy NO"}
         </Button>

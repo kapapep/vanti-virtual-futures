@@ -23,7 +23,7 @@ import {
   tradeHistoryQuery,
   type PortfolioPosition,
 } from "@/lib/portfolio";
-import { executeTrade, tradeErrorMessage } from "@/lib/trade";
+import { sellPosition, tradeErrorMessage } from "@/lib/trade";
 
 export const Route = createFileRoute("/_authenticated/portfolio")({
   head: () => ({
@@ -91,11 +91,10 @@ function PortfolioPage() {
 
   const sell = useMutation({
     mutationFn: (position: PortfolioPosition) =>
-      executeTrade({
+      sellPosition({
         marketId: position.marketId,
         side: position.side,
-        action: "sell",
-        amount: Math.max(0.01, position.contracts * position.currentPrice),
+        contracts: position.contracts,
       }),
     onSuccess: (result) => {
       toast.success(`Sold for ${formatBalance(result.total)}`);
