@@ -3,22 +3,29 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AnimatedNumber } from "@/components/vanti/animated-number";
 import { EmptyState } from "@/components/vanti/empty-state";
 import { useProfile, useSession } from "@/hooks/use-vanti-session";
-import {
-  addVirtualCash,
-  cashErrorMessage,
-  transactionLabel,
-  withdrawVirtualCash,
-} from "@/lib/cash";
 import { formatBalance, formatDateTime, formatSignedBalance } from "@/lib/format";
 import { transactionsQuery } from "@/lib/portfolio";
 import { cn } from "@/lib/utils";
+import {
+  balanceErrorMessage,
+  resetVirtualBalance,
+  STARTING_BALANCE_LABEL,
+  transactionLabel,
+} from "@/lib/virtual-balance";
 
 export const Route = createFileRoute("/_authenticated/balance")({
   head: () => ({
@@ -26,39 +33,38 @@ export const Route = createFileRoute("/_authenticated/balance")({
       { title: "Balance — Vanti" },
       {
         name: "description",
-        content: "Your Vanti virtual cash balance, top-ups and full account ledger.",
+        content: "Your Vanti virtual balance and full trade activity. Virtual currency only.",
       },
       { property: "og:title", content: "Balance — Vanti" },
       {
         property: "og:description",
-        content: "Your Vanti virtual cash balance, top-ups and full account ledger.",
+        content: "Your Vanti virtual balance and full trade activity. Virtual currency only.",
       },
     ],
   }),
   component: BalancePage,
 });
 
-const QUICK_AMOUNTS = [100, 500, 1000, 5000] as const;
-
-type CashMode = "add" | "withdraw";
-
 /** Pill button whose label is the action itself. */
 function PillAction({
   label,
   active,
   onClick,
+  disabled,
 }: {
   label: string;
   active: boolean;
   onClick: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
       aria-pressed={active}
       className={cn(
-        "inline-flex min-h-11 items-center rounded-full border px-5 text-sm font-semibold transition-colors",
+        "inline-flex min-h-11 items-center rounded-full border px-5 text-sm font-semibold transition-colors disabled:opacity-60",
         active
           ? "border-accent-solid bg-accent-solid text-accent-solid-foreground"
           : "border-border bg-surface text-foreground hover:border-accent-solid hover:text-accent-solid",
@@ -74,32 +80,18 @@ function BalancePage() {
   const queryClient = useQueryClient();
   const { data: profile, isPending } = useProfile();
   const { data: transactions = [] } = useQuery(transactionsQuery(user?.id));
-  const [amount, setAmount] = useState("500");
-  const [mode, setMode] = useState<CashMode | null>(null);
+  const [confirming, setConfirming] = useState(false);
 
-  const cash = useMutation({
-    mutationFn: ({ value, kind }: { value: number; kind: CashMode }) =>
-      kind === "add" ? addVirtualCash(value) : withdrawVirtualCash(value),
-    onSuccess: (result, variables) => {
-      toast.success(
-        variables.kind === "add"
-          ? `Added ${formatBalance(result.amount)} of virtual cash.`
-          : `Withdrew ${formatBalance(result.amount)} of virtual cash.`,
-      );
-      setMode(null);
-      void queryClient.invalidateQueries({ queryKey: ["profile"] });
-      void queryClient.invalidateQueries({ queryKey: ["transactions"] });
+  const reset = useMutation({
+    mutationFn: resetVirtualBalance,
+    onSuccess: () => {
+      toast.success(`Reset your virtual balance to ${STARTING_BALANCE_LABEL}.`);
+      setConfirming(false);
+      void queryClient.invalidateQueries();
     },
-    onError: (error) => toast.error(cashErrorMessage(error)),
+    onError: (error) => toast.error(balanceErrorMessage(error)),
   });
 
-  const parsed = Number(amount);
-  const available = profile?.balance ?? 0;
-  const valid =
-    Number.isFinite(parsed) &&
-    parsed >= 1 &&
-    parsed <= 10000 &&
-    (mode === "withdraw" ? parsed <= available : true);
   const ledger = [...transactions].reverse();
 
   return (
@@ -110,7 +102,7 @@ function BalancePage() {
         <div className="flex flex-col gap-4">
           <div className="min-w-0">
             <p className="whitespace-nowrap text-meta font-medium uppercase text-muted-foreground">
-              Available cash
+              Virtual balance
             </p>
             {isPending ? (
               <Skeleton className="mt-2 h-7 w-32" />
@@ -121,95 +113,47 @@ function BalancePage() {
                 format={formatBalance}
               />
             )}
+            <p className="mt-2 max-w-md text-meta text-muted-foreground">
+              Virtual currency only. No deposits, no withdrawals, no real-money value.
+            </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <PillAction
-              label="Add cash"
-              active={mode === "add"}
-              onClick={() => setMode(mode === "add" ? null : "add")}
-            />
-            <PillAction
-              label="Withdraw"
-              active={mode === "withdraw"}
-              onClick={() => setMode(mode === "withdraw" ? null : "withdraw")}
+              label={reset.isPending ? "Resetting…" : "Reset balance"}
+              active={false}
+              disabled={reset.isPending}
+              onClick={() => setConfirming(true)}
             />
           </div>
         </div>
-
-        <div className="space-y-5">
-          {mode ? (
-            <div className="space-y-3">
-              <Label
-                htmlFor="cash-amount"
-                className="text-meta font-medium uppercase text-muted-foreground"
-              >
-                {mode === "add" ? "Add virtual cash" : "Withdraw virtual cash"}
-              </Label>
-              <div className="flex flex-wrap gap-2">
-                {QUICK_AMOUNTS.map((value) => (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => setAmount(String(value))}
-                    className={cn(
-                      "num inline-flex min-h-11 items-center rounded-md border px-4 text-sm font-semibold transition-colors",
-                      Number(amount) === value
-                        ? "border-accent-solid bg-accent-subtle text-accent-solid"
-                        : "border-border text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    {formatBalance(value)}
-                  </button>
-                ))}
-                {mode === "withdraw" ? (
-                  <button
-                    type="button"
-                    onClick={() => setAmount(String(Math.floor(available * 100) / 100))}
-                    className="inline-flex min-h-11 items-center rounded-md border border-border px-4 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    Max
-                  </button>
-                ) : null}
-              </div>
-              <div className="flex flex-col gap-2 @sm:flex-row">
-                <Input
-                  id="cash-amount"
-                  inputMode="decimal"
-                  value={amount}
-                  onChange={(event) => setAmount(event.target.value)}
-                  className="num h-11 @sm:max-w-40"
-                  aria-label={
-                    mode === "add"
-                      ? "Amount of virtual cash to add"
-                      : "Amount of virtual cash to withdraw"
-                  }
-                />
-                <Button
-                  className="h-11 @sm:w-44"
-                  disabled={!valid || cash.isPending}
-                  onClick={() => cash.mutate({ value: parsed, kind: mode })}
-                >
-                  {cash.isPending
-                    ? mode === "add"
-                      ? "Adding…"
-                      : "Withdrawing…"
-                    : mode === "add"
-                      ? "Add virtual cash"
-                      : "Withdraw virtual cash"}
-                </Button>
-              </div>
-              <p className="text-meta text-muted-foreground">
-                {mode === "add"
-                  ? `Up to ${formatBalance(10000)} of practice cash per day. No payment method needed, ever.`
-                  : `Withdrawals move practice cash out of your available balance. Max ${formatBalance(available)}.`}
-              </p>
-            </div>
-          ) : null}
-        </div>
       </section>
 
+      <AlertDialog open={confirming} onOpenChange={setConfirming}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset your virtual balance?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Reset your virtual balance to {STARTING_BALANCE_LABEL}? This clears your positions and
+              trade history. This can&apos;t be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(event) => {
+                event.preventDefault();
+                reset.mutate();
+              }}
+              disabled={reset.isPending}
+            >
+              {reset.isPending ? "Resetting…" : "Reset balance"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <section className="space-y-3">
-        <h2 className="text-base font-semibold text-foreground">Cash activity</h2>
+        <h2 className="text-base font-semibold text-foreground">Trade activity</h2>
         {ledger.length ? (
           <div className="divide-y divide-border rounded-lg border border-border bg-card">
             {ledger.map((entry) => (
@@ -239,7 +183,7 @@ function BalancePage() {
             ))}
           </div>
         ) : (
-          <EmptyState title="Your cash activity will appear here." />
+          <EmptyState title="Your trade activity will appear here." />
         )}
       </section>
     </div>
