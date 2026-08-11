@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { CategoryIcon } from "@/components/vanti/category-icon";
@@ -61,7 +61,7 @@ function DiscoverPage() {
   const markets = useQuery(marketsQuery);
   const categories = useQuery(categoriesQuery);
   const [category, setCategory] = useState<string | null>(null);
-  const railRef = useRef<HTMLDivElement>(null);
+  const railRef = useRef<HTMLElement>(null);
   const pausedRef = useRef(false);
 
   useEffect(() => {
