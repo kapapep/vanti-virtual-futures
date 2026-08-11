@@ -213,7 +213,7 @@ export function TradePanel({
         <div className="mt-3 space-y-1.5 border-t border-border pt-3">
           <Row label="Price" value={formatBalance(price)} />
           <Row label="Contracts" value={contracts.toFixed(2)} />
-          <Row label="Potential payout" value={formatBalance(payout)} />
+          <Row label="Potential winnings" value={formatBalance(payout)} />
           <Row
             label="Potential profit"
             value={`${profit >= 0 ? "+" : "−"}${formatBalance(Math.abs(profit))}`}
@@ -254,7 +254,7 @@ export function TradePanel({
               <Row label="Contracts" value={receipt.contracts.toFixed(2)} />
               <Row label="Price" value={formatBalance(receipt.price)} />
               <Row label="Total" value={formatBalance(receipt.total)} />
-              <Row label="Potential payout" value={formatBalance(receipt.contracts)} />
+              <Row label="Potential winnings" value={formatBalance(receipt.contracts)} />
             </div>
           </div>
         ) : null}

@@ -27,7 +27,7 @@ const TRADE_ERRORS: Record<string, string> = {
   NOT_AUTHORIZED: "You don't have permission to do that.",
   INVALID_SIDE: "Pick either YES or NO.",
   INVALID_ACTION: "That trade action isn't supported.",
-  INVALID_AMOUNT: "Enter an amount greater than $0.",
+  INVALID_AMOUNT: "Enter an amount greater than V0.",
   INVALID_PRICE: "This market's price is unavailable right now.",
   INVALID_OUTCOME: "Choose a valid outcome.",
   MARKET_NOT_FOUND: "This market no longer exists.",

@@ -11,13 +11,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Trade the outcome of real events with virtual money. Every Vanti account starts with a $10,000.00 virtual balance. No real money, ever.",
+          "Trade the outcome of real events with virtual money. Every Vanti account starts with a V10,000.00 virtual balance. No real money, ever.",
       },
       { property: "og:title", content: "Vanti — Virtual-Money Prediction Markets" },
       {
         property: "og:description",
         content:
-          "Trade the outcome of real events with virtual money. Start with $10,000.00 virtual.",
+          "Trade the outcome of real events with virtual money. Start with V10,000.00 virtual.",
       },
     ],
   }),
@@ -82,7 +82,7 @@ function Landing() {
       <div className="sticky bottom-0 z-10 border-t border-border bg-background/90 px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 backdrop-blur sm:border-0 sm:bg-transparent sm:backdrop-blur-none">
         <div className="mx-auto w-full max-w-sm">
           <Button asChild size="lg" className="h-12 w-full text-base">
-            <Link to="/auth">Get started — $10,000.00 virtual</Link>
+            <Link to="/auth">Get started — V10,000.00 virtual</Link>
           </Button>
           <p className="mt-3 text-center text-meta text-muted-foreground">
             No deposits, no withdrawals. Not a gambling or financial service.

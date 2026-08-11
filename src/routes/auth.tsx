@@ -17,12 +17,12 @@ export const Route = createFileRoute("/auth")({
       {
         name: "description",
         content:
-          "Log in to Vanti or create an account and start with a $10,000.00 virtual balance. Virtual money only.",
+          "Log in to Vanti or create an account and start with a V10,000.00 virtual balance. Virtual money only.",
       },
       { property: "og:title", content: "Sign in or create your Vanti account" },
       {
         property: "og:description",
-        content: "Create a Vanti account and start with a $10,000.00 virtual balance.",
+        content: "Create a Vanti account and start with a V10,000.00 virtual balance.",
       },
     ],
   }),
@@ -78,7 +78,7 @@ function AuthPage() {
         if (!data.session) {
           throw new Error("Sign-up succeeded but no session was returned. Please try signing in.");
         }
-        toast.success("Welcome to Vanti — $10,000.00 virtual balance granted.");
+        toast.success("Welcome to Vanti — V10,000.00 virtual balance granted.");
         navigate({ to: "/home", search: { tab: "for-you" }, replace: true });
         return;
       }
@@ -109,7 +109,7 @@ function AuthPage() {
             {mode === "login" ? "Sign in to Vanti" : "Create your account"}
           </h1>
           <p className="mt-1 text-meta text-muted-foreground">
-            Every account starts with a <span className="num">$10,000.00</span> virtual balance.
+            Every account starts with a <span className="num">V10,000.00</span> virtual balance.
             Virtual money only — no deposits, ever.
           </p>
 
