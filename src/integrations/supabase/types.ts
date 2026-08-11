@@ -517,6 +517,10 @@ export type Database = {
         Args: { p_market_id: string; p_outcome: string }
         Returns: Json
       }
+      sell_position: {
+        Args: { p_contracts: number; p_market_id: string; p_side: string }
+        Returns: Json
+      }
       withdraw_virtual_cash: { Args: { p_amount: number }; Returns: Json }
     }
     Enums: {
