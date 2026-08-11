@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { CategoryIcon } from "@/components/vanti/category-icon";
@@ -61,6 +61,64 @@ function DiscoverPage() {
   const markets = useQuery(marketsQuery);
   const categories = useQuery(categoriesQuery);
   const [category, setCategory] = useState<string | null>(null);
+  const railRef = useRef<HTMLElement>(null);
+  const pausedRef = useRef(false);
+
+  useEffect(() => {
+    const el = railRef.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let raf = 0;
+    let last = performance.now();
+    let dir = 1;
+    const speed = 22; // px per second
+
+    const tick = (now: number) => {
+      const dt = (now - last) / 1000;
+      last = now;
+      const max = el.scrollWidth - el.clientWidth;
+      if (!pausedRef.current && max > 4) {
+        let next = el.scrollLeft + dir * speed * dt;
+        if (next >= max) {
+          next = max;
+          dir = -1;
+        } else if (next <= 0) {
+          next = 0;
+          dir = 1;
+        }
+        el.scrollLeft = next;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+
+    const pause = () => {
+      pausedRef.current = true;
+    };
+    const resume = () => {
+      pausedRef.current = false;
+    };
+    el.addEventListener("pointerenter", pause);
+    el.addEventListener("pointerdown", pause);
+    el.addEventListener("pointerleave", resume);
+    el.addEventListener("touchstart", pause, { passive: true });
+    el.addEventListener("touchend", resume, { passive: true });
+    el.addEventListener("focusin", pause);
+    el.addEventListener("focusout", resume);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      el.removeEventListener("pointerenter", pause);
+      el.removeEventListener("pointerdown", pause);
+      el.removeEventListener("pointerleave", resume);
+      el.removeEventListener("touchstart", pause);
+      el.removeEventListener("touchend", resume);
+      el.removeEventListener("focusin", pause);
+      el.removeEventListener("focusout", resume);
+    };
+  }, [categories.data]);
+
   const all = markets.data ?? [];
   const active = all.filter(
     (m) => m.status === "active" && (!category || m.category?.slug === category),
@@ -84,7 +142,10 @@ function DiscoverPage() {
         </p>
       </div>
 
-      <section className="-mx-4 overflow-x-auto px-4 lg:mx-0 lg:px-0">
+      <section
+        ref={railRef}
+        className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden"
+      >
         <div className="flex w-max gap-2">
           <button
             type="button"
