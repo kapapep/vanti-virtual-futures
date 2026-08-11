@@ -37,6 +37,7 @@ const TRADE_ERRORS: Record<string, string> = {
   PROFILE_NOT_FOUND: "We couldn't load your account.",
   INSUFFICIENT_BALANCE: "Insufficient balance for this trade.",
   NO_POSITION: "You don't hold any contracts on that side.",
+  EXCEEDS_POSITION: "You can't sell more contracts than you hold.",
 };
 
 /** Turns a raw Postgres error into a readable, user-facing message. */
@@ -97,6 +98,7 @@ export function marketPositionsQuery(marketId: string, userId: string | undefine
         .from("positions")
         .select("id, market_id, side, contracts, avg_price")
         .eq("market_id", marketId)
+        .eq("user_id", userId!)
         .gt("contracts", 0);
       if (error) throw error;
       return (data ?? []).map((row) => ({
