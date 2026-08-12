@@ -50,8 +50,8 @@ const primaryNav = [
 ] as const;
 
 const mobileNav = [
-  { label: "Markets", to: "/markets", icon: TrendingUp },
   { label: "Feed", to: "/home", icon: House },
+  { label: "Markets", to: "/markets", icon: TrendingUp },
   { label: "Syndicates", to: "/syndicates", icon: Users2 },
   { label: "Portfolio", to: "/portfolio", icon: Wallet },
   { label: "Profile", to: "/profile", icon: CircleUser },
