@@ -2,16 +2,15 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Bell,
-  Compass,
-  Home,
-  LineChart,
+  CircleUser,
+  House,
   LogOut,
   Pencil,
-  PieChart,
   Search,
   Star,
-  User,
-  Users,
+  TrendingUp,
+  Users2,
+  Wallet,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
@@ -42,20 +41,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
 const primaryNav = [
-  { label: "Home", to: "/home", icon: Home },
-  { label: "Discover", to: "/discover", icon: Compass },
-  { label: "Markets", to: "/markets", icon: LineChart },
-  { label: "Portfolio", to: "/portfolio", icon: PieChart },
+  { label: "Home", to: "/home", icon: House },
+  { label: "Markets", to: "/markets", icon: TrendingUp },
+  { label: "Syndicates", to: "/syndicates", icon: Users2 },
+  { label: "Portfolio", to: "/portfolio", icon: Wallet },
   { label: "Watchlist", to: "/watchlist", icon: Star },
-  { label: "Following", to: "/following", icon: Users },
+  { label: "Following", to: "/following", icon: CircleUser },
 ] as const;
 
 const mobileNav = [
-  { label: "Markets", to: "/markets", icon: LineChart },
-  { label: "Feed", to: "/home", icon: Home },
-  { label: "Discover", to: "/discover", icon: Compass },
-  { label: "Portfolio", to: "/portfolio", icon: PieChart },
-  { label: "Profile", to: "/profile", icon: User },
+  { label: "Markets", to: "/markets", icon: TrendingUp },
+  { label: "Feed", to: "/home", icon: House },
+  { label: "Syndicates", to: "/syndicates", icon: Users2 },
+  { label: "Portfolio", to: "/portfolio", icon: Wallet },
+  { label: "Profile", to: "/profile", icon: CircleUser },
 ] as const;
 
 function AccountMenu() {

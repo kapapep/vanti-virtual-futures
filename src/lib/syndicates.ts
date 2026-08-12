@@ -206,6 +206,22 @@ export const syndicateActivityQuery = queryOptions({
   },
 });
 
+/** Public pools for the Syndicates discovery tab. */
+export const browseSyndicatesQuery = queryOptions({
+  queryKey: ["browse-syndicates"],
+  staleTime: 30 * 1000,
+  queryFn: async (): Promise<Syndicate[]> => {
+    const { data, error } = await supabase
+      .from("syndicates")
+      .select(SYNDICATE_SELECT)
+      .eq("visibility", "public")
+      .order("created_at", { ascending: false })
+      .limit(60);
+    if (error) throw error;
+    return (data ?? []).map(mapSyndicate);
+  },
+});
+
 const SYNDICATE_ERRORS: Record<string, string> = {
   NOT_AUTHENTICATED: "Sign in to join a syndicate.",
   SYNDICATE_NOT_FOUND: "This syndicate no longer exists.",
