@@ -326,7 +326,7 @@ function HomePage() {
           }
           action={
             <Button asChild size="sm">
-              <Link to="/discover">Discover markets</Link>
+              <Link to="/markets">Discover markets</Link>
             </Button>
           }
         />
