@@ -3,12 +3,10 @@ import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "rec
 import { formatBalance } from "@/lib/format";
 import type { EquityPoint } from "@/lib/portfolio";
 
-/** Portfolio value over time. Green when up on the window, red when down. */
+/** Portfolio value over time, drawn in the Vanti accent blue. */
 export function EquityChart({ points }: { points: EquityPoint[] }) {
   const first = points[0]?.value ?? 0;
-  const last = points[points.length - 1]?.value ?? 0;
-  const up = last >= first;
-  const color = up ? "var(--positive)" : "var(--negative)";
+  const color = "var(--accent-solid)";
   const values = points.map((p) => p.value);
   const min = Math.min(...values, first);
   const max = Math.max(...values, first);
@@ -42,7 +40,7 @@ export function EquityChart({ points }: { points: EquityPoint[] }) {
           />
           <YAxis
             domain={[min - pad, max + pad]}
-            tickFormatter={(v: number) => `$${Math.round(v).toLocaleString("en-US")}`}
+            tickFormatter={(v: number) => `V${Math.round(v).toLocaleString("en-US")}`}
             tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
             axisLine={false}
             tickLine={false}

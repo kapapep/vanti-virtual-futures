@@ -23,6 +23,8 @@ export type PortfolioPosition = {
   unrealizedPct: number;
   costBasis: number;
   value: number;
+  /** Set when this row is a member's share of a syndicate's pooled position. */
+  syndicate: { id: string; name: string } | null;
 };
 
 export type PortfolioTrade = {
@@ -38,6 +40,7 @@ export type PortfolioTrade = {
   /** Market status at read time, used to badge a settled prediction W or L. */
   marketStatus: string;
   marketOutcome: string | null;
+  marketResolutionDate: string | null;
 };
 
 export type PortfolioTransaction = {
@@ -48,7 +51,11 @@ export type PortfolioTransaction = {
   createdAt: string;
 };
 
-/** Open positions for a user, joined with their market's live price. */
+/**
+ * Open positions a user holds directly, joined with their market's live price.
+ * Pooled syndicate rows are excluded here: they are owned by the captain and
+ * surfaced per member by `syndicatePositionsQuery` at each member's own share.
+ */
 export function positionsQuery(userId: string | undefined) {
   return queryOptions({
     queryKey: ["portfolio-positions", userId],
@@ -61,6 +68,7 @@ export function positionsQuery(userId: string | undefined) {
           "id, market_id, side, contracts, avg_price, markets(question, yes_price, status, outcome, resolution_date, categories(name))",
         )
         .eq("user_id", userId!)
+        .is("syndicate_id", null)
         .gt("contracts", 0);
       if (error) throw error;
 
@@ -92,6 +100,63 @@ export function positionsQuery(userId: string | undefined) {
             unrealizedPct: costBasis > 0 ? unrealized / costBasis : 0,
             costBasis,
             value: contracts * currentPrice,
+            syndicate: null,
+          } satisfies PortfolioPosition;
+        });
+    },
+  });
+}
+
+/**
+ * A member's own slice of every pool they are in that holds a live position.
+ * Shares and cost come from their contribution, never the pool total.
+ */
+export function syndicatePositionsQuery(userId: string | undefined) {
+  return queryOptions({
+    queryKey: ["syndicate-positions", userId],
+    enabled: Boolean(userId),
+    staleTime: 30 * 1000,
+    queryFn: async (): Promise<PortfolioPosition[]> => {
+      const { data, error } = await supabase
+        .from("syndicate_members")
+        .select(
+          "id, contributed, shares_owned, syndicates!syndicate_members_syndicate_id_fkey(id, name, outcome_side, status, market_id, markets!syndicates_market_id_fkey(question, yes_price, status, outcome, resolution_date, categories(name)))",
+        )
+        .eq("user_id", userId!)
+        .gt("shares_owned", 0);
+      if (error) throw error;
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return ((data ?? []) as any[])
+        .filter((row) => row.syndicates?.status === "locked" && row.syndicates?.markets)
+        .map((row) => {
+          const pool = row.syndicates;
+          const market = pool.markets;
+          const side = pool.outcome_side as TradeSide;
+          const yesPrice = Number(market.yes_price);
+          const currentPrice = side === "yes" ? yesPrice : 1 - yesPrice;
+          const contracts = Number(row.shares_owned);
+          const costBasis = Number(row.contributed);
+          const avgPrice = contracts > 0 ? costBasis / contracts : 0;
+          const unrealized = contracts * currentPrice - costBasis;
+          return {
+            id: `syndicate:${row.id}`,
+            marketId: pool.market_id,
+            side,
+            contracts,
+            avgPrice,
+            currentPrice,
+            question: market.question,
+            status: market.status,
+            outcome: market.outcome,
+            resolutionDate: market.resolution_date,
+            yesPrice,
+            categoryName: market.categories?.name ?? null,
+            unrealized,
+            unrealizedPct: costBasis > 0 ? unrealized / costBasis : 0,
+            costBasis,
+            value: contracts * currentPrice,
+            syndicate: { id: pool.id, name: pool.name },
           } satisfies PortfolioPosition;
         });
     },
@@ -108,7 +173,7 @@ export function tradeHistoryQuery(userId: string | undefined) {
       const { data, error } = await supabase
         .from("trades")
         .select(
-          "id, market_id, side, action, contracts, price, total, created_at, markets(question, status, outcome)",
+          "id, market_id, side, action, contracts, price, total, created_at, markets(question, status, outcome, resolution_date)",
         )
         .eq("user_id", userId!)
         .order("created_at", { ascending: false })
@@ -126,6 +191,7 @@ export function tradeHistoryQuery(userId: string | undefined) {
         createdAt: row.created_at,
         marketStatus: row.markets?.status ?? "active",
         marketOutcome: row.markets?.outcome ?? null,
+        marketResolutionDate: row.markets?.resolution_date ?? null,
       }));
     },
   });
@@ -236,6 +302,86 @@ export function buildSummary(input: {
 
 export type EquityPoint = { t: number; value: number };
 
+export type SettledPosition = {
+  id: string;
+  marketId: string;
+  question: string;
+  side: TradeSide;
+  outcome: string;
+  won: boolean;
+  contracts: number;
+  costBasis: number;
+  payout: number;
+  realized: number;
+  realizedPct: number;
+  settledAt: string;
+};
+
+/**
+ * Closed-out predictions, rebuilt from trades on markets that have resolved.
+ * Realized P&L is the $1.00-per-contract settlement on the winning side minus
+ * what the trader paid, net of anything they sold before resolution.
+ */
+export function buildSettledPositions(trades: PortfolioTrade[]): SettledPosition[] {
+  const groups = new Map<string, PortfolioTrade[]>();
+  for (const trade of trades) {
+    if (trade.marketStatus !== "resolved" || !trade.marketOutcome) continue;
+    const key = `${trade.marketId}:${trade.side}`;
+    const list = groups.get(key) ?? [];
+    list.push(trade);
+    groups.set(key, list);
+  }
+
+  const settled: SettledPosition[] = [];
+  for (const [key, list] of groups) {
+    const first = list[0]!;
+    let contracts = 0;
+    let cost = 0;
+    for (const trade of list) {
+      if (trade.action === "buy") {
+        contracts += trade.contracts;
+        cost += trade.total;
+      } else {
+        contracts -= trade.contracts;
+        cost -= trade.total;
+      }
+    }
+    const held = Math.max(0, contracts);
+    const won = first.side === first.marketOutcome;
+    const payout = won ? held : 0;
+    const realized = payout - cost;
+    const basis = Math.max(cost, 0);
+    const settledAt =
+      first.marketResolutionDate ??
+      list.reduce((latest, t) => (t.createdAt > latest ? t.createdAt : latest), first.createdAt);
+    settled.push({
+      id: key,
+      marketId: first.marketId,
+      question: first.question,
+      side: first.side,
+      outcome: first.marketOutcome!,
+      won,
+      contracts: held,
+      costBasis: cost,
+      payout,
+      realized,
+      realizedPct: basis > 0 ? realized / basis : 0,
+      settledAt,
+    });
+  }
+
+  return settled.sort((a, b) => new Date(b.settledAt).getTime() - new Date(a.settledAt).getTime());
+}
+
+/** Change in portfolio value over the last 24 hours, from the equity curve. */
+export function todayChange(points: EquityPoint[], portfolioValue: number) {
+  const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+  const before = points.filter((p) => p.t <= cutoff);
+  const reference = before.length ? before[before.length - 1]!.value : (points[0]?.value ?? portfolioValue);
+  const change = portfolioValue - reference;
+  return { change, pct: reference > 0 ? change / reference : 0 };
+}
+
 /**
  * Equity curve: cash balance after each ledger entry plus the cost basis of the
  * positions held at that moment, with the final point marked to market.
@@ -284,7 +430,6 @@ export const EQUITY_RANGES = [
   { key: "1D", hours: 24 },
   { key: "1W", hours: 24 * 7 },
   { key: "1M", hours: 24 * 30 },
-  { key: "3M", hours: 24 * 90 },
   { key: "ALL", hours: null },
 ] as const;
 
