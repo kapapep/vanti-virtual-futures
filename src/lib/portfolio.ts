@@ -302,6 +302,86 @@ export function buildSummary(input: {
 
 export type EquityPoint = { t: number; value: number };
 
+export type SettledPosition = {
+  id: string;
+  marketId: string;
+  question: string;
+  side: TradeSide;
+  outcome: string;
+  won: boolean;
+  contracts: number;
+  costBasis: number;
+  payout: number;
+  realized: number;
+  realizedPct: number;
+  settledAt: string;
+};
+
+/**
+ * Closed-out predictions, rebuilt from trades on markets that have resolved.
+ * Realized P&L is the $1.00-per-contract settlement on the winning side minus
+ * what the trader paid, net of anything they sold before resolution.
+ */
+export function buildSettledPositions(trades: PortfolioTrade[]): SettledPosition[] {
+  const groups = new Map<string, PortfolioTrade[]>();
+  for (const trade of trades) {
+    if (trade.marketStatus !== "resolved" || !trade.marketOutcome) continue;
+    const key = `${trade.marketId}:${trade.side}`;
+    const list = groups.get(key) ?? [];
+    list.push(trade);
+    groups.set(key, list);
+  }
+
+  const settled: SettledPosition[] = [];
+  for (const [key, list] of groups) {
+    const first = list[0]!;
+    let contracts = 0;
+    let cost = 0;
+    for (const trade of list) {
+      if (trade.action === "buy") {
+        contracts += trade.contracts;
+        cost += trade.total;
+      } else {
+        contracts -= trade.contracts;
+        cost -= trade.total;
+      }
+    }
+    const held = Math.max(0, contracts);
+    const won = first.side === first.marketOutcome;
+    const payout = won ? held : 0;
+    const realized = payout - cost;
+    const basis = Math.max(cost, 0);
+    const settledAt =
+      first.marketResolutionDate ??
+      list.reduce((latest, t) => (t.createdAt > latest ? t.createdAt : latest), first.createdAt);
+    settled.push({
+      id: key,
+      marketId: first.marketId,
+      question: first.question,
+      side: first.side,
+      outcome: first.marketOutcome!,
+      won,
+      contracts: held,
+      costBasis: cost,
+      payout,
+      realized,
+      realizedPct: basis > 0 ? realized / basis : 0,
+      settledAt,
+    });
+  }
+
+  return settled.sort((a, b) => new Date(b.settledAt).getTime() - new Date(a.settledAt).getTime());
+}
+
+/** Change in portfolio value over the last 24 hours, from the equity curve. */
+export function todayChange(points: EquityPoint[], portfolioValue: number) {
+  const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+  const before = points.filter((p) => p.t <= cutoff);
+  const reference = before.length ? before[before.length - 1]!.value : (points[0]?.value ?? portfolioValue);
+  const change = portfolioValue - reference;
+  return { change, pct: reference > 0 ? change / reference : 0 };
+}
+
 /**
  * Equity curve: cash balance after each ledger entry plus the cost basis of the
  * positions held at that moment, with the final point marked to market.
