@@ -430,7 +430,6 @@ export const EQUITY_RANGES = [
   { key: "1D", hours: 24 },
   { key: "1W", hours: 24 * 7 },
   { key: "1M", hours: 24 * 30 },
-  { key: "3M", hours: 24 * 90 },
   { key: "ALL", hours: null },
 ] as const;
 
