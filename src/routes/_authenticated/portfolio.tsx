@@ -1,9 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Select,
   SelectContent,
@@ -11,19 +23,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
+import { AnimatedNumber } from "@/components/vanti/animated-number";
 import { EmptyState } from "@/components/vanti/empty-state";
-import { PositionRowSkeleton } from "@/components/vanti/skeletons";
+import { EquityChart } from "@/components/vanti/equity-chart";
 import { PositionRow } from "@/components/vanti/position-row";
+import { PositionRowSkeleton } from "@/components/vanti/skeletons";
 import { TradeHistoryList } from "@/components/vanti/trade-history-list";
-import { useSession } from "@/hooks/use-vanti-session";
-import { formatBalance } from "@/lib/format";
+import { usePortfolio } from "@/hooks/use-portfolio";
 import {
-  positionsQuery,
+  formatBalance,
+  formatContracts,
+  formatDate,
+  formatSignedBalance,
+  formatSignedPercent,
+} from "@/lib/format";
+import {
+  EQUITY_RANGES,
+  sliceEquity,
   tradeHistoryQuery,
+  type EquityRangeKey,
   type PortfolioPosition,
+  type SettledPosition,
 } from "@/lib/portfolio";
 import { sellPosition, tradeErrorMessage } from "@/lib/trade";
+import { cn } from "@/lib/utils";
+import {
+  balanceErrorMessage,
+  resetVirtualBalance,
+  STARTING_BALANCE_LABEL,
+} from "@/lib/virtual-balance";
 
 export const Route = createFileRoute("/_authenticated/portfolio")({
   head: () => ({
@@ -31,13 +60,17 @@ export const Route = createFileRoute("/_authenticated/portfolio")({
       { title: "Portfolio — Vanti" },
       {
         name: "description",
-        content: "Your open Vanti positions and full virtual trade history.",
+        content:
+          "Your Vanti account value, virtual balance, open positions and settled predictions.",
       },
       { property: "og:title", content: "Portfolio — Vanti" },
       {
         property: "og:description",
-        content: "Your open Vanti positions and full virtual trade history.",
+        content:
+          "Your Vanti account value, virtual balance, open positions and settled predictions.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: PortfolioPage,
@@ -46,21 +79,18 @@ export const Route = createFileRoute("/_authenticated/portfolio")({
 type PositionSort = "pnl" | "size" | "resolution";
 
 function PortfolioPage() {
-  const { user } = useSession();
-  const userId = user?.id;
   const queryClient = useQueryClient();
-
-  const { data: positions = [], isPending: positionsPending } = useQuery(positionsQuery(userId));
+  const { userId, positions, settled, summary, equity, today, hasEquityHistory, isPending } =
+    usePortfolio();
   const { data: trades = [] } = useQuery(tradeHistoryQuery(userId));
 
   const [sort, setSort] = useState<PositionSort>("pnl");
   const [marketFilter, setMarketFilter] = useState("all");
   const [sideFilter, setSideFilter] = useState("all");
+  const [range, setRange] = useState<EquityRangeKey>("1W");
+  const [confirmingReset, setConfirmingReset] = useState(false);
 
-  const positionsValue = useMemo(
-    () => positions.reduce((sum, p) => sum + p.value, 0),
-    [positions],
-  );
+  const chartPoints = useMemo(() => sliceEquity(equity, range), [equity, range]);
 
   const sortedPositions = useMemo(() => {
     const list = [...positions];
@@ -108,28 +138,107 @@ function PortfolioPage() {
     onError: (error) => toast.error(tradeErrorMessage(error)),
   });
 
+  const reset = useMutation({
+    mutationFn: resetVirtualBalance,
+    onSuccess: () => {
+      toast.success(`Reset your virtual balance to ${STARTING_BALANCE_LABEL}.`);
+      setConfirmingReset(false);
+      void queryClient.invalidateQueries();
+    },
+    onError: (error) => toast.error(balanceErrorMessage(error)),
+  });
+
+  const dayUp = today.change >= 0;
+
   return (
-    <div className="@container space-y-8">
-      <div className="space-y-1">
-        <h1 className="text-figure font-semibold text-foreground">Portfolio</h1>
-        <p className="text-sm text-muted-foreground">
-          Your open positions and every virtual trade you have made.
+    <div className="@container space-y-8 pb-10">
+      {/* Balance header: total account value is the hero figure. */}
+      <header className="space-y-4">
+        <h1 className="text-meta font-semibold uppercase text-muted-foreground">
+          Total account value
+        </h1>
+        {isPending ? (
+          <Skeleton className="h-12 w-56" />
+        ) : (
+          <AnimatedNumber
+            className="num block text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl"
+            value={summary.portfolioValue}
+            format={formatBalance}
+          />
+        )}
+        <p className={cn("num text-sm font-semibold", dayUp ? "text-positive" : "text-negative")}>
+          {formatSignedBalance(today.change)} ({formatSignedPercent(today.pct)}) today
         </p>
-      </div>
 
-      <Tabs defaultValue="positions" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="positions">Open positions</TabsTrigger>
-          <TabsTrigger value="history">Trade history</TabsTrigger>
-        </TabsList>
+        <dl className="grid max-w-md grid-cols-2 gap-3">
+          <div className="rounded-lg border border-border bg-card p-3">
+            <dt className="text-meta uppercase text-muted-foreground">Available</dt>
+            <dd className="num mt-1 text-lg font-semibold text-foreground">
+              {formatBalance(summary.balance)}
+            </dd>
+          </div>
+          <div className="rounded-lg border border-border bg-card p-3">
+            <dt className="text-meta uppercase text-muted-foreground">In positions</dt>
+            <dd className="num mt-1 text-lg font-semibold text-foreground">
+              {formatBalance(summary.positionsValue)}
+            </dd>
+          </div>
+        </dl>
 
-        <TabsContent value="positions" className="space-y-4">
-          <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            className="min-h-11"
+            onClick={() => setConfirmingReset(true)}
+            disabled={reset.isPending}
+          >
+            {reset.isPending ? "Resetting…" : "Reset balance"}
+          </Button>
+          <p className="text-meta text-muted-foreground">
+            Virtual currency only. No deposits, no withdrawals, no real-money value.
+          </p>
+        </div>
+      </header>
+
+      {/* Value chart, hidden until there is enough history to shape a line. */}
+      {hasEquityHistory ? (
+        <section className="space-y-3 rounded-lg border border-border bg-card p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-sm font-semibold text-foreground">Portfolio value</h2>
+            <div className="flex gap-1" role="group" aria-label="Chart range">
+              {EQUITY_RANGES.map((option) => (
+                <button
+                  key={option.key}
+                  type="button"
+                  onClick={() => setRange(option.key)}
+                  aria-pressed={range === option.key}
+                  className={cn(
+                    "num min-h-11 rounded-md px-3 text-meta font-semibold transition-colors duration-150",
+                    range === option.key
+                      ? "bg-accent-subtle text-accent-solid"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {option.key}
+                </button>
+              ))}
+            </div>
+          </div>
+          <EquityChart points={chartPoints} />
+        </section>
+      ) : null}
+
+      {/* Open positions, including each pool share the trader owns. */}
+      <section className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-base font-semibold text-foreground">Open positions</h2>
+          <div className="flex items-center gap-3">
             <p className="num text-meta text-muted-foreground">
-              {positions.length} open · {formatBalance(positionsValue)} at market
+              {positions.length} open · {formatBalance(summary.positionsValue)} at market
             </p>
             <Select value={sort} onValueChange={(v) => setSort(v as PositionSort)}>
-              <SelectTrigger className="h-9 w-44" aria-label="Sort positions">
+              <SelectTrigger className="h-11 w-44" aria-label="Sort positions">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -139,40 +248,52 @@ function PortfolioPage() {
               </SelectContent>
             </Select>
           </div>
+        </div>
 
-          {positionsPending ? (
-            <div className="@container divide-y divide-border rounded-lg border border-border bg-card">
-              {Array.from({ length: 3 }, (_, i) => (
-                <PositionRowSkeleton key={i} />
-              ))}
-            </div>
-          ) : sortedPositions.length ? (
-            <div className="@container divide-y divide-border rounded-lg border border-border bg-card">
-              {sortedPositions.map((position) => (
-                <PositionRow
-                  key={position.id}
-                  position={position}
-                  selling={sell.isPending && sell.variables?.id === position.id}
-                  onSell={(p) => sell.mutate(p)}
-                />
-              ))}
-            </div>
-          ) : (
-            <EmptyState
-              title="No open positions yet. Browse markets to place your first trade."
-              action={
-                <Button asChild size="sm">
-                  <Link to="/markets">Browse markets</Link>
-                </Button>
-              }
-            />
-          )}
-        </TabsContent>
+        {isPending ? (
+          <div className="@container divide-y divide-border rounded-lg border border-border bg-card">
+            {Array.from({ length: 3 }, (_, i) => (
+              <PositionRowSkeleton key={i} />
+            ))}
+          </div>
+        ) : sortedPositions.length ? (
+          <div className="@container divide-y divide-border rounded-lg border border-border bg-card">
+            {sortedPositions.map((position) => (
+              <PositionRow
+                key={position.id}
+                position={position}
+                selling={sell.isPending && sell.variables?.id === position.id}
+                onSell={(p) => sell.mutate(p)}
+              />
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            title="No open positions yet. Browse markets to place your first trade."
+            action={
+              <Button asChild size="sm">
+                <Link to="/markets">Browse markets</Link>
+              </Button>
+            }
+          />
+        )}
+      </section>
 
-        <TabsContent value="history" className="@container space-y-4">
+      <SettledSection settled={settled} />
+
+      {/* Full ledger stays available, collapsed so the screen reads as one scroll. */}
+      <Collapsible className="@container space-y-4">
+        <CollapsibleTrigger className="group flex min-h-11 w-full items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3 text-left">
+          <span className="text-base font-semibold text-foreground">Trade activity</span>
+          <span className="flex items-center gap-2">
+            <span className="num text-meta text-muted-foreground">{trades.length} trades</span>
+            <ChevronDown className="size-4 text-muted-foreground transition-transform duration-150 group-data-[state=open]:rotate-180" />
+          </span>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-4">
           <div className="flex flex-wrap items-center gap-3">
             <Select value={marketFilter} onValueChange={setMarketFilter}>
-              <SelectTrigger className="h-9 w-full max-w-xs" aria-label="Filter by market">
+              <SelectTrigger className="h-11 w-full max-w-xs" aria-label="Filter by market">
                 <SelectValue placeholder="All markets" />
               </SelectTrigger>
               <SelectContent>
@@ -185,7 +306,7 @@ function PortfolioPage() {
               </SelectContent>
             </Select>
             <Select value={sideFilter} onValueChange={setSideFilter}>
-              <SelectTrigger className="h-9 w-32" aria-label="Filter by side">
+              <SelectTrigger className="h-11 w-32" aria-label="Filter by side">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -203,8 +324,128 @@ function PortfolioPage() {
                 : "Your trade history will appear here."
             }
           />
-        </TabsContent>
-      </Tabs>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <AlertDialog open={confirmingReset} onOpenChange={setConfirmingReset}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset your virtual balance?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Reset your virtual balance to {STARTING_BALANCE_LABEL}? This clears your positions and
+              trade history. This can&apos;t be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(event) => {
+                event.preventDefault();
+                reset.mutate();
+              }}
+              disabled={reset.isPending}
+            >
+              {reset.isPending ? "Resetting…" : "Reset balance"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
+  );
+}
+
+/** Resolved predictions with their realized outcome. Collapsed by default. */
+function SettledSection({ settled }: { settled: SettledPosition[] }) {
+  const realized = settled.reduce((sum, s) => sum + s.realized, 0);
+
+  return (
+    <Collapsible className="space-y-4">
+      <CollapsibleTrigger className="group flex min-h-11 w-full items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3 text-left">
+        <span className="text-base font-semibold text-foreground">Settled positions</span>
+        <span className="flex items-center gap-2">
+          <span className="num text-meta text-muted-foreground">{settled.length}</span>
+          {settled.length ? (
+            <span
+              className={cn(
+                "num text-meta font-semibold",
+                realized >= 0 ? "text-positive" : "text-negative",
+              )}
+            >
+              {formatSignedBalance(realized)}
+            </span>
+          ) : null}
+          <ChevronDown className="size-4 text-muted-foreground transition-transform duration-150 group-data-[state=open]:rotate-180" />
+        </span>
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        {settled.length ? (
+          <div className="divide-y divide-border rounded-lg border border-border bg-card">
+            {settled.map((item) => (
+              <div key={item.id} className="flex items-start justify-between gap-4 px-4 py-3">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={cn(
+                        "num rounded px-1.5 py-0.5 text-meta font-semibold uppercase",
+                        item.side === "yes"
+                          ? "bg-positive-subtle text-positive"
+                          : "bg-negative-subtle text-negative",
+                      )}
+                    >
+                      {item.side}
+                    </span>
+                    <span className="num text-meta uppercase text-muted-foreground">
+                      Resolved {item.outcome}
+                    </span>
+                    <span
+                      className={cn(
+                        "num grid size-4 place-items-center rounded text-[10px] font-semibold",
+                        item.won
+                          ? "bg-positive-subtle text-positive"
+                          : "bg-negative-subtle text-negative",
+                      )}
+                      aria-label={item.won ? "Won" : "Lost"}
+                    >
+                      {item.won ? "W" : "L"}
+                    </span>
+                  </div>
+                  <Link
+                    to="/market/$marketId"
+                    params={{ marketId: item.marketId }}
+                    className="mt-1 line-clamp-2 block text-sm font-semibold leading-snug text-foreground hover:text-accent-solid"
+                  >
+                    {item.question}
+                  </Link>
+                  <p className="num mt-1 text-meta text-muted-foreground">
+                    {formatContracts(item.contracts)} contracts · settled{" "}
+                    {formatDate(item.settledAt)}
+                  </p>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p
+                    className={cn(
+                      "num text-sm font-semibold",
+                      item.realized >= 0 ? "text-positive" : "text-negative",
+                    )}
+                  >
+                    {formatSignedBalance(item.realized)}
+                  </p>
+                  <p
+                    className={cn(
+                      "num text-meta",
+                      item.realized >= 0 ? "text-positive" : "text-negative",
+                    )}
+                  >
+                    {formatSignedPercent(item.realizedPct)}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <EmptyState title="Nothing has settled yet. Resolved predictions land here." />
+        )}
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
