@@ -40,36 +40,24 @@ import { EditProfileDialog } from "@/components/vanti/edit-profile-dialog";
 import { VantiMark } from "@/components/vanti/vanti-mark";
 import { useProfile } from "@/hooks/use-vanti-session";
 import { supabase } from "@/integrations/supabase/client";
-import { formatBalance } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 const primaryNav = [
   { label: "Home", to: "/home", icon: Home },
   { label: "Discover", to: "/discover", icon: Compass },
   { label: "Markets", to: "/markets", icon: LineChart },
-  { label: "Balance", to: "/balance", icon: Wallet },
   { label: "Portfolio", to: "/portfolio", icon: PieChart },
   { label: "Watchlist", to: "/watchlist", icon: Star },
   { label: "Following", to: "/following", icon: Users },
 ] as const;
 
 const mobileNav = [
-  { label: "Home", to: "/home", icon: Home },
+  { label: "Markets", to: "/markets", icon: LineChart },
+  { label: "Feed", to: "/home", icon: Home },
   { label: "Discover", to: "/discover", icon: Compass },
-  { label: "Balance", to: "/balance", balance: true },
   { label: "Portfolio", to: "/portfolio", icon: PieChart },
   { label: "Profile", to: "/profile", icon: User },
 ] as const;
-
-/** Live virtual balance, shown in the tab bar in place of an icon. */
-function BalanceTabValue() {
-  const { data: profile } = useProfile();
-  return (
-    <span className="num text-xs leading-5 text-foreground">
-      {profile ? formatBalance(profile.balance) : "—"}
-    </span>
-  );
-}
 
 function AccountMenu() {
   const { data: profile } = useProfile();
@@ -242,7 +230,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 active ? "text-accent-solid" : "text-muted-foreground",
               )}
             >
-              {"balance" in item ? <BalanceTabValue /> : <item.icon className="size-5" />}
+              <item.icon className="size-5" />
               {item.label}
             </Link>
           );
