@@ -22,6 +22,7 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedWatchlistRouteImport } from './routes/_authenticated/watchlist'
 import { Route as AuthenticatedConnectionsUsernameRouteImport } from './routes/_authenticated/connections.$username'
 import { Route as AuthenticatedMarketMarketIdRouteImport } from './routes/_authenticated/market.$marketId'
+import { Route as AuthenticatedSyndicateSyndicateIdRouteImport } from './routes/_authenticated/syndicate.$syndicateId'
 import { Route as AuthenticatedUUsernameRouteImport } from './routes/_authenticated/u.$username'
 
 const IndexRoute = IndexRouteImport.update({
@@ -90,6 +91,12 @@ const AuthenticatedMarketMarketIdRoute =
     path: '/market/$marketId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedSyndicateSyndicateIdRoute =
+  AuthenticatedSyndicateSyndicateIdRouteImport.update({
+    id: '/syndicate/$syndicateId',
+    path: '/syndicate/$syndicateId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedUUsernameRoute = AuthenticatedUUsernameRouteImport.update({
   id: '/u/$username',
   path: '/u/$username',
@@ -109,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/watchlist': typeof AuthenticatedWatchlistRoute
   '/connections/$username': typeof AuthenticatedConnectionsUsernameRoute
   '/market/$marketId': typeof AuthenticatedMarketMarketIdRoute
+  '/syndicate/$syndicateId': typeof AuthenticatedSyndicateSyndicateIdRoute
   '/u/$username': typeof AuthenticatedUUsernameRoute
 }
 export interface FileRoutesByTo {
@@ -124,6 +132,7 @@ export interface FileRoutesByTo {
   '/watchlist': typeof AuthenticatedWatchlistRoute
   '/connections/$username': typeof AuthenticatedConnectionsUsernameRoute
   '/market/$marketId': typeof AuthenticatedMarketMarketIdRoute
+  '/syndicate/$syndicateId': typeof AuthenticatedSyndicateSyndicateIdRoute
   '/u/$username': typeof AuthenticatedUUsernameRoute
 }
 export interface FileRoutesById {
@@ -141,6 +150,7 @@ export interface FileRoutesById {
   '/_authenticated/watchlist': typeof AuthenticatedWatchlistRoute
   '/_authenticated/connections/$username': typeof AuthenticatedConnectionsUsernameRoute
   '/_authenticated/market/$marketId': typeof AuthenticatedMarketMarketIdRoute
+  '/_authenticated/syndicate/$syndicateId': typeof AuthenticatedSyndicateSyndicateIdRoute
   '/_authenticated/u/$username': typeof AuthenticatedUUsernameRoute
 }
 export interface FileRouteTypes {
@@ -158,6 +168,7 @@ export interface FileRouteTypes {
     | '/watchlist'
     | '/connections/$username'
     | '/market/$marketId'
+    | '/syndicate/$syndicateId'
     | '/u/$username'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -173,6 +184,7 @@ export interface FileRouteTypes {
     | '/watchlist'
     | '/connections/$username'
     | '/market/$marketId'
+    | '/syndicate/$syndicateId'
     | '/u/$username'
   id:
     | '__root__'
@@ -189,6 +201,7 @@ export interface FileRouteTypes {
     | '/_authenticated/watchlist'
     | '/_authenticated/connections/$username'
     | '/_authenticated/market/$marketId'
+    | '/_authenticated/syndicate/$syndicateId'
     | '/_authenticated/u/$username'
   fileRoutesById: FileRoutesById
 }
@@ -291,6 +304,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMarketMarketIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/syndicate/$syndicateId': {
+      id: '/_authenticated/syndicate/$syndicateId'
+      path: '/syndicate/$syndicateId'
+      fullPath: '/syndicate/$syndicateId'
+      preLoaderRoute: typeof AuthenticatedSyndicateSyndicateIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/u/$username': {
       id: '/_authenticated/u/$username'
       path: '/u/$username'
@@ -312,6 +332,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedWatchlistRoute: typeof AuthenticatedWatchlistRoute
   AuthenticatedConnectionsUsernameRoute: typeof AuthenticatedConnectionsUsernameRoute
   AuthenticatedMarketMarketIdRoute: typeof AuthenticatedMarketMarketIdRoute
+  AuthenticatedSyndicateSyndicateIdRoute: typeof AuthenticatedSyndicateSyndicateIdRoute
   AuthenticatedUUsernameRoute: typeof AuthenticatedUUsernameRoute
 }
 
@@ -326,6 +347,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedWatchlistRoute: AuthenticatedWatchlistRoute,
   AuthenticatedConnectionsUsernameRoute: AuthenticatedConnectionsUsernameRoute,
   AuthenticatedMarketMarketIdRoute: AuthenticatedMarketMarketIdRoute,
+  AuthenticatedSyndicateSyndicateIdRoute:
+    AuthenticatedSyndicateSyndicateIdRoute,
   AuthenticatedUUsernameRoute: AuthenticatedUUsernameRoute,
 }
 
@@ -340,3 +363,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

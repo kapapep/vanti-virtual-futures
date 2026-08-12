@@ -203,6 +203,7 @@ export type Database = {
           id: string
           market_id: string
           side: string
+          syndicate_id: string | null
           user_id: string
         }
         Insert: {
@@ -211,6 +212,7 @@ export type Database = {
           id?: string
           market_id: string
           side: string
+          syndicate_id?: string | null
           user_id: string
         }
         Update: {
@@ -219,6 +221,7 @@ export type Database = {
           id?: string
           market_id?: string
           side?: string
+          syndicate_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -227,6 +230,13 @@ export type Database = {
             columns: ["market_id"]
             isOneToOne: false
             referencedRelation: "markets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "positions_syndicate_id_fkey"
+            columns: ["syndicate_id"]
+            isOneToOne: false
+            referencedRelation: "syndicates"
             referencedColumns: ["id"]
           },
           {
@@ -247,6 +257,7 @@ export type Database = {
           image_url: string | null
           market_id: string | null
           parent_id: string | null
+          syndicate_id: string | null
           user_id: string
         }
         Insert: {
@@ -257,6 +268,7 @@ export type Database = {
           image_url?: string | null
           market_id?: string | null
           parent_id?: string | null
+          syndicate_id?: string | null
           user_id: string
         }
         Update: {
@@ -267,6 +279,7 @@ export type Database = {
           image_url?: string | null
           market_id?: string | null
           parent_id?: string | null
+          syndicate_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -282,6 +295,13 @@ export type Database = {
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_syndicate_id_fkey"
+            columns: ["syndicate_id"]
+            isOneToOne: false
+            referencedRelation: "syndicates"
             referencedColumns: ["id"]
           },
           {
@@ -364,6 +384,229 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      syndicate_contributions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          price_at_entry: number
+          shares_bought: number
+          syndicate_id: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          price_at_entry: number
+          shares_bought: number
+          syndicate_id: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          price_at_entry?: number
+          shares_bought?: number
+          syndicate_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "syndicate_contributions_syndicate_id_fkey"
+            columns: ["syndicate_id"]
+            isOneToOne: false
+            referencedRelation: "syndicates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syndicate_contributions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      syndicate_ledger: {
+        Row: {
+          amount: number
+          balance_after: number | null
+          created_at: string
+          entry_type: Database["public"]["Enums"]["syndicate_ledger_entry"]
+          id: string
+          metadata: Json
+          syndicate_id: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          balance_after?: number | null
+          created_at?: string
+          entry_type: Database["public"]["Enums"]["syndicate_ledger_entry"]
+          id?: string
+          metadata?: Json
+          syndicate_id: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          balance_after?: number | null
+          created_at?: string
+          entry_type?: Database["public"]["Enums"]["syndicate_ledger_entry"]
+          id?: string
+          metadata?: Json
+          syndicate_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "syndicate_ledger_syndicate_id_fkey"
+            columns: ["syndicate_id"]
+            isOneToOne: false
+            referencedRelation: "syndicates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syndicate_ledger_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      syndicate_members: {
+        Row: {
+          contributed: number
+          id: string
+          joined_at: string
+          shares_owned: number
+          syndicate_id: string
+          user_id: string
+        }
+        Insert: {
+          contributed?: number
+          id?: string
+          joined_at?: string
+          shares_owned?: number
+          syndicate_id: string
+          user_id: string
+        }
+        Update: {
+          contributed?: number
+          id?: string
+          joined_at?: string
+          shares_owned?: number
+          syndicate_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "syndicate_members_syndicate_id_fkey"
+            columns: ["syndicate_id"]
+            isOneToOne: false
+            referencedRelation: "syndicates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syndicate_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      syndicates: {
+        Row: {
+          captain_fee_bps: number
+          captain_id: string
+          created_at: string
+          description: string | null
+          id: string
+          lock_at: string
+          market_id: string
+          max_members: number
+          min_contribution: number
+          name: string
+          outcome_side: string
+          position_id: string | null
+          settled_at: string | null
+          status: Database["public"]["Enums"]["syndicate_status"]
+          target_stake: number
+          total_contributed: number
+          total_shares: number
+          updated_at: string
+          visibility: Database["public"]["Enums"]["syndicate_visibility"]
+        }
+        Insert: {
+          captain_fee_bps?: number
+          captain_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          lock_at: string
+          market_id: string
+          max_members?: number
+          min_contribution?: number
+          name: string
+          outcome_side: string
+          position_id?: string | null
+          settled_at?: string | null
+          status?: Database["public"]["Enums"]["syndicate_status"]
+          target_stake: number
+          total_contributed?: number
+          total_shares?: number
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["syndicate_visibility"]
+        }
+        Update: {
+          captain_fee_bps?: number
+          captain_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          lock_at?: string
+          market_id?: string
+          max_members?: number
+          min_contribution?: number
+          name?: string
+          outcome_side?: string
+          position_id?: string | null
+          settled_at?: string | null
+          status?: Database["public"]["Enums"]["syndicate_status"]
+          target_stake?: number
+          total_contributed?: number
+          total_shares?: number
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["syndicate_visibility"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "syndicates_captain_id_fkey"
+            columns: ["captain_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syndicates_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "markets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syndicates_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
             referencedColumns: ["id"]
           },
         ]
@@ -503,6 +746,10 @@ export type Database = {
     }
     Functions: {
       add_virtual_cash: { Args: { p_amount: number }; Returns: Json }
+      cancel_syndicate: {
+        Args: { p_reason?: string; p_syndicate_id: string }
+        Returns: Json
+      }
       execute_trade: {
         Args: {
           p_action: string
@@ -512,6 +759,15 @@ export type Database = {
         }
         Returns: Json
       }
+      is_syndicate_member: {
+        Args: { p_syndicate_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      join_syndicate: {
+        Args: { p_amount: number; p_syndicate_id: string }
+        Returns: Json
+      }
+      process_syndicate_locks: { Args: never; Returns: Json }
       record_explicit_violation: { Args: { p_reason?: string }; Returns: Json }
       reset_virtual_balance: { Args: never; Returns: Json }
       resolve_market: {
@@ -522,10 +778,16 @@ export type Database = {
         Args: { p_contracts: number; p_market_id: string; p_side: string }
         Returns: Json
       }
+      settle_syndicate: {
+        Args: { p_result?: string; p_syndicate_id: string }
+        Returns: Json
+      }
       withdraw_virtual_cash: { Args: { p_amount: number }; Returns: Json }
     }
     Enums: {
-      [_ in never]: never
+      syndicate_ledger_entry: "contribution" | "payout" | "refund" | "fee"
+      syndicate_status: "open" | "locked" | "settled" | "cancelled"
+      syndicate_visibility: "public" | "invite_only"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -652,6 +914,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      syndicate_ledger_entry: ["contribution", "payout", "refund", "fee"],
+      syndicate_status: ["open", "locked", "settled", "cancelled"],
+      syndicate_visibility: ["public", "invite_only"],
+    },
   },
 } as const
