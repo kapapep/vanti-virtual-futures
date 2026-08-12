@@ -172,14 +172,20 @@ export type RecentTrade = {
   createdAt: string;
 };
 
-export function marketTradesQuery(marketId: string) {
+/**
+ * Recent activity for a market, scoped to the signed-in user's own trades.
+ * Other users' trade rows are private (RLS: trades_select_own).
+ */
+export function marketTradesQuery(marketId: string, userId: string | undefined) {
   return queryOptions({
-    queryKey: ["market-trades", marketId],
+    queryKey: ["market-trades", marketId, userId],
+    enabled: Boolean(userId),
     queryFn: async (): Promise<RecentTrade[]> => {
       const { data, error } = await supabase
         .from("trades")
         .select("id, side, action, contracts, price, created_at")
         .eq("market_id", marketId)
+        .eq("user_id", userId!)
         .order("created_at", { ascending: false })
         .limit(15);
       if (error) throw error;

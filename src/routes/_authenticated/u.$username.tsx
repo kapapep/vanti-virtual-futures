@@ -237,7 +237,7 @@ function UserProfilePage() {
             emptyCopy={
               isOwn
                 ? "Your trade history will appear here."
-                : `@${profile.username} hasn't traded yet.`
+                : `@${profile.username}'s trade history is private.`
             }
           />
         </TabsContent>

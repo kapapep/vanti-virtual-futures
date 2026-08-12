@@ -54,7 +54,7 @@ function MarketDetailPage() {
   const { user } = useSession();
   const queryClient = useQueryClient();
   const market = useQuery(marketQuery(marketId));
-  const trades = useQuery(marketTradesQuery(marketId));
+  const trades = useQuery(marketTradesQuery(marketId, user?.id));
   const watchlist = useQuery(watchlistQuery(user?.id));
 
   const watched = (watchlist.data ?? []).includes(marketId);
@@ -209,9 +209,11 @@ function MarketDetailPage() {
           </div>
 
           <div className="rounded-lg border border-border bg-card p-4">
-            <h2 className="text-sm font-semibold text-foreground">Recent activity</h2>
+            <h2 className="text-sm font-semibold text-foreground">Your recent activity</h2>
             {(trades.data ?? []).length === 0 ? (
-              <p className="mt-2 text-sm text-muted-foreground">No trades yet.</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                You haven't traded this market yet.
+              </p>
             ) : (
               <ul className="mt-3 divide-y divide-border">
                 {(trades.data ?? []).map((t) => (
