@@ -12,7 +12,6 @@ import {
   Star,
   User,
   Users,
-  Wallet,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
