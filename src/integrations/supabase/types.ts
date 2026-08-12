@@ -452,13 +452,6 @@ export type Database = {
             foreignKeyName: "transactions_trade_id_fkey"
             columns: ["trade_id"]
             isOneToOne: false
-            referencedRelation: "market_recent_trades"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "transactions_trade_id_fkey"
-            columns: ["trade_id"]
-            isOneToOne: false
             referencedRelation: "trades"
             referencedColumns: ["id"]
           },
@@ -506,44 +499,7 @@ export type Database = {
       }
     }
     Views: {
-      market_recent_trades: {
-        Row: {
-          action: string | null
-          contracts: number | null
-          created_at: string | null
-          id: string | null
-          market_id: string | null
-          price: number | null
-          side: string | null
-        }
-        Insert: {
-          action?: string | null
-          contracts?: number | null
-          created_at?: string | null
-          id?: string | null
-          market_id?: string | null
-          price?: number | null
-          side?: string | null
-        }
-        Update: {
-          action?: string | null
-          contracts?: number | null
-          created_at?: string | null
-          id?: string | null
-          market_id?: string | null
-          price?: number | null
-          side?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "trades_market_id_fkey"
-            columns: ["market_id"]
-            isOneToOne: false
-            referencedRelation: "markets"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       add_virtual_cash: { Args: { p_amount: number }; Returns: Json }
