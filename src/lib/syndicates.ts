@@ -207,6 +207,7 @@ export const syndicateActivityQuery = queryOptions({
 });
 
 const SYNDICATE_ERRORS: Record<string, string> = {
+  __PLACEHOLDER__: "",
   NOT_AUTHENTICATED: "Sign in to join a syndicate.",
   SYNDICATE_NOT_FOUND: "This syndicate no longer exists.",
   SYNDICATE_CLOSED: "This syndicate is no longer taking contributions.",
