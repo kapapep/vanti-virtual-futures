@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 
 import { CategoryIcon } from "@/components/vanti/category-icon";
-import { MarketCard } from "@/components/vanti/market-card";
+import { TradableMarketCard } from "@/components/vanti/tradable-market-card";
 import { MarketGridSkeleton } from "@/components/vanti/skeletons";
 import { categoriesQuery, marketsQuery, type Market } from "@/lib/markets";
 import { cn } from "@/lib/utils";
@@ -65,12 +65,17 @@ function MarketsPage() {
       )
     : [];
 
+  const trending = [...filtered]
+    .filter((m) => m.status === "active")
+    .sort((a, b) => b.volume - a.volume)
+    .slice(0, 3);
+
   return (
     <section className="space-y-6">
       <div className="space-y-1">
         <h1 className="text-figure font-semibold text-foreground">Markets</h1>
         <p className="text-sm text-muted-foreground">
-          Every market with YES/NO pricing in cents, volume and resolution details.
+          Find a question, then buy YES or NO right from the card.
         </p>
       </div>
 
@@ -139,10 +144,29 @@ function MarketsPage() {
           </p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {filtered.map((market) => (
-            <MarketCard key={market.id} market={market} />
-          ))}
+        <div className="space-y-10">
+          {trending.length > 0 ? (
+            <section className="space-y-4">
+              <div className="space-y-0.5">
+                <h2 className="text-base font-semibold text-foreground">Trending</h2>
+                <p className="text-meta text-muted-foreground">Highest virtual volume right now.</p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {trending.map((m) => (
+                  <TradableMarketCard key={m.id} market={m} />
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          <section className="space-y-4">
+            <h2 className="text-base font-semibold text-foreground">All markets</h2>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {filtered.map((market) => (
+                <TradableMarketCard key={market.id} market={market} />
+              ))}
+            </div>
+          </section>
         </div>
       )}
     </section>
