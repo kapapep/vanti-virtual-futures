@@ -80,6 +80,7 @@ function UserProfilePage() {
   const { username } = Route.useParams();
   const { user } = useSession();
   const queryClient = useQueryClient();
+  const [confirmingReset, setConfirmingReset] = useState(false);
 
   const { data: profile, isPending, isError } = useQuery(profileByUsernameQuery(username));
   const { data: stats } = useQuery(followStatsQuery(profile?.id));
@@ -98,6 +99,16 @@ function UserProfilePage() {
       void queryClient.invalidateQueries({ queryKey: ["follow-stats"] });
     },
     onError: () => toast.error("Couldn't update follow. Try again."),
+  });
+
+  const reset = useMutation({
+    mutationFn: resetVirtualBalance,
+    onSuccess: () => {
+      toast.success(`Reset your virtual balance to ${STARTING_BALANCE_LABEL}.`);
+      setConfirmingReset(false);
+      void queryClient.invalidateQueries();
+    },
+    onError: (error) => toast.error(balanceErrorMessage(error)),
   });
 
   if (isPending) return <ProfileSkeleton />;
