@@ -368,6 +368,9 @@ function HomePage() {
             setComposerOpen(false);
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}
+          onPosted={() => {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
         />
       ) : null}
     </div>
