@@ -33,7 +33,7 @@ import {
 } from "@/lib/pools";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/_authenticated/syndicate/$syndicateId")({
+export const Route = createFileRoute("/_authenticated/pools/$poolId")({
   head: () => ({
     meta: [
       { title: "Pool — Vanti" },

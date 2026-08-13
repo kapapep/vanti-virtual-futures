@@ -120,7 +120,7 @@ export function poolPositionsQuery(userId: string | undefined) {
       const { data, error } = await supabase
         .from("syndicate_members")
         .select(
-          "id, contributed, shares_owned, syndicates!syndicate_members_syndicate_id_fkey(id, name, outcome_side, status, market_id, markets!pools_market_id_fkey(question, yes_price, status, outcome, resolution_date, categories(name)))",
+          "id, contributed, shares_owned, syndicates!syndicate_members_syndicate_id_fkey(id, name, outcome_side, status, market_id, markets!syndicates_market_id_fkey(question, yes_price, status, outcome, resolution_date, categories(name)))",
         )
         .eq("user_id", userId!)
         .gt("shares_owned", 0);

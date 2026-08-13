@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PoolCard } from "@/components/vanti/pool-card";
 import { browsePoolsQuery, type Pool } from "@/lib/pools";
 
-export const Route = createFileRoute("/_authenticated/syndicates")({
+export const Route = createFileRoute("/_authenticated/pools/")({
   head: () => ({
     meta: [
       { title: "Pools — Vanti" },

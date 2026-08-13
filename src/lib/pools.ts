@@ -56,7 +56,7 @@ export type PoolLedgerEntry = {
 };
 
 const POOL_SELECT =
-  "id, market_id, captain_id, name, description, outcome_side, target_stake, min_contribution, max_members, captain_fee_bps, lock_at, visibility, status, total_contributed, total_shares, position_id, settled_at, created_at, profiles!pools_captain_id_fkey(id, username, display_name, avatar_url), markets!pools_market_id_fkey(id, question, yes_price, status, outcome), syndicate_members(count)";
+  "id, market_id, captain_id, name, description, outcome_side, target_stake, min_contribution, max_members, captain_fee_bps, lock_at, visibility, status, total_contributed, total_shares, position_id, settled_at, created_at, profiles!syndicates_captain_id_fkey(id, username, display_name, avatar_url), markets!syndicates_market_id_fkey(id, question, yes_price, status, outcome), syndicate_members(count)";
 
 // Supabase's generated relational types don't narrow nested selects here.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
