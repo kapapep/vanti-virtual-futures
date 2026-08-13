@@ -312,6 +312,44 @@ function UserProfilePage() {
           )}
         </TabsContent>
       </Tabs>
+
+      {isOwn ? (
+        <section className="space-y-1">
+          <h2 className="text-sm font-semibold uppercase text-muted-foreground">Settings</h2>
+          <button
+            type="button"
+            onClick={() => setConfirmingReset(true)}
+            className="flex w-full items-center justify-between py-3 text-left text-sm text-foreground transition-colors hover:text-negative"
+          >
+            <span>Reset virtual balance</span>
+            <span className="text-meta text-muted-foreground">Clears positions &amp; history</span>
+          </button>
+        </section>
+      ) : null}
+
+      <AlertDialog open={confirmingReset} onOpenChange={setConfirmingReset}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset your virtual balance?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Reset your virtual balance to {STARTING_BALANCE_LABEL}? This clears your positions and
+              trade history. This can&apos;t be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(event) => {
+                event.preventDefault();
+                reset.mutate();
+              }}
+              disabled={reset.isPending}
+            >
+              {reset.isPending ? "Resetting…" : "Reset balance"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
