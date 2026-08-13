@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 import { ChevronDown, SlidersHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,51 @@ function sortMarkets(markets: Market[], sort: SortKey) {
     default:
       return list.sort((a, b) => b.volume - a.volume);
   }
+}
+
+function useAutoScrollRail(enabled: boolean) {
+  const ref = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !enabled) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let raf = 0;
+    let paused = false;
+    let direction = 1;
+    let resumeTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const pause = () => {
+      paused = true;
+      if (resumeTimer) clearTimeout(resumeTimer);
+      resumeTimer = setTimeout(() => {
+        paused = false;
+      }, 3000);
+    };
+
+    const step = () => {
+      const max = el.scrollWidth - el.clientWidth;
+      if (!paused && max > 4) {
+        if (el.scrollLeft >= max - 1) direction = -1;
+        else if (el.scrollLeft <= 0) direction = 1;
+        el.scrollLeft += direction * 0.4;
+      }
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+
+    const events = ["pointerdown", "wheel", "touchstart", "focusin", "mouseenter"] as const;
+    events.forEach((e) => el.addEventListener(e, pause, { passive: true }));
+
+    return () => {
+      cancelAnimationFrame(raf);
+      if (resumeTimer) clearTimeout(resumeTimer);
+      events.forEach((e) => el.removeEventListener(e, pause));
+    };
+  }, [enabled]);
+
+  return ref;
 }
 
 export const Route = createFileRoute("/_authenticated/markets")({
@@ -80,6 +126,7 @@ function MarketsPage() {
     .slice(0, 3);
 
   const activeSort = SORTS.find((s) => s.key === sort) ?? SORTS[0];
+  const railRef = useAutoScrollRail((categories.data?.length ?? 0) > 0);
 
   return (
     <section className="space-y-6">
@@ -87,7 +134,10 @@ function MarketsPage() {
 
       <div className="sticky top-[57px] z-10 -mx-4 border-b border-border bg-background px-4 pb-2 pt-2 lg:top-0">
         <div className="flex items-center gap-3">
-          <div className="-mx-4 flex flex-1 items-center gap-2 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden">
+          <div
+            ref={railRef}
+            className="-mx-4 flex flex-1 items-center gap-2 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden"
+          >
             <button
               type="button"
               onClick={() => navigate({ search: (prev: MarketsSearch) => ({ ...prev, category: undefined }) })}

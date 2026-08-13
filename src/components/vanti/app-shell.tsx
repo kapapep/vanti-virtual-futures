@@ -215,7 +215,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       {/* Mobile bottom tab bar */}
-      <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t border-border bg-background lg:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 gap-0 border-t border-border bg-background px-1 pb-[env(safe-area-inset-bottom)] lg:hidden">
         {mobileNav.map((item) => {
           const active = pathname === item.to;
           return (
@@ -224,12 +224,12 @@ export function AppShell({ children }: { children: ReactNode }) {
               to={item.to}
               search={item.to === "/home" ? { tab: "for-you" } : {}}
               className={cn(
-                "flex flex-col items-center gap-1 py-2.5 text-meta font-medium transition-colors",
+                "flex min-w-0 flex-col items-center justify-center gap-1 px-0.5 py-2.5 text-center text-meta font-medium leading-none transition-colors",
                 active ? "text-accent-solid" : "text-muted-foreground",
               )}
             >
-              <item.icon className="size-5" />
-              {item.label}
+              <item.icon className="size-5 shrink-0" />
+              <span className="w-full truncate">{item.label}</span>
             </Link>
           );
         })}
