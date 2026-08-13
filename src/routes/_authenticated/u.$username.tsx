@@ -46,7 +46,13 @@ import {
   profileByUsernameQuery,
   setFollowing,
 } from "@/lib/social";
+import {
+  balanceErrorMessage,
+  resetVirtualBalance,
+  STARTING_BALANCE_LABEL,
+} from "@/lib/virtual-balance";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/_authenticated/u/$username")({
   head: ({ params }) => ({
