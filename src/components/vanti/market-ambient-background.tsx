@@ -113,6 +113,16 @@ export function MarketAmbientBackground() {
         }}
       />
 
+      {/* Fade chart behind wordmark + headline so curves don't collide with text */}
+      <div
+        className="absolute inset-x-0 top-0 h-[55%]"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 22%, var(--background) 0%, var(--background) 22%, transparent 55%)",
+          opacity: 0.7,
+        }}
+      />
+
       {/* Primary brand probability curve */}
       <svg
         viewBox="0 0 1200 320"
