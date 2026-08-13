@@ -21,7 +21,7 @@ export function MarketCard({ market, actions }: { market: Market; actions?: Reac
       >
       <ProbabilityBar price={market.yesPrice} height={4} className="[&>div]:rounded-none" />
 
-      <div className="flex flex-1 flex-col gap-3 p-4">
+      <div className={cn("flex flex-1 flex-col gap-3 p-4", actions && "pb-0")}>
         <div className="flex items-center gap-2 text-meta text-muted-foreground">
           {market.category ? (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-border px-2 py-0.5 font-medium">
