@@ -125,16 +125,16 @@
 
 /* Dark is the default palette (true-black OLED); `.light` switches. */
 :root {
-  --radius: 6px;
+  --radius: 14px;
   --font-vanti-sans: "Figtree", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-vanti-mono: "Figtree", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme: dark;
 
   /* Dark palette (default) */
   --bg: #000000;
-  --elev: #1c1c1e;
+  --elev: #131315;
   --elev2: #2c2c2e;
-  --hair: #38383a;
+  --hair: rgba(255, 255, 255, 0.06);
   --label: #ffffff;
   --label2: rgba(235, 235, 245, 0.6);
   --label3: rgba(235, 235, 245, 0.3);
