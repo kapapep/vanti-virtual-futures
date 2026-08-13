@@ -5,13 +5,25 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Countdown } from "@/components/vanti/countdown";
 import { PoolProgress } from "@/components/vanti/pool-progress";
 import { SideBadge, PoolStatusPill } from "@/components/vanti/pool-status-pill";
-import { formatCount } from "@/lib/format";
-import type { Pool } from "@/lib/pools";
+import { formatBalance, formatCount, formatPercent } from "@/lib/format";
+import { poolPnl, type Pool } from "@/lib/pools";
+import { cn } from "@/lib/utils";
 
 /** Compact pool row used on market detail and in the feed. */
-export function PoolCard({ pool }: { pool: Pool }) {
+export function PoolCard({
+  pool,
+  urgent = false,
+  showPnl = false,
+}: {
+  pool: Pool;
+  /** Highlight the lock countdown when the pool closes very soon. */
+  urgent?: boolean;
+  /** Show live P&L instead of the funding progress bar. */
+  showPnl?: boolean;
+}) {
   const captain = pool.captain;
   const initial = (captain?.displayName ?? captain?.username ?? "?").slice(0, 1).toUpperCase();
+  const pnl = showPnl && pool.market ? poolPnl(pool, pool.market.yesPrice) : null;
 
   return (
     <Link
@@ -33,19 +45,37 @@ export function PoolCard({ pool }: { pool: Pool }) {
           <p className="text-meta text-muted-foreground">
             Captained by @{captain?.username ?? "unknown"}
           </p>
-          <PoolProgress raised={pool.totalContributed} target={pool.targetStake} height={4} />
+          {pnl ? (
+            <div className="flex items-baseline justify-between gap-2 text-meta">
+              <span className="num font-medium text-foreground">
+                {formatBalance(pnl.value)}{" "}
+                <span className="font-normal text-muted-foreground">position value</span>
+              </span>
+              <span
+                className={cn("num font-medium", pnl.pnl < 0 ? "text-negative" : "text-positive")}
+              >
+                {pnl.pnl >= 0 ? "+" : "−"}
+                {formatBalance(Math.abs(pnl.pnl))} ({formatPercent(Math.abs(pnl.ratio))})
+              </span>
+            </div>
+          ) : (
+            <PoolProgress raised={pool.totalContributed} target={pool.targetStake} height={4} />
+          )}
           <div className="flex items-center justify-between gap-2 text-meta text-muted-foreground">
             <span className="num inline-flex items-center gap-1">
               <Users className="size-3" />
               {formatCount(pool.memberCount)}/{formatCount(pool.maxMembers)}
             </span>
-            <span className="num">
-              {pool.status === "open" ? (
-                <>
-                  Locks in <Countdown to={pool.lockAt} />
-                </>
-              ) : null}
-            </span>
+            {pool.status === "open" ? (
+              <span
+                className={cn(
+                  "num",
+                  urgent && "font-extrabold text-urgent",
+                )}
+              >
+                Locks in <Countdown to={pool.lockAt} />
+              </span>
+            ) : null}
           </div>
         </div>
       </div>

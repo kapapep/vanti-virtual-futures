@@ -110,6 +110,8 @@
   --color-track: var(--track);
   --color-yes: var(--yes);
   --color-no: var(--no);
+  --color-urgent: var(--urgent);
+  --color-urgent: var(--urgent);
   --font-sans: var(--font-vanti-sans);
   --font-mono: var(--font-vanti-mono);
   --text-display: 2.5rem;
