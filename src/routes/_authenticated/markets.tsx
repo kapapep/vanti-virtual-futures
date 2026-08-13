@@ -138,7 +138,7 @@ function MarketsPage() {
       {markets.isPending ? (
         <MarketGridSkeleton count={6} />
       ) : filtered.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-border p-8 text-center">
+        <div className="rounded-lg border border-dashed border-border bg-surface p-8 text-center">
           <p className="text-sm text-muted-foreground">
             No markets here yet. Pick another category to keep browsing.
           </p>
