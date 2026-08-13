@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, ChevronDown, ImagePlus, X } from "lucide-react";
+import { Check, ChevronDown, ImagePlus, Loader2, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -13,6 +13,7 @@ import { AudioRecorder, type RecordedAudio } from "@/components/vanti/audio-reco
 import { formatCents } from "@/lib/format";
 import { marketsQuery } from "@/lib/markets";
 import { fileToPostImageDataUrl } from "@/lib/media-file";
+import { lightHaptic } from "@/lib/haptics";
 import { moderatePostMedia } from "@/lib/moderation.functions";
 import { createPost } from "@/lib/posts";
 import { cn } from "@/lib/utils";
@@ -22,9 +23,11 @@ const MAX_LENGTH = 500;
 function MarketPicker({
   value,
   onChange,
+  disabled = false,
 }: {
   value: string | null;
   onChange: (marketId: string | null) => void;
+  disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [term, setTerm] = useState("");
@@ -39,7 +42,7 @@ function MarketPicker({
     <div className="flex items-center gap-2">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="max-w-full">
+          <Button variant="outline" size="sm" className="max-w-full" disabled={disabled}>
             <span className="truncate">
               {selected ? selected.question : "Attach a market"}
             </span>
@@ -82,7 +85,13 @@ function MarketPicker({
         </PopoverContent>
       </Popover>
       {selected ? (
-        <Button variant="ghost" size="icon" aria-label="Remove market" onClick={() => onChange(null)}>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Remove market"
+          disabled={disabled}
+          onClick={() => onChange(null)}
+        >
           <X className="size-4" />
         </Button>
       ) : null}
@@ -116,6 +125,7 @@ export function PostComposer({
   const [image, setImage] = useState<string | null>(null);
   const [audio, setAudio] = useState<RecordedAudio | null>(null);
   const [preparing, setPreparing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
   const suspendedUntil = profile?.suspended_until ?? null;
@@ -138,6 +148,7 @@ export function PostComposer({
 
   const submit = useMutation({
     mutationFn: async () => {
+      setError(null);
       if (!user) throw new Error("Sign in to post.");
       if (suspended) throw new Error("Your account is suspended. You can't post right now.");
 
@@ -175,21 +186,26 @@ export function PostComposer({
       setImage(null);
       setAudio(null);
       if (!lockedMarket) setAttached(null);
+      setError(null);
       void queryClient.invalidateQueries({ queryKey: ["feed"] });
       void queryClient.invalidateQueries({ queryKey: ["market-posts"] });
       void queryClient.invalidateQueries({ queryKey: ["pool-posts"] });
       void queryClient.invalidateQueries({ queryKey: ["post-replies"] });
       void queryClient.invalidateQueries({ queryKey: ["user-posts"] });
-      toast.success(parentId ? "Reply posted" : "Posted");
       onPosted?.();
+      toast.success(parentId ? "Reply posted" : "Posted", {
+        position: "bottom-center",
+        className: "mb-20 lg:mb-0",
+      });
+      void lightHaptic();
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (err: Error) => setError(err.message || "Couldn't post — try again"),
   });
 
   const hasMedia = Boolean(image || audio);
+  const busy = submit.isPending || preparing;
   const disabled =
-    submit.isPending ||
-    preparing ||
+    busy ||
     suspended ||
     (body.trim().length === 0 && !hasMedia) ||
     remaining < 0;
@@ -214,7 +230,7 @@ export function PostComposer({
         placeholder={placeholder}
         rows={compact ? 2 : 3}
         className="resize-none text-sm"
-        disabled={suspended}
+        disabled={suspended || submit.isPending}
         aria-label={parentId ? "Write a reply" : "Write a post"}
       />
 
@@ -230,6 +246,7 @@ export function PostComposer({
             size="icon"
             aria-label="Remove image"
             className="absolute right-2 top-2"
+            disabled={submit.isPending}
             onClick={() => setImage(null)}
           >
             <X className="size-4" />
@@ -246,7 +263,7 @@ export function PostComposer({
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-1">
           {lockedMarket || parentId ? null : (
-            <MarketPicker value={attached} onChange={setAttached} />
+            <MarketPicker value={attached} onChange={setAttached} disabled={submit.isPending} />
           )}
           <input
             ref={fileInput}
@@ -260,7 +277,7 @@ export function PostComposer({
             size="icon"
             className="size-11"
             aria-label="Add an image"
-            disabled={suspended || preparing}
+            disabled={suspended || busy}
             onClick={() => fileInput.current?.click()}
           >
             <ImagePlus className="size-4" />
@@ -277,10 +294,21 @@ export function PostComposer({
             {remaining}
           </span>
           <Button size="sm" disabled={disabled} onClick={() => submit.mutate()}>
-            {submit.isPending ? "Checking…" : parentId ? "Reply" : "Post"}
+            {submit.isPending ? (
+              <Loader2 className="size-4 animate-spin" aria-label="Posting" />
+            ) : parentId ? (
+              "Reply"
+            ) : (
+              "Post"
+            )}
           </Button>
         </div>
       </div>
+      {error ? (
+        <p role="alert" className="mt-2 text-right text-meta text-negative">
+          {error}
+        </p>
+      ) : null}
       {!user ? (
         <p className="mt-2 text-meta text-muted-foreground">Sign in to join the conversation.</p>
       ) : (

@@ -377,7 +377,13 @@ function HomePage() {
               Share your read on a market. Virtual money only.
             </DialogDescription>
           </DialogHeader>
-          <PostComposer compact onPosted={() => setComposerOpen(false)} />
+          <PostComposer
+            compact
+            onPosted={() => {
+              setComposerOpen(false);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+          />
         </DialogContent>
       </Dialog>
     </div>
