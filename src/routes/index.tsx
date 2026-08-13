@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { MarketAmbientBackground } from "@/components/vanti/market-ambient-background";
 import { VantiMark } from "@/components/vanti/vanti-mark";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   head: () => ({
