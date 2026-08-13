@@ -1,8 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Grid3x3, LineChart, Layers } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EditProfileDialog } from "@/components/vanti/edit-profile-dialog";
@@ -35,7 +46,13 @@ import {
   profileByUsernameQuery,
   setFollowing,
 } from "@/lib/social";
+import {
+  balanceErrorMessage,
+  resetVirtualBalance,
+  STARTING_BALANCE_LABEL,
+} from "@/lib/virtual-balance";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/_authenticated/u/$username")({
   head: ({ params }) => ({
@@ -63,6 +80,7 @@ function UserProfilePage() {
   const { username } = Route.useParams();
   const { user } = useSession();
   const queryClient = useQueryClient();
+  const [confirmingReset, setConfirmingReset] = useState(false);
 
   const { data: profile, isPending, isError } = useQuery(profileByUsernameQuery(username));
   const { data: stats } = useQuery(followStatsQuery(profile?.id));
@@ -81,6 +99,16 @@ function UserProfilePage() {
       void queryClient.invalidateQueries({ queryKey: ["follow-stats"] });
     },
     onError: () => toast.error("Couldn't update follow. Try again."),
+  });
+
+  const reset = useMutation({
+    mutationFn: resetVirtualBalance,
+    onSuccess: () => {
+      toast.success(`Reset your virtual balance to ${STARTING_BALANCE_LABEL}.`);
+      setConfirmingReset(false);
+      void queryClient.invalidateQueries();
+    },
+    onError: (error) => toast.error(balanceErrorMessage(error)),
   });
 
   if (isPending) return <ProfileSkeleton />;
@@ -284,6 +312,44 @@ function UserProfilePage() {
           )}
         </TabsContent>
       </Tabs>
+
+      {isOwn ? (
+        <section className="space-y-1">
+          <h2 className="text-sm font-semibold uppercase text-muted-foreground">Settings</h2>
+          <button
+            type="button"
+            onClick={() => setConfirmingReset(true)}
+            className="flex w-full items-center justify-between py-3 text-left text-sm text-foreground transition-colors hover:text-negative"
+          >
+            <span>Reset virtual balance</span>
+            <span className="text-meta text-muted-foreground">Clears positions &amp; history</span>
+          </button>
+        </section>
+      ) : null}
+
+      <AlertDialog open={confirmingReset} onOpenChange={setConfirmingReset}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset your virtual balance?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Reset your virtual balance to {STARTING_BALANCE_LABEL}? This clears your positions and
+              trade history. This can&apos;t be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(event) => {
+                event.preventDefault();
+                reset.mutate();
+              }}
+              disabled={reset.isPending}
+            >
+              {reset.isPending ? "Resetting…" : "Reset balance"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

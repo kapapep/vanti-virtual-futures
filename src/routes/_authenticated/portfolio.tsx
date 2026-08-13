@@ -4,16 +4,6 @@ import { ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
@@ -48,11 +38,6 @@ import {
 } from "@/lib/portfolio";
 import { sellPosition, tradeErrorMessage } from "@/lib/trade";
 import { cn } from "@/lib/utils";
-import {
-  balanceErrorMessage,
-  resetVirtualBalance,
-  STARTING_BALANCE_LABEL,
-} from "@/lib/virtual-balance";
 
 export const Route = createFileRoute("/_authenticated/portfolio")({
   head: () => ({
@@ -88,7 +73,7 @@ function PortfolioPage() {
   const [marketFilter, setMarketFilter] = useState("all");
   const [sideFilter, setSideFilter] = useState("all");
   const [range, setRange] = useState<EquityRangeKey>("1W");
-  const [confirmingReset, setConfirmingReset] = useState(false);
+  
 
   const chartPoints = useMemo(() => sliceEquity(equity, range), [equity, range]);
 
@@ -138,15 +123,6 @@ function PortfolioPage() {
     onError: (error) => toast.error(tradeErrorMessage(error)),
   });
 
-  const reset = useMutation({
-    mutationFn: resetVirtualBalance,
-    onSuccess: () => {
-      toast.success(`Reset your virtual balance to ${STARTING_BALANCE_LABEL}.`);
-      setConfirmingReset(false);
-      void queryClient.invalidateQueries();
-    },
-    onError: (error) => toast.error(balanceErrorMessage(error)),
-  });
 
   const dayUp = today.change >= 0;
 
@@ -185,20 +161,9 @@ function PortfolioPage() {
           </div>
         </dl>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            className="min-h-11"
-            onClick={() => setConfirmingReset(true)}
-            disabled={reset.isPending}
-          >
-            {reset.isPending ? "Resetting…" : "Reset balance"}
-          </Button>
-          <p className="text-meta text-muted-foreground">
-            Virtual currency only. No deposits, no withdrawals, no real-money value.
-          </p>
-        </div>
+        <p className="text-meta text-muted-foreground">
+          Virtual currency only. No deposits, no withdrawals, no real-money value.
+        </p>
       </header>
 
       {/* Value chart, hidden until there is enough history to shape a line. */}
@@ -327,29 +292,6 @@ function PortfolioPage() {
         </CollapsibleContent>
       </Collapsible>
 
-      <AlertDialog open={confirmingReset} onOpenChange={setConfirmingReset}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Reset your virtual balance?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Reset your virtual balance to {STARTING_BALANCE_LABEL}? This clears your positions and
-              trade history. This can&apos;t be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(event) => {
-                event.preventDefault();
-                reset.mutate();
-              }}
-              disabled={reset.isPending}
-            >
-              {reset.isPending ? "Resetting…" : "Reset balance"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
