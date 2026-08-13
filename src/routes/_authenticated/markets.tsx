@@ -1,6 +1,15 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { ChevronDown, SlidersHorizontal } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { CategoryIcon } from "@/components/vanti/category-icon";
 import { TradableMarketCard } from "@/components/vanti/tradable-market-card";
 import { MarketGridSkeleton } from "@/components/vanti/skeletons";
@@ -70,69 +79,73 @@ function MarketsPage() {
     .sort((a, b) => b.volume - a.volume)
     .slice(0, 3);
 
+  const activeSort = SORTS.find((s) => s.key === sort) ?? SORTS[0];
+
   return (
     <section className="space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-figure font-semibold text-foreground">Markets</h1>
-        <p className="text-sm text-muted-foreground">
-          Find a question, then buy YES or NO right from the card.
-        </p>
-      </div>
+      <h1 className="text-figure font-semibold text-foreground">Markets</h1>
 
-      <div className="sticky top-[57px] z-10 -mx-4 space-y-2 border-b border-border bg-background px-4 pb-2 pt-2 lg:top-0">
-      <div className="-mx-4 flex items-center gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden">
-        <button
-          type="button"
-          onClick={() => navigate({ search: (prev: MarketsSearch) => ({ ...prev, category: undefined }) })}
-          className={cn(
-            "inline-flex min-h-11 shrink-0 items-center rounded-full border px-3.5 text-xs font-medium transition-colors duration-150 sm:min-h-8",
-            !category
-              ? "border-accent-solid bg-accent-subtle text-accent-solid"
-              : "border-border text-muted-foreground hover:text-foreground",
-          )}
-        >
-          All
-        </button>
-        {(categories.data ?? []).map((c) => (
-          <button
-            key={c.id}
-            type="button"
-            onClick={() => navigate({ search: (prev: MarketsSearch) => ({ ...prev, category: c.slug }) })}
-            className={cn(
-              "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-xs font-medium whitespace-nowrap transition-colors duration-150 sm:min-h-8",
-              category === c.slug
-                ? "border-accent-solid bg-accent-subtle text-accent-solid"
-                : "border-border text-muted-foreground hover:text-foreground",
-            )}
-          >
-            <CategoryIcon name={c.icon} className="size-3" />
-            {c.name}
-          </button>
-        ))}
-      </div>
-
-      <div className="flex items-center justify-between gap-3 border-t border-border pt-2">
-        <div className="-mx-4 flex min-w-0 gap-1 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden">
-          {SORTS.map((s) => (
+      <div className="sticky top-[57px] z-10 -mx-4 border-b border-border bg-background px-4 pb-2 pt-2 lg:top-0">
+        <div className="flex items-center gap-3">
+          <div className="-mx-4 flex flex-1 items-center gap-2 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden">
             <button
-              key={s.key}
               type="button"
-              onClick={() => navigate({ search: (prev: MarketsSearch) => ({ ...prev, sort: s.key }) })}
+              onClick={() => navigate({ search: (prev: MarketsSearch) => ({ ...prev, category: undefined }) })}
               className={cn(
-                "inline-flex min-h-11 shrink-0 items-center rounded-md px-2.5 text-xs font-semibold whitespace-nowrap transition-colors duration-150 sm:min-h-8",
-                sort === s.key
-                  ? "bg-secondary text-foreground"
-                  : "text-muted-foreground hover:text-foreground",
+                "inline-flex min-h-11 shrink-0 items-center rounded-full border px-3.5 text-xs font-medium transition-colors duration-150 sm:min-h-8",
+                !category
+                  ? "border-accent-solid bg-accent-subtle text-accent-solid"
+                  : "border-border text-muted-foreground hover:text-foreground",
               )}
             >
-              {s.label}
+              All
             </button>
-          ))}
+            {(categories.data ?? []).map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => navigate({ search: (prev: MarketsSearch) => ({ ...prev, category: c.slug }) })}
+                className={cn(
+                  "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-xs font-medium whitespace-nowrap transition-colors duration-150 sm:min-h-8",
+                  category === c.slug
+                    ? "border-accent-solid bg-accent-subtle text-accent-solid"
+                    : "border-border text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <CategoryIcon name={c.icon} className="size-3" />
+                {c.name}
+              </button>
+            ))}
+          </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 shrink-0 gap-1.5 border-border px-3 text-xs font-medium text-foreground"
+              >
+                <SlidersHorizontal className="size-3.5" />
+                <span className="hidden sm:inline">{activeSort.label}</span>
+                <ChevronDown className="size-3.5 opacity-60" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-[10rem]">
+              <DropdownMenuRadioGroup
+                value={sort}
+                onValueChange={(value) =>
+                  navigate({ search: (prev: MarketsSearch) => ({ ...prev, sort: value as SortKey }) })
+                }
+              >
+                {SORTS.map((s) => (
+                  <DropdownMenuRadioItem key={s.key} value={s.key} className="text-xs">
+                    {s.label}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-        <p className="num hidden shrink-0 text-meta text-muted-foreground sm:block">
-          {filtered.length} markets
-        </p>
-      </div>
       </div>
 
       {markets.isPending ? (
@@ -147,10 +160,7 @@ function MarketsPage() {
         <div className="space-y-10">
           {trending.length > 0 ? (
             <section className="space-y-4">
-              <div className="space-y-0.5">
-                <h2 className="text-base font-semibold text-foreground">Trending</h2>
-                <p className="text-meta text-muted-foreground">Highest virtual volume right now.</p>
-              </div>
+              <h2 className="text-base font-semibold text-foreground">Trending</h2>
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {trending.map((m) => (
                   <TradableMarketCard key={m.id} market={m} />
