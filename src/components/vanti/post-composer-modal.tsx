@@ -15,6 +15,7 @@ import { lightHaptic } from "@/lib/haptics";
 import { marketsQuery } from "@/lib/markets";
 import { fileToPostImageDataUrl } from "@/lib/media-file";
 import { moderatePostMedia } from "@/lib/moderation.functions";
+import { showPostedToast } from "@/components/vanti/posted-toast";
 import { createPost } from "@/lib/posts";
 import { cn } from "@/lib/utils";
 
@@ -125,7 +126,13 @@ function CountRing({ used }: { used: number }) {
 }
 
 /** Full-screen Twitter-style composer for a new post. */
-export function PostComposerModal({ onClose }: { onClose: () => void }) {
+export function PostComposerModal({
+  onClose,
+  onPosted,
+}: {
+  onClose: () => void;
+  onPosted?: () => void;
+}) {
   const { user } = useSession();
   const { data: profile } = useProfile();
   const queryClient = useQueryClient();
@@ -263,7 +270,7 @@ export function PostComposerModal({ onClose }: { onClose: () => void }) {
       void queryClient.invalidateQueries({ queryKey: ["market-posts"] });
       void queryClient.invalidateQueries({ queryKey: ["user-posts"] });
       onClose();
-      toast.success("Posted", { position: "bottom-center", className: "mb-20 lg:mb-0" });
+      showPostedToast({ onView: onPosted });
       void lightHaptic();
     },
     onError: (err: Error) => setError(err.message || "Couldn't post — try again"),
