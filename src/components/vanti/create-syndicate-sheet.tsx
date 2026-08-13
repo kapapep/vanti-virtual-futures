@@ -19,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useSession } from "@/hooks/use-vanti-session";
 import { formatCents } from "@/lib/format";
 import type { Market } from "@/lib/markets";
-import { createSyndicate, sidePrice, type SyndicateSide } from "@/lib/syndicates";
+import { createPool, sidePrice, type PoolSide } from "@/lib/pools";
 import { cn } from "@/lib/utils";
 
 /** Default lock time: 24h out, rounded to the minute, in local input format. */
@@ -30,7 +30,7 @@ function defaultLockAt() {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
-export function CreateSyndicateSheet({
+export function CreatePoolSheet({
   market,
   trigger,
 }: {
@@ -43,7 +43,7 @@ export function CreateSyndicateSheet({
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [side, setSide] = useState<SyndicateSide>("yes");
+  const [side, setSide] = useState<PoolSide>("yes");
   const [target, setTarget] = useState("1000");
   const [minContribution, setMinContribution] = useState("25");
   const [maxMembers, setMaxMembers] = useState("25");
@@ -55,9 +55,9 @@ export function CreateSyndicateSheet({
 
   const create = useMutation({
     mutationFn: async () => {
-      if (!user) throw new Error("Sign in to start a syndicate.");
+      if (!user) throw new Error("Sign in to start a pool.");
       const fee = Math.round(Math.min(10, Math.max(0, Number(feePercent) || 0)) * 100);
-      return createSyndicate({
+      return createPool({
         marketId: market.id,
         captainId: user.id,
         name,
@@ -72,13 +72,13 @@ export function CreateSyndicateSheet({
       });
     },
     onSuccess: (id) => {
-      void queryClient.invalidateQueries({ queryKey: ["market-syndicates", market.id] });
-      void queryClient.invalidateQueries({ queryKey: ["syndicate-activity"] });
+      void queryClient.invalidateQueries({ queryKey: ["market-pools", market.id] });
+      void queryClient.invalidateQueries({ queryKey: ["pool-activity"] });
       setOpen(false);
       setName("");
       setDescription("");
-      toast.success("Syndicate created. Invite traders to fund it.");
-      void navigate({ to: "/syndicate/$syndicateId", params: { syndicateId: id } });
+      toast.success("Pool created. Invite traders to fund it.");
+      void navigate({ to: "/pool/$poolId", params: { poolId: id } });
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -88,7 +88,7 @@ export function CreateSyndicateSheet({
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent side="bottom" className="max-h-[92dvh] overflow-y-auto">
         <SheetHeader className="text-left">
-          <SheetTitle className="text-lg font-extrabold">Start a syndicate</SheetTitle>
+          <SheetTitle className="text-lg font-extrabold">Start a pool</SheetTitle>
           <SheetDescription>
             Pool virtual currency with other traders on this market. This market is binary — a draw
             or a no-show resolves NO.
@@ -101,9 +101,9 @@ export function CreateSyndicateSheet({
           </p>
 
           <div className="space-y-1.5">
-            <Label htmlFor="syndicate-name">Name</Label>
+            <Label htmlFor="pool-name">Name</Label>
             <Input
-              id="syndicate-name"
+              id="pool-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Sharp money collective"
@@ -112,9 +112,9 @@ export function CreateSyndicateSheet({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="syndicate-description">Thesis (optional)</Label>
+            <Label htmlFor="pool-description">Thesis (optional)</Label>
             <Textarea
-              id="syndicate-description"
+              id="pool-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Why this side wins"
@@ -125,7 +125,7 @@ export function CreateSyndicateSheet({
           <div className="space-y-1.5">
             <span className="text-meta font-medium uppercase text-muted-foreground">Side</span>
             <div className="grid grid-cols-2 gap-2">
-              {(["yes", "no"] as SyndicateSide[]).map((option) => (
+              {(["yes", "no"] as PoolSide[]).map((option) => (
                 <button
                   key={option}
                   type="button"
@@ -157,9 +157,9 @@ export function CreateSyndicateSheet({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="syndicate-target">Target stake (V)</Label>
+              <Label htmlFor="pool-target">Target stake (V)</Label>
               <Input
-                id="syndicate-target"
+                id="pool-target"
                 type="number"
                 inputMode="decimal"
                 min={1}
@@ -169,9 +169,9 @@ export function CreateSyndicateSheet({
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="syndicate-min">Min contribution (V)</Label>
+              <Label htmlFor="pool-min">Min contribution (V)</Label>
               <Input
-                id="syndicate-min"
+                id="pool-min"
                 type="number"
                 inputMode="decimal"
                 min={1}
@@ -181,9 +181,9 @@ export function CreateSyndicateSheet({
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="syndicate-members">Max members</Label>
+              <Label htmlFor="pool-members">Max members</Label>
               <Input
-                id="syndicate-members"
+                id="pool-members"
                 type="number"
                 inputMode="numeric"
                 min={2}
@@ -194,9 +194,9 @@ export function CreateSyndicateSheet({
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="syndicate-fee">Captain fee (% of profit)</Label>
+              <Label htmlFor="pool-fee">Captain fee (% of profit)</Label>
               <Input
-                id="syndicate-fee"
+                id="pool-fee"
                 type="number"
                 inputMode="decimal"
                 min={0}
@@ -210,9 +210,9 @@ export function CreateSyndicateSheet({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="syndicate-lock">Locks at</Label>
+            <Label htmlFor="pool-lock">Locks at</Label>
             <Input
-              id="syndicate-lock"
+              id="pool-lock"
               type="datetime-local"
               value={lockAt}
               onChange={(e) => setLockAt(e.target.value)}
@@ -225,14 +225,14 @@ export function CreateSyndicateSheet({
 
           <div className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
             <div>
-              <Label htmlFor="syndicate-private" className="text-sm">
+              <Label htmlFor="pool-private" className="text-sm">
                 Invite only
               </Label>
               <p className="text-meta text-muted-foreground">
                 Only members can see this pool and its chat.
               </p>
             </div>
-            <Switch id="syndicate-private" checked={inviteOnly} onCheckedChange={setInviteOnly} />
+            <Switch id="pool-private" checked={inviteOnly} onCheckedChange={setInviteOnly} />
           </div>
 
           <Button
@@ -240,7 +240,7 @@ export function CreateSyndicateSheet({
             onClick={() => create.mutate()}
             disabled={create.isPending}
           >
-            {create.isPending ? "Creating…" : "Create syndicate"}
+            {create.isPending ? "Creating…" : "Create pool"}
           </Button>
           <p className="text-meta text-muted-foreground">
             Virtual currency only. No deposits, no withdrawals, no real-money value. Contributions

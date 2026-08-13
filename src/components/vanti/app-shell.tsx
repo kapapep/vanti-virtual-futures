@@ -43,7 +43,7 @@ import { cn } from "@/lib/utils";
 const primaryNav = [
   { label: "Home", to: "/home", icon: House },
   { label: "Markets", to: "/markets", icon: TrendingUp },
-  { label: "Syndicates", to: "/syndicates", icon: Users2 },
+  { label: "Pools", to: "/pools", icon: Users2 },
   { label: "Portfolio", to: "/portfolio", icon: Wallet },
   { label: "Watchlist", to: "/watchlist", icon: Star },
   { label: "Following", to: "/following", icon: CircleUser },
@@ -52,7 +52,7 @@ const primaryNav = [
 const mobileNav = [
   { label: "Feed", to: "/home", icon: House },
   { label: "Markets", to: "/markets", icon: TrendingUp },
-  { label: "Syndicates", to: "/syndicates", icon: Users2 },
+  { label: "Pools", to: "/pools", icon: Users2 },
   { label: "Portfolio", to: "/portfolio", icon: Wallet },
   { label: "Profile", to: "/profile", icon: CircleUser },
 ] as const;

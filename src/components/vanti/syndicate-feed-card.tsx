@@ -2,39 +2,39 @@ import { Link } from "@tanstack/react-router";
 import { Users } from "lucide-react";
 
 import { Countdown } from "@/components/vanti/countdown";
-import { SyndicateProgress } from "@/components/vanti/syndicate-progress";
+import { PoolProgress } from "@/components/vanti/pool-progress";
 import { formatBalance, formatCount, formatRelativeTime } from "@/lib/format";
-import { fundedRatio, syndicateResult, type Syndicate } from "@/lib/syndicates";
+import { fundedRatio, poolResult, type Pool } from "@/lib/pools";
 import { cn } from "@/lib/utils";
 
-export type SyndicateEvent = "started" | "funded" | "settled";
+export type PoolEvent = "started" | "funded" | "settled";
 
-/** Headline copy for each kind of syndicate feed event. */
-export function syndicateEventOf(syndicate: Syndicate): SyndicateEvent {
-  if (syndicate.status === "settled" || syndicate.status === "cancelled") return "settled";
-  if (fundedRatio(syndicate) >= 1) return "funded";
+/** Headline copy for each kind of pool feed event. */
+export function poolEventOf(pool: Pool): PoolEvent {
+  if (pool.status === "settled" || pool.status === "cancelled") return "settled";
+  if (fundedRatio(pool) >= 1) return "funded";
   return "started";
 }
 
-export function SyndicateFeedCard({
-  syndicate,
+export function PoolFeedCard({
+  pool,
   event,
 }: {
-  syndicate: Syndicate;
-  event: SyndicateEvent;
+  pool: Pool;
+  event: PoolEvent;
 }) {
-  const result = syndicateResult(syndicate);
-  const captain = syndicate.captain?.username ?? "A trader";
+  const result = poolResult(pool);
+  const captain = pool.captain?.username ?? "A trader";
   const headline =
     event === "settled"
       ? result === "win"
-        ? "Syndicate paid out"
+        ? "Pool paid out"
         : result === "loss"
-          ? "Syndicate came up short"
-          : "Syndicate refunded at cost"
+          ? "Pool came up short"
+          : "Pool refunded at cost"
       : event === "funded"
-        ? "Syndicate hit its target"
-        : "New syndicate opened";
+        ? "Pool hit its target"
+        : "New pool opened";
 
   return (
     <article className="rounded-lg border border-border bg-surface p-4">
@@ -52,40 +52,40 @@ export function SyndicateFeedCard({
         >
           {headline}
         </span>
-        <span className="num ml-auto">{formatRelativeTime(syndicate.createdAt)}</span>
+        <span className="num ml-auto">{formatRelativeTime(pool.createdAt)}</span>
       </div>
 
       <Link
-        to="/syndicate/$syndicateId"
-        params={{ syndicateId: syndicate.id }}
+        to="/pool/$poolId"
+        params={{ poolId: pool.id }}
         className="mt-2 block space-y-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <p className="text-sm font-extrabold text-foreground">{syndicate.name}</p>
+        <p className="text-sm font-extrabold text-foreground">{pool.name}</p>
         <p className="text-meta text-muted-foreground">
           @{captain} backing{" "}
           <span
             className={cn(
               "font-medium uppercase",
-              syndicate.outcomeSide === "yes" ? "text-positive" : "text-negative",
+              pool.outcomeSide === "yes" ? "text-positive" : "text-negative",
             )}
           >
-            {syndicate.outcomeSide}
+            {pool.outcomeSide}
           </span>
-          {syndicate.market ? ` · ${syndicate.market.question}` : ""}
+          {pool.market ? ` · ${pool.market.question}` : ""}
         </p>
-        <SyndicateProgress
-          raised={syndicate.totalContributed}
-          target={syndicate.targetStake}
+        <PoolProgress
+          raised={pool.totalContributed}
+          target={pool.targetStake}
           height={4}
         />
         <p className="num text-meta text-muted-foreground">
-          {formatCount(syndicate.memberCount)} members ·{" "}
-          {syndicate.status === "open" ? (
+          {formatCount(pool.memberCount)} members ·{" "}
+          {pool.status === "open" ? (
             <>
-              locks in <Countdown to={syndicate.lockAt} />
+              locks in <Countdown to={pool.lockAt} />
             </>
           ) : (
-            `${formatBalance(syndicate.totalContributed)} pooled`
+            `${formatBalance(pool.totalContributed)} pooled`
           )}
         </p>
       </Link>

@@ -94,7 +94,7 @@ function MarketPicker({
 export function PostComposer({
   parentId,
   marketId,
-  syndicateId,
+  poolId,
   lockedMarket = false,
   placeholder = "What's your read on the market?",
   compact = false,
@@ -102,7 +102,7 @@ export function PostComposer({
 }: {
   parentId?: string;
   marketId?: string | null;
-  syndicateId?: string | null;
+  poolId?: string | null;
   lockedMarket?: boolean;
   placeholder?: string;
   compact?: boolean;
@@ -164,7 +164,7 @@ export function PostComposer({
         userId: user.id,
         body,
         marketId: lockedMarket ? (marketId ?? null) : attached,
-        syndicateId: syndicateId ?? null,
+        poolId: poolId ?? null,
         parentId: parentId ?? null,
         imageUrl: image,
         audioUrl: audio?.dataUrl ?? null,
@@ -177,7 +177,7 @@ export function PostComposer({
       if (!lockedMarket) setAttached(null);
       void queryClient.invalidateQueries({ queryKey: ["feed"] });
       void queryClient.invalidateQueries({ queryKey: ["market-posts"] });
-      void queryClient.invalidateQueries({ queryKey: ["syndicate-posts"] });
+      void queryClient.invalidateQueries({ queryKey: ["pool-posts"] });
       void queryClient.invalidateQueries({ queryKey: ["post-replies"] });
       void queryClient.invalidateQueries({ queryKey: ["user-posts"] });
       toast.success(parentId ? "Reply posted" : "Posted");

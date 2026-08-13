@@ -3,25 +3,25 @@ import { useQuery } from "@tanstack/react-query";
 import { Users2 } from "lucide-react";
 
 import { Skeleton } from "@/components/ui/skeleton";
-import { SyndicateCard } from "@/components/vanti/syndicate-card";
-import { browseSyndicatesQuery, type Syndicate } from "@/lib/syndicates";
+import { PoolCard } from "@/components/vanti/pool-card";
+import { browsePoolsQuery, type Pool } from "@/lib/pools";
 
-export const Route = createFileRoute("/_authenticated/syndicates")({
+export const Route = createFileRoute("/_authenticated/pools")({
   head: () => ({
     meta: [
-      { title: "Syndicates — Vanti" },
+      { title: "Pools — Vanti" },
       {
         name: "description",
-        content: "Browse open virtual-currency syndicates and pool into a shared market position.",
+        content: "Browse open virtual-currency pools and pool into a shared market position.",
       },
-      { property: "og:title", content: "Syndicates — Vanti" },
+      { property: "og:title", content: "Pools — Vanti" },
       {
         property: "og:description",
-        content: "Browse open virtual-currency syndicates and pool into a shared market position.",
+        content: "Browse open virtual-currency pools and pool into a shared market position.",
       },
     ],
   }),
-  component: SyndicatesPage,
+  component: PoolsPage,
   errorComponent: ({ error }) => (
     <p role="alert" className="text-sm text-negative">
       {error.message}
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/_authenticated/syndicates")({
   ),
 });
 
-function Section({ title, hint, list }: { title: string; hint: string; list: Syndicate[] }) {
+function Section({ title, hint, list }: { title: string; hint: string; list: Pool[] }) {
   if (list.length === 0) return null;
   return (
     <section className="space-y-2">
@@ -39,16 +39,16 @@ function Section({ title, hint, list }: { title: string; hint: string; list: Syn
       </div>
       <div className="space-y-2">
         {list.map((s) => (
-          <SyndicateCard key={s.id} syndicate={s} />
+          <PoolCard key={s.id} pool={s} />
         ))}
       </div>
     </section>
   );
 }
 
-function SyndicatesPage() {
-  const syndicates = useQuery(browseSyndicatesQuery);
-  const list = syndicates.data ?? [];
+function PoolsPage() {
+  const pools = useQuery(browsePoolsQuery);
+  const list = pools.data ?? [];
   const funding = list.filter((s) => s.status === "open");
   const locked = list.filter((s) => s.status === "locked");
   const settled = list.filter((s) => s.status === "settled" || s.status === "cancelled");
@@ -56,13 +56,13 @@ function SyndicatesPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h1 className="text-figure font-semibold text-foreground">Syndicates</h1>
+        <h1 className="text-figure font-semibold text-foreground">Pools</h1>
         <p className="text-sm text-muted-foreground">
           Pool virtual currency with other traders and split winnings by shares owned.
         </p>
       </div>
 
-      {syndicates.isPending ? (
+      {pools.isPending ? (
         <div className="space-y-2">
           <Skeleton className="h-24 w-full rounded-lg" />
           <Skeleton className="h-24 w-full rounded-lg" />
@@ -71,7 +71,7 @@ function SyndicatesPage() {
       ) : list.length === 0 ? (
         <p className="inline-flex items-center gap-2 rounded-lg border border-dashed border-border bg-surface px-4 py-8 text-sm text-muted-foreground">
           <Users2 className="size-4" />
-          No public syndicates yet. Open a market and start the first pool.
+          No public pools yet. Open a market and start the first pool.
         </p>
       ) : (
         <>

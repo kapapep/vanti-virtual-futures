@@ -23,8 +23,8 @@ export type PortfolioPosition = {
   unrealizedPct: number;
   costBasis: number;
   value: number;
-  /** Set when this row is a member's share of a syndicate's pooled position. */
-  syndicate: { id: string; name: string } | null;
+  /** Set when this row is a member's share of a pool's pooled position. */
+  pool: { id: string; name: string } | null;
 };
 
 export type PortfolioTrade = {
@@ -53,8 +53,8 @@ export type PortfolioTransaction = {
 
 /**
  * Open positions a user holds directly, joined with their market's live price.
- * Pooled syndicate rows are excluded here: they are owned by the captain and
- * surfaced per member by `syndicatePositionsQuery` at each member's own share.
+ * Pooled pool rows are excluded here: they are owned by the captain and
+ * surfaced per member by `poolPositionsQuery` at each member's own share.
  */
 export function positionsQuery(userId: string | undefined) {
   return queryOptions({
@@ -100,7 +100,7 @@ export function positionsQuery(userId: string | undefined) {
             unrealizedPct: costBasis > 0 ? unrealized / costBasis : 0,
             costBasis,
             value: contracts * currentPrice,
-            syndicate: null,
+            pool: null,
           } satisfies PortfolioPosition;
         });
     },
@@ -111,16 +111,16 @@ export function positionsQuery(userId: string | undefined) {
  * A member's own slice of every pool they are in that holds a live position.
  * Shares and cost come from their contribution, never the pool total.
  */
-export function syndicatePositionsQuery(userId: string | undefined) {
+export function poolPositionsQuery(userId: string | undefined) {
   return queryOptions({
-    queryKey: ["syndicate-positions", userId],
+    queryKey: ["pool-positions", userId],
     enabled: Boolean(userId),
     staleTime: 30 * 1000,
     queryFn: async (): Promise<PortfolioPosition[]> => {
       const { data, error } = await supabase
         .from("syndicate_members")
         .select(
-          "id, contributed, shares_owned, syndicates!syndicate_members_syndicate_id_fkey(id, name, outcome_side, status, market_id, markets!syndicates_market_id_fkey(question, yes_price, status, outcome, resolution_date, categories(name)))",
+          "id, contributed, shares_owned, syndicates!syndicate_members_syndicate_id_fkey(id, name, outcome_side, status, market_id, markets!pools_market_id_fkey(question, yes_price, status, outcome, resolution_date, categories(name)))",
         )
         .eq("user_id", userId!)
         .gt("shares_owned", 0);
@@ -140,7 +140,7 @@ export function syndicatePositionsQuery(userId: string | undefined) {
           const avgPrice = contracts > 0 ? costBasis / contracts : 0;
           const unrealized = contracts * currentPrice - costBasis;
           return {
-            id: `syndicate:${row.id}`,
+            id: `pool:${row.id}`,
             marketId: pool.market_id,
             side,
             contracts,
@@ -156,7 +156,7 @@ export function syndicatePositionsQuery(userId: string | undefined) {
             unrealizedPct: costBasis > 0 ? unrealized / costBasis : 0,
             costBasis,
             value: contracts * currentPrice,
-            syndicate: { id: pool.id, name: pool.name },
+            pool: { id: pool.id, name: pool.name },
           } satisfies PortfolioPosition;
         });
     },

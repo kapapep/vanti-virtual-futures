@@ -8,7 +8,7 @@ import {
   buildSummary,
   positionsQuery,
   resolvedResultsQuery,
-  syndicatePositionsQuery,
+  poolPositionsQuery,
   todayChange,
   tradeHistoryQuery,
   transactionsQuery,
@@ -42,7 +42,7 @@ export function usePortfolio(): PortfolioData {
 
   const profile = useProfile();
   const direct = useQuery(positionsQuery(userId));
-  const pooled = useQuery(syndicatePositionsQuery(userId));
+  const pooled = useQuery(poolPositionsQuery(userId));
   const trades = useQuery(tradeHistoryQuery(userId));
   const transactions = useQuery(transactionsQuery(userId));
   const resolved = useQuery(resolvedResultsQuery(userId));
