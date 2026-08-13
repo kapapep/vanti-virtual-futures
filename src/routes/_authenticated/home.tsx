@@ -6,13 +6,6 @@ import { toast } from "sonner";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/vanti/empty-state";
 import { PostCard } from "@/components/vanti/post-card";
@@ -22,7 +15,7 @@ import {
   type PoolEvent,
 } from "@/components/vanti/pool-feed-card";
 import { poolActivityQuery, type Pool } from "@/lib/pools";
-import { PostComposer } from "@/components/vanti/post-composer";
+import { PostComposerModal } from "@/components/vanti/post-composer-modal";
 import { useSession } from "@/hooks/use-vanti-session";
 import { formatCents, formatDelta } from "@/lib/format";
 import { TREND_LABEL, trendLabel } from "@/lib/market-trend";
@@ -361,31 +354,22 @@ function HomePage() {
       ) : null}
 
       {/* Floating composer trigger */}
-      <Dialog open={composerOpen} onOpenChange={setComposerOpen}>
-        <button
-          type="button"
-          onClick={() => setComposerOpen(true)}
-          aria-label="Write a post"
-          className="fixed bottom-20 right-4 z-30 grid size-14 place-items-center rounded-full bg-accent-solid text-accent-solid-foreground shadow-lg transition-transform hover:scale-105 lg:bottom-8 lg:right-8"
-        >
-          <Plus className="size-6" />
-        </button>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="text-left text-base">New post</DialogTitle>
-            <DialogDescription className="text-left text-meta">
-              Share your read on a market. Virtual money only.
-            </DialogDescription>
-          </DialogHeader>
-          <PostComposer
-            compact
-            onPosted={() => {
-              setComposerOpen(false);
-              window.scrollTo({ top: 0, behavior: "smooth" });
-            }}
-          />
-        </DialogContent>
-      </Dialog>
+      <button
+        type="button"
+        onClick={() => setComposerOpen(true)}
+        aria-label="Write a post"
+        className="fixed bottom-20 right-4 z-30 grid size-14 place-items-center rounded-full bg-accent-solid text-accent-solid-foreground shadow-lg transition-transform hover:scale-105 lg:bottom-8 lg:right-8"
+      >
+        <Plus className="size-6" />
+      </button>
+      {composerOpen ? (
+        <PostComposerModal
+          onClose={() => {
+            setComposerOpen(false);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+        />
+      ) : null}
     </div>
   );
 }
