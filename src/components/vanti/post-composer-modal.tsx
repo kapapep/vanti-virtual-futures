@@ -135,8 +135,11 @@ export function PostComposerModal({ onClose }: { onClose: () => void }) {
   const [audio, setAudio] = useState<RecordedAudio | null>(null);
   const [preparing, setPreparing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [toolbarBottom, setToolbarBottom] = useState(0);
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const textarea = useRef<HTMLTextAreaElement>(null);
+  const nativeKeyboardHeight = useRef(0);
   const markets = useQuery(marketsQuery);
   const attachedMarket = (markets.data ?? []).find((m) => m.id === attached);
 
@@ -145,6 +148,63 @@ export function PostComposerModal({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     textarea.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    const viewport = window.visualViewport;
+
+    const syncToViewport = () => {
+      const viewportOffset = viewport
+        ? Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop)
+        : 0;
+      const offset = Math.max(viewportOffset, nativeKeyboardHeight.current);
+      setToolbarBottom(offset);
+      setKeyboardOpen(offset > 0);
+    };
+
+    viewport?.addEventListener("resize", syncToViewport);
+    viewport?.addEventListener("scroll", syncToViewport);
+    syncToViewport();
+
+    type KeyboardHandle = { remove: () => Promise<void> | void };
+    type KeyboardPlugin = {
+      addListener: (
+        event: "keyboardWillShow" | "keyboardWillHide",
+        callback: (event: { keyboardHeight?: number }) => void,
+      ) => Promise<KeyboardHandle> | KeyboardHandle;
+    };
+    const capacitor = (globalThis as unknown as {
+      Capacitor?: { Plugins?: { Keyboard?: KeyboardPlugin } };
+    }).Capacitor;
+    const keyboard = capacitor?.Plugins?.Keyboard;
+    const handles: KeyboardHandle[] = [];
+    let disposed = false;
+
+    const register = async (
+      event: "keyboardWillShow" | "keyboardWillHide",
+      callback: (event: { keyboardHeight?: number }) => void,
+    ) => {
+      if (!keyboard) return;
+      const handle = await keyboard.addListener(event, callback);
+      if (disposed) await handle.remove();
+      else handles.push(handle);
+    };
+
+    void register("keyboardWillShow", (event) => {
+      nativeKeyboardHeight.current = Math.max(0, event.keyboardHeight ?? 0);
+      syncToViewport();
+    });
+    void register("keyboardWillHide", () => {
+      nativeKeyboardHeight.current = 0;
+      syncToViewport();
+    });
+
+    return () => {
+      disposed = true;
+      viewport?.removeEventListener("resize", syncToViewport);
+      viewport?.removeEventListener("scroll", syncToViewport);
+      for (const handle of handles) void handle.remove();
+    };
   }, []);
 
   useEffect(() => {
@@ -244,7 +304,7 @@ export function PostComposerModal({ onClose }: { onClose: () => void }) {
         </Button>
       </header>
 
-      <div className="flex-1 overflow-y-auto px-4 pb-4">
+      <div className="flex-1 overflow-y-auto px-4 pb-24">
         <div className="flex gap-3">
           <Avatar className="size-10 shrink-0 border border-border">
             {profile?.avatar_url ? (
@@ -319,7 +379,10 @@ export function PostComposerModal({ onClose }: { onClose: () => void }) {
             {suspended ? (
               <p className="mt-3 rounded-md border border-border bg-surface px-3 py-2 text-meta text-negative">
                 Posting is suspended until{" "}
-                <span className="num">{new Date(suspendedUntil!).toLocaleDateString()}</span> for
+                <span className="num">
+                  {suspendedUntil ? new Date(suspendedUntil).toLocaleDateString() : ""}
+                </span>{" "}
+                for
                 breaking the explicit-content rule.
               </p>
             ) : null}
@@ -333,7 +396,14 @@ export function PostComposerModal({ onClose }: { onClose: () => void }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-5 border-t border-border px-4 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+      <div
+        className={cn(
+          "fixed inset-x-0 z-[60] flex items-center gap-5 border-t border-border bg-background px-4 py-2 transition-[bottom] duration-150 ease-out",
+          !keyboardOpen && "pb-[max(0.5rem,env(safe-area-inset-bottom))]",
+        )}
+        style={{ bottom: `${toolbarBottom}px` }}
+        aria-label="Post attachments"
+      >
         <MarketPill value={attached} onChange={setAttached} disabled={submit.isPending} />
         <input
           ref={fileInput}
