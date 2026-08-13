@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { Clock, TrendingDown, TrendingUp, Users } from "lucide-react";
 
@@ -8,15 +9,16 @@ import { formatCents, formatCount, formatDate, formatDelta, formatVolume } from 
 import type { Market } from "@/lib/markets";
 import { cn } from "@/lib/utils";
 
-export function MarketCard({ market }: { market: Market }) {
+export function MarketCard({ market, actions }: { market: Market; actions?: ReactNode }) {
   const up = market.change24h >= 0;
 
   return (
-    <Link
-      to="/market/$marketId"
-      params={{ marketId: market.id }}
-      className="group flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-accent-solid/50"
-    >
+    <div className="group flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-accent-solid/50">
+      <Link
+        to="/market/$marketId"
+        params={{ marketId: market.id }}
+        className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+      >
       <ProbabilityBar price={market.yesPrice} height={4} className="[&>div]:rounded-none" />
 
       <div className="flex flex-1 flex-col gap-3 p-4">
