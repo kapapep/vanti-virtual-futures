@@ -70,7 +70,7 @@ export function PositionRow({
             </span>
             {position.pool ? (
               <Link
-                to="/pool/$poolId"
+                to="/pools/$poolId"
                 params={{ poolId: position.pool.id }}
                 title={`Pool: ${position.pool.name}`}
                 className="inline-flex min-w-0 items-center gap-1 rounded bg-accent-subtle px-1.5 py-0.5 text-meta font-semibold text-accent-solid hover:underline"

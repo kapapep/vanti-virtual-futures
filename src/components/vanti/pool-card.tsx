@@ -15,7 +15,7 @@ export function PoolCard({ pool }: { pool: Pool }) {
 
   return (
     <Link
-      to="/pool/$poolId"
+      to="/pools/$poolId"
       params={{ poolId: pool.id }}
       className="block rounded-lg border border-border bg-card p-3 transition-colors hover:bg-secondary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >

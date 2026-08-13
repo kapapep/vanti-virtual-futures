@@ -78,7 +78,7 @@ export function CreatePoolSheet({
       setName("");
       setDescription("");
       toast.success("Pool created. Invite traders to fund it.");
-      void navigate({ to: "/pool/$poolId", params: { poolId: id } });
+      void navigate({ to: "/pools/$poolId", params: { poolId: id } });
     },
     onError: (error: Error) => toast.error(error.message),
   });

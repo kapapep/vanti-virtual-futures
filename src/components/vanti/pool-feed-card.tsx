@@ -56,7 +56,7 @@ export function PoolFeedCard({
       </div>
 
       <Link
-        to="/pool/$poolId"
+        to="/pools/$poolId"
         params={{ poolId: pool.id }}
         className="mt-2 block space-y-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
