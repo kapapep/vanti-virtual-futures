@@ -9,36 +9,38 @@ export function TradableMarketCard({ market }: { market: Market }) {
   const tradable = market.status === "active";
 
   return (
-    <div className="flex flex-col gap-2">
-      <MarketCard market={market} />
-      {tradable ? (
-        <div className="grid grid-cols-2 gap-2">
-          <TradeDialog
-            market={market}
-            side="yes"
-            trigger={
-              <Button
-                variant="outline"
-                className="min-h-11 border-positive/40 text-positive hover:bg-positive/10 hover:text-positive"
-              >
-                Buy YES <span className="num ml-1">{formatCents(market.yesPrice)}</span>
-              </Button>
-            }
-          />
-          <TradeDialog
-            market={market}
-            side="no"
-            trigger={
-              <Button
-                variant="outline"
-                className="min-h-11 border-negative/40 text-negative hover:bg-negative/10 hover:text-negative"
-              >
-                Buy NO <span className="num ml-1">{formatCents(market.noPrice)}</span>
-              </Button>
-            }
-          />
-        </div>
-      ) : null}
-    </div>
+    <MarketCard
+      market={market}
+      actions={
+        tradable ? (
+          <>
+            <TradeDialog
+              market={market}
+              side="yes"
+              trigger={
+                <Button
+                  variant="outline"
+                  className="min-h-11 border-positive/40 text-positive hover:bg-positive/10 hover:text-positive"
+                >
+                  Buy YES <span className="num ml-1">{formatCents(market.yesPrice)}</span>
+                </Button>
+              }
+            />
+            <TradeDialog
+              market={market}
+              side="no"
+              trigger={
+                <Button
+                  variant="outline"
+                  className="min-h-11 border-negative/40 text-negative hover:bg-negative/10 hover:text-negative"
+                >
+                  Buy NO <span className="num ml-1">{formatCents(market.noPrice)}</span>
+                </Button>
+              }
+            />
+          </>
+        ) : null
+      }
+    />
   );
 }
