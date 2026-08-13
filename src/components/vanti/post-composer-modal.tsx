@@ -96,12 +96,12 @@ function CountRing({ used }: { used: number }) {
   const r = 8;
   const c = 2 * Math.PI * r;
   const tone =
-    remaining < 0 ? "text-negative" : remaining <= 50 ? "text-warning" : "text-accent-solid";
+    remaining < 0 ? "text-negative" : remaining <= 50 ? "text-urgent" : "text-accent-solid";
 
   return (
     <div className="flex items-center gap-1.5" role="status" aria-label={`${remaining} characters left`}>
       {remaining <= 50 ? (
-        <span className={cn("num text-meta", remaining < 0 ? "text-negative" : "text-warning")}>
+        <span className={cn("num text-meta", remaining < 0 ? "text-negative" : "text-urgent")}>
           {remaining}
         </span>
       ) : null}
