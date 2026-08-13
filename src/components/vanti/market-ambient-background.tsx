@@ -106,8 +106,10 @@ export function MarketAmbientBackground() {
           backgroundImage:
             "linear-gradient(to right, var(--border) 1px, transparent 1px), linear-gradient(to bottom, var(--border) 1px, transparent 1px)",
           backgroundSize: "72px 72px",
-          maskImage: "radial-gradient(circle at 50% 40%, transparent 18%, black 70%)",
-          WebkitMaskImage: "radial-gradient(circle at 50% 40%, transparent 18%, black 70%)",
+          maskImage:
+            "linear-gradient(to bottom, transparent 0%, black 18%), radial-gradient(circle at 50% 40%, transparent 18%, black 70%)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, transparent 0%, black 18%), radial-gradient(circle at 50% 40%, transparent 18%, black 70%)",
         }}
       />
 
