@@ -17,11 +17,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/vanti/empty-state";
 import { PostCard } from "@/components/vanti/post-card";
 import {
-  SyndicateFeedCard,
-  syndicateEventOf,
-  type SyndicateEvent,
-} from "@/components/vanti/syndicate-feed-card";
-import { syndicateActivityQuery, type Syndicate } from "@/lib/syndicates";
+  PoolFeedCard,
+  poolEventOf,
+  type PoolEvent,
+} from "@/components/vanti/pool-feed-card";
+import { poolActivityQuery, type Pool } from "@/lib/pools";
 import { PostComposer } from "@/components/vanti/post-composer";
 import { useSession } from "@/hooks/use-vanti-session";
 import { formatCents, formatDelta } from "@/lib/format";
@@ -76,14 +76,14 @@ type Tab = "for-you" | "following";
 
 /** A generated notice about a big price move. */
 type PriceMoveItem = { kind: "move"; id: string; market: Market; label: string; at: number };
-type SyndicateItem = {
-  kind: "syndicate";
+type PoolItem = {
+  kind: "pool";
   id: string;
-  syndicate: Syndicate;
-  event: SyndicateEvent;
+  pool: Pool;
+  event: PoolEvent;
   at: number;
 };
-type FeedItem = { kind: "post"; post: FeedPost; at: number } | PriceMoveItem | SyndicateItem;
+type FeedItem = { kind: "post"; post: FeedPost; at: number } | PriceMoveItem | PoolItem;
 
 function PriceMoveCard({ market, label }: { market: Market; label: string }) {
   const up = market.change24h >= 0;
@@ -203,7 +203,7 @@ function HomePage() {
   const following = useQuery(followingIdsQuery(viewerId));
   const watchlist = useQuery(watchlistQuery(viewerId));
   const markets = useQuery(marketsQuery);
-  const syndicates = useQuery(syndicateActivityQuery);
+  const pools = useQuery(poolActivityQuery);
 
   const followingIds = following.data ?? [];
   const watchedIds = watchlist.data ?? [];
@@ -261,15 +261,15 @@ function HomePage() {
       post,
       at: new Date(post.createdAt).getTime(),
     }));
-    const syndicateItems: FeedItem[] = (syndicates.data ?? []).slice(0, 3).map((syndicate) => ({
-      kind: "syndicate" as const,
-      id: `syndicate-${syndicate.id}`,
-      syndicate,
-      event: syndicateEventOf(syndicate),
-      at: new Date(syndicate.settledAt ?? syndicate.createdAt).getTime(),
+    const poolItems: FeedItem[] = (pools.data ?? []).slice(0, 3).map((pool) => ({
+      kind: "pool" as const,
+      id: `pool-${pool.id}`,
+      pool,
+      event: poolEventOf(pool),
+      at: new Date(pool.settledAt ?? pool.createdAt).getTime(),
     }));
-    return [...moveItems, ...syndicateItems, ...postItems].sort((a, b) => b.at - a.at);
-  }, [posts, moveItems, syndicates.data]);
+    return [...moveItems, ...poolItems, ...postItems].sort((a, b) => b.at - a.at);
+  }, [posts, moveItems, pools.data]);
 
   const loading = !ready || (feed.isPending && posts.length === 0);
   const showSuggestions = tab === "following" && ready && followingIds.length === 0;
@@ -335,8 +335,8 @@ function HomePage() {
           {items.map((item) =>
             item.kind === "move" ? (
               <PriceMoveCard key={item.id} market={item.market} label={item.label} />
-            ) : item.kind === "syndicate" ? (
-              <SyndicateFeedCard key={item.id} syndicate={item.syndicate} event={item.event} />
+            ) : item.kind === "pool" ? (
+              <PoolFeedCard key={item.id} pool={item.pool} event={item.event} />
             ) : (
               <PostCard
                 key={item.post.id}

@@ -68,15 +68,15 @@ export function PositionRow({
             <span className="num text-meta text-muted-foreground">
               {formatDate(position.resolutionDate)}
             </span>
-            {position.syndicate ? (
+            {position.pool ? (
               <Link
-                to="/syndicate/$syndicateId"
-                params={{ syndicateId: position.syndicate.id }}
-                title={`Syndicate: ${position.syndicate.name}`}
+                to="/pools/$poolId"
+                params={{ poolId: position.pool.id }}
+                title={`Pool: ${position.pool.name}`}
                 className="inline-flex min-w-0 items-center gap-1 rounded bg-accent-subtle px-1.5 py-0.5 text-meta font-semibold text-accent-solid hover:underline"
               >
                 <Users className="size-3 shrink-0" />
-                <span className="max-w-[10rem] truncate">{position.syndicate.name}</span>
+                <span className="max-w-[10rem] truncate">{position.pool.name}</span>
               </Link>
             ) : null}
           </div>
@@ -91,7 +91,7 @@ export function PositionRow({
 
         <div className="grid grid-cols-2 gap-x-6 gap-y-2 @md:grid-cols-4 @3xl:w-[24rem] @3xl:shrink-0">
           <Stat
-            label={position.syndicate ? "Your shares" : "Contracts"}
+            label={position.pool ? "Your shares" : "Contracts"}
             value={formatContracts(position.contracts)}
           />
           <Stat label="Avg" value={formatCents(position.avgPrice)} />
@@ -113,7 +113,7 @@ export function PositionRow({
           <p className="num text-sm font-semibold text-foreground @3xl:hidden">
             {formatBalance(position.value)}
           </p>
-          {position.syndicate ? (
+          {position.pool ? (
             // Pooled stakes settle with the pool: no early exits.
             <span className="text-meta uppercase text-muted-foreground">Pooled</span>
           ) : (

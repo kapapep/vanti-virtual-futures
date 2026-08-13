@@ -7,34 +7,34 @@ import { PostCard } from "@/components/vanti/post-card";
 import { PostComposer } from "@/components/vanti/post-composer";
 import { useSession } from "@/hooks/use-vanti-session";
 import { supabase } from "@/integrations/supabase/client";
-import { repliesQuery, syndicatePostsQuery } from "@/lib/posts";
+import { repliesQuery, poolPostsQuery } from "@/lib/posts";
 
 /**
- * The per-market discussion component, scoped to a syndicate instead of a
+ * The per-market discussion component, scoped to a pool instead of a
  * market, with realtime inserts so the group chat feels live.
  */
-export function SyndicateChat({ syndicateId, canPost }: { syndicateId: string; canPost: boolean }) {
+export function PoolChat({ poolId, canPost }: { poolId: string; canPost: boolean }) {
   const { user } = useSession();
   const queryClient = useQueryClient();
-  const posts = useQuery(syndicatePostsQuery(syndicateId, user?.id));
+  const posts = useQuery(poolPostsQuery(poolId, user?.id));
   const list = posts.data ?? [];
   const replies = useQuery(repliesQuery(list.map((p) => p.id), user?.id));
 
   useEffect(() => {
     const channel = supabase
-      .channel(`syndicate-chat-${syndicateId}`)
+      .channel(`pool-chat-${poolId}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "posts", filter: `syndicate_id=eq.${syndicateId}` },
+        { event: "*", schema: "public", table: "posts", filter: `syndicate_id=eq.${poolId}` },
         () => {
-          void queryClient.invalidateQueries({ queryKey: ["syndicate-posts", syndicateId] });
+          void queryClient.invalidateQueries({ queryKey: ["pool-posts", poolId] });
         },
       )
       .subscribe();
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [syndicateId, queryClient]);
+  }, [poolId, queryClient]);
 
   return (
     <section className="space-y-3 rounded-lg border border-border bg-card p-4">
@@ -47,10 +47,10 @@ export function SyndicateChat({ syndicateId, canPost }: { syndicateId: string; c
 
       {canPost ? (
         <PostComposer
-          syndicateId={syndicateId}
+          poolId={poolId}
           lockedMarket
           compact
-          placeholder="Message your syndicate"
+          placeholder="Message your pool"
         />
       ) : (
         <p className="text-meta text-muted-foreground">Contribute to join the conversation.</p>

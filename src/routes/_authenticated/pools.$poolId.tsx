@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Countdown } from "@/components/vanti/countdown";
-import { SyndicateChat } from "@/components/vanti/syndicate-chat";
-import { SyndicateProgress } from "@/components/vanti/syndicate-progress";
-import { SideBadge, SyndicateStatusPill } from "@/components/vanti/syndicate-status-pill";
+import { PoolChat } from "@/components/vanti/pool-chat";
+import { PoolProgress } from "@/components/vanti/pool-progress";
+import { SideBadge, PoolStatusPill } from "@/components/vanti/pool-status-pill";
 import { useProfile, useSession } from "@/hooks/use-vanti-session";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -22,27 +22,27 @@ import {
   formatSignedPercent,
 } from "@/lib/format";
 import {
-  joinSyndicate,
+  joinPool,
   sharesFor,
   sidePrice,
-  syndicateLedgerQuery,
-  syndicateMembersQuery,
-  syndicatePnl,
-  syndicateQuery,
-  syndicateResult,
-} from "@/lib/syndicates";
+  poolLedgerQuery,
+  poolMembersQuery,
+  poolPnl,
+  poolQuery,
+  poolResult,
+} from "@/lib/pools";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/_authenticated/syndicate/$syndicateId")({
+export const Route = createFileRoute("/_authenticated/pools/$poolId")({
   head: () => ({
     meta: [
-      { title: "Syndicate — Vanti" },
+      { title: "Pool — Vanti" },
       {
         name: "description",
         content:
           "Pool virtual currency with other Vanti traders, track shares owned and split winnings by shares.",
       },
-      { property: "og:title", content: "Syndicate — Vanti" },
+      { property: "og:title", content: "Pool — Vanti" },
       {
         property: "og:description",
         content:
@@ -52,36 +52,36 @@ export const Route = createFileRoute("/_authenticated/syndicate/$syndicateId")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: SyndicateDetailPage,
+  component: PoolDetailPage,
   errorComponent: ({ error }) => (
     <p role="alert" className="text-sm text-negative">
       {error.message}
     </p>
   ),
-  notFoundComponent: () => <p className="text-sm text-muted-foreground">Syndicate not found.</p>,
+  notFoundComponent: () => <p className="text-sm text-muted-foreground">Pool not found.</p>,
 });
 
 const QUICK_AMOUNTS = [25, 50, 100];
 
-function SyndicateDetailPage() {
-  const { syndicateId } = Route.useParams();
+function PoolDetailPage() {
+  const { poolId } = Route.useParams();
   const { user } = useSession();
   const { data: profile } = useProfile();
   const queryClient = useQueryClient();
-  const syndicate = useQuery(syndicateQuery(syndicateId));
-  const members = useQuery(syndicateMembersQuery(syndicateId));
-  const ledger = useQuery(syndicateLedgerQuery(syndicateId));
+  const pool = useQuery(poolQuery(poolId));
+  const members = useQuery(poolMembersQuery(poolId));
+  const ledger = useQuery(poolLedgerQuery(poolId));
   const [amount, setAmount] = useState("");
 
   // Realtime: the progress bar and member list must move as people join.
   useEffect(() => {
     const channel = supabase
-      .channel(`syndicate-${syndicateId}`)
+      .channel(`pool-${poolId}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "syndicates", filter: `id=eq.${syndicateId}` },
+        { event: "*", schema: "public", table: "syndicates", filter: `id=eq.${poolId}` },
         () => {
-          void queryClient.invalidateQueries({ queryKey: ["syndicate", syndicateId] });
+          void queryClient.invalidateQueries({ queryKey: ["pool", poolId] });
         },
       )
       .on(
@@ -90,30 +90,30 @@ function SyndicateDetailPage() {
           event: "*",
           schema: "public",
           table: "syndicate_members",
-          filter: `syndicate_id=eq.${syndicateId}`,
+          filter: `syndicate_id=eq.${poolId}`,
         },
         () => {
-          void queryClient.invalidateQueries({ queryKey: ["syndicate", syndicateId] });
-          void queryClient.invalidateQueries({ queryKey: ["syndicate-members", syndicateId] });
+          void queryClient.invalidateQueries({ queryKey: ["pool", poolId] });
+          void queryClient.invalidateQueries({ queryKey: ["pool-members", poolId] });
         },
       )
       .subscribe();
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [syndicateId, queryClient]);
+  }, [poolId, queryClient]);
 
   const join = useMutation({
     mutationFn: async () => {
       const value = Number(amount);
       if (!Number.isFinite(value) || value <= 0) throw new Error("Enter an amount greater than V0.");
-      return joinSyndicate({ syndicateId, amount: value });
+      return joinPool({ poolId, amount: value });
     },
     onSuccess: (result) => {
       setAmount("");
-      void queryClient.invalidateQueries({ queryKey: ["syndicate", syndicateId] });
-      void queryClient.invalidateQueries({ queryKey: ["syndicate-members", syndicateId] });
-      void queryClient.invalidateQueries({ queryKey: ["syndicate-ledger", syndicateId] });
+      void queryClient.invalidateQueries({ queryKey: ["pool", poolId] });
+      void queryClient.invalidateQueries({ queryKey: ["pool-members", poolId] });
+      void queryClient.invalidateQueries({ queryKey: ["pool-ledger", poolId] });
       void queryClient.invalidateQueries({ queryKey: ["profile"] });
       toast.success(
         `Bought ${formatContracts(result.sharesBought)} shares at ${formatCents(result.priceAtEntry)}.`,
@@ -122,7 +122,7 @@ function SyndicateDetailPage() {
     onError: (error: Error) => toast.error(error.message),
   });
 
-  if (syndicate.isPending) {
+  if (pool.isPending) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-28 w-full rounded-lg" />
@@ -130,15 +130,15 @@ function SyndicateDetailPage() {
       </div>
     );
   }
-  if (!syndicate.data) return <p className="text-sm text-muted-foreground">Syndicate not found.</p>;
+  if (!pool.data) return <p className="text-sm text-muted-foreground">Pool not found.</p>;
 
-  const s = syndicate.data;
+  const s = pool.data;
   const list = members.data ?? [];
   const viewerMember = list.find((m) => m.userId === user?.id);
   const yesPrice = s.market?.yesPrice ?? 0.5;
   const price = sidePrice(yesPrice, s.outcomeSide);
-  const pnl = syndicatePnl(s, yesPrice);
-  const result = syndicateResult(s);
+  const pnl = poolPnl(s, yesPrice);
+  const result = poolResult(s);
   const open = s.status === "open" && new Date(s.lockAt).getTime() > Date.now();
   const parsed = Number(amount);
   const previewShares = sharesFor(Number.isFinite(parsed) ? parsed : 0, price);
@@ -152,7 +152,7 @@ function SyndicateDetailPage() {
     <div className="space-y-6 pb-24 lg:pb-0">
       <header className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
-          <SyndicateStatusPill syndicate={s} />
+          <PoolStatusPill pool={s} />
           <SideBadge side={s.outcomeSide} />
           {s.visibility === "invite_only" ? (
             <span className="rounded-full bg-secondary px-2 py-0.5 text-meta font-medium uppercase text-secondary-foreground">
@@ -190,7 +190,7 @@ function SyndicateDetailPage() {
                 )}
               </span>
             </div>
-            <SyndicateProgress raised={s.totalContributed} target={s.targetStake} height={8} />
+            <PoolProgress raised={s.totalContributed} target={s.targetStake} height={8} />
             <dl className="grid grid-cols-2 gap-3 pt-1 text-sm sm:grid-cols-4">
               <div>
                 <dt className="text-meta uppercase text-muted-foreground">Members</dt>
@@ -317,7 +317,7 @@ function SyndicateDetailPage() {
             )}
           </section>
 
-          <SyndicateChat syndicateId={syndicateId} canPost={Boolean(viewerMember) || s.captainId === user?.id} />
+          <PoolChat poolId={poolId} canPost={Boolean(viewerMember) || s.captainId === user?.id} />
         </div>
 
         <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">

@@ -1,8 +1,8 @@
 import { formatBalance, formatPercent } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-/** Funding progress toward a syndicate's target stake. */
-export function SyndicateProgress({
+/** Funding progress toward a pool's target stake. */
+export function PoolProgress({
   raised,
   target,
   height = 6,

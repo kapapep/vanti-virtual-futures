@@ -162,14 +162,14 @@ export function marketPostsQuery(marketId: string, viewerId: string | undefined)
 }
 
 /** One level of replies for a set of parent posts. */
-export function syndicatePostsQuery(syndicateId: string, viewerId: string | undefined) {
+export function poolPostsQuery(poolId: string, viewerId: string | undefined) {
   return queryOptions({
-    queryKey: ["syndicate-posts", syndicateId, viewerId],
+    queryKey: ["pool-posts", poolId, viewerId],
     queryFn: async (): Promise<FeedPost[]> => {
       const { data, error } = await supabase
         .from("posts")
         .select(POST_SELECT)
-        .eq("syndicate_id", syndicateId)
+        .eq("syndicate_id", poolId)
         .is("parent_id", null)
         .order("created_at", { ascending: false })
         .limit(100);
@@ -274,7 +274,7 @@ export async function createPost(input: {
   userId: string;
   body: string;
   marketId?: string | null;
-  syndicateId?: string | null;
+  poolId?: string | null;
   parentId?: string | null;
   imageUrl?: string | null;
   audioUrl?: string | null;
@@ -287,7 +287,7 @@ export async function createPost(input: {
     user_id: input.userId,
     body,
     market_id: input.marketId ?? null,
-    syndicate_id: input.syndicateId ?? null,
+    syndicate_id: input.poolId ?? null,
     parent_id: input.parentId ?? null,
     image_url: input.imageUrl ?? null,
     audio_url: input.audioUrl ?? null,
