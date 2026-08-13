@@ -18,8 +18,8 @@ const SECTIONS: Record<SectionKey, { title: string; hint: string }> = {
 export const Route = createFileRoute("/_authenticated/pools/")({
   validateSearch: (search: Record<string, unknown>) => ({
     section:
-      typeof search.section === "string" && search.section in SECTIONS
-        ? (search.section as SectionKey)
+      typeof search["section"] === "string" && search["section"] in SECTIONS
+        ? (search["section"] as SectionKey)
         : undefined,
   }),
   head: () => ({
