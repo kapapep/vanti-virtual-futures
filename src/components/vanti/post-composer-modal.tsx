@@ -166,38 +166,34 @@ export function PostComposerModal({ onClose }: { onClose: () => void }) {
     viewport?.addEventListener("scroll", syncToViewport);
     syncToViewport();
 
-    type KeyboardHandle = { remove: () => Promise<void> | void };
-    type KeyboardPlugin = {
-      addListener: (
-        event: "keyboardWillShow" | "keyboardWillHide",
-        callback: (event: { keyboardHeight?: number }) => void,
-      ) => Promise<KeyboardHandle> | KeyboardHandle;
-    };
-    const capacitor = (globalThis as unknown as {
-      Capacitor?: { Plugins?: { Keyboard?: KeyboardPlugin } };
-    }).Capacitor;
-    const keyboard = capacitor?.Plugins?.Keyboard;
+    type KeyboardHandle = { remove: () => Promise<void> };
     const handles: KeyboardHandle[] = [];
     let disposed = false;
 
-    const register = async (
-      event: "keyboardWillShow" | "keyboardWillHide",
-      callback: (event: { keyboardHeight?: number }) => void,
-    ) => {
-      if (!keyboard) return;
-      const handle = await keyboard.addListener(event, callback);
-      if (disposed) await handle.remove();
-      else handles.push(handle);
+    const registerNativeKeyboard = async () => {
+      const [{ Capacitor }, { Keyboard }] = await Promise.all([
+        import("@capacitor/core"),
+        import("@capacitor/keyboard"),
+      ]);
+      if (!Capacitor.isNativePlatform()) return;
+
+      const showHandle = await Keyboard.addListener("keyboardWillShow", (event) => {
+        nativeKeyboardHeight.current = Math.max(0, event.keyboardHeight);
+        syncToViewport();
+      });
+      const hideHandle = await Keyboard.addListener("keyboardWillHide", () => {
+        nativeKeyboardHeight.current = 0;
+        syncToViewport();
+      });
+
+      if (disposed) {
+        await Promise.all([showHandle.remove(), hideHandle.remove()]);
+      } else {
+        handles.push(showHandle, hideHandle);
+      }
     };
 
-    void register("keyboardWillShow", (event) => {
-      nativeKeyboardHeight.current = Math.max(0, event.keyboardHeight ?? 0);
-      syncToViewport();
-    });
-    void register("keyboardWillHide", () => {
-      nativeKeyboardHeight.current = 0;
-      syncToViewport();
-    });
+    void registerNativeKeyboard();
 
     return () => {
       disposed = true;
