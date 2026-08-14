@@ -34,13 +34,21 @@ function clampPrice(value: number) {
   return Math.min(0.99, Math.max(0.01, value));
 }
 
-/** 24h change and sparkline series derived from a market's recent price points. */
-function deriveSeries(points: PricePoint[], currentPrice: number) {
+/**
+ * Single source of truth for 24h change: current YES price vs the YES price
+ * recorded closest to (but not after) 24h ago. Used by every surface.
+ */
+export function computeChange24h(points: PricePoint[], currentPrice: number) {
   const cutoff = Date.now() - 24 * 60 * 60 * 1000;
   const older = points.filter((p) => p.t <= cutoff);
   const reference = older.length ? older[older.length - 1]!.price : (points[0]?.price ?? currentPrice);
+  return currentPrice - reference;
+}
+
+/** 24h change and sparkline series derived from a market's recent price points. */
+function deriveSeries(points: PricePoint[], currentPrice: number) {
   return {
-    change24h: currentPrice - reference,
+    change24h: computeChange24h(points, currentPrice),
     spark: points.slice(-40),
   };
 }
@@ -73,7 +81,8 @@ export const marketsQuery = queryOptions({
         .from("market_price_history")
         .select("market_id, yes_price, recorded_at")
         .gte("recorded_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
-        .order("recorded_at", { ascending: true }),
+        .order("recorded_at", { ascending: true })
+        .limit(50000),
     ]);
     if (marketsRes.error) throw marketsRes.error;
     if (historyRes.error) throw historyRes.error;

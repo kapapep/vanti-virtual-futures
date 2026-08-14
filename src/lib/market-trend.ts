@@ -17,3 +17,21 @@ export const TREND_LABEL = {
 export function trendLabel(change24h: number): string {
   return change24h >= 0 ? TREND_LABEL.PRICE_UP : TREND_LABEL.PRICE_DOWN;
 }
+
+export type TrendDirection = "up" | "down" | "flat";
+
+/**
+ * Single source of truth for how a 24h change is rendered: arrow direction and
+ * colour always derive from the sign of the one shared change value.
+ */
+export function trendDirection(change24h: number): TrendDirection {
+  if (!Number.isFinite(change24h) || change24h === 0) return "flat";
+  return change24h > 0 ? "up" : "down";
+}
+
+/** CSS colour for a trend direction: up = green, down = red, flat = muted gray. */
+export function trendColor(direction: TrendDirection): string {
+  if (direction === "up") return "var(--vanti-yes)";
+  if (direction === "down") return "var(--vanti-no)";
+  return "var(--vanti-muted)";
+}
