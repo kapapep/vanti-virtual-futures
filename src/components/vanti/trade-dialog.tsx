@@ -64,20 +64,21 @@ export function TradeDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        asChild
-        onClick={() =>
+      <div
+        className="flex flex-1"
+        onClick={() => {
           console.log("[trade] buy tapped", {
             side,
             marketId: market.id,
             userId: user.id,
             authLoading,
             pending,
-          })
-        }
+          });
+          setOpen(true);
+        }}
       >
         {trigger}
-      </DialogTrigger>
+      </div>
       <DialogContent className="max-h-[88vh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-left text-sm font-semibold leading-snug">
