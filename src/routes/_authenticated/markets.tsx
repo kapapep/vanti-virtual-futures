@@ -133,16 +133,17 @@ function MarketsPage() {
       <h1 className="text-figure font-semibold text-foreground">Markets</h1>
 
       <div className="sticky top-[57px] z-10 -mx-4 border-b border-border bg-background px-4 pb-2 pt-2 lg:top-0">
-        <div className="flex items-center gap-3">
+        {/* The filter button owns its own grid slot, so chips never scroll under it. */}
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
           <div
             ref={railRef}
-            className="-mx-4 flex flex-1 items-center gap-2 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden"
+            className="-ml-4 flex min-w-0 snap-x items-center gap-2 overflow-x-auto pl-4 pr-1 [scrollbar-width:none] sm:ml-0 sm:pl-0 [&::-webkit-scrollbar]:hidden"
           >
             <button
               type="button"
               onClick={() => navigate({ search: (prev: MarketsSearch) => ({ ...prev, category: undefined }) })}
               className={cn(
-                "inline-flex min-h-11 shrink-0 items-center rounded-full border px-3.5 text-xs font-medium transition-colors duration-150 sm:min-h-8",
+                "inline-flex min-h-11 shrink-0 snap-start items-center rounded-full border px-3.5 text-xs font-medium transition-colors duration-150 sm:min-h-8",
                 !category
                   ? "border-accent-solid bg-accent-subtle text-accent-solid"
                   : "border-border text-muted-foreground hover:text-foreground",
@@ -156,7 +157,7 @@ function MarketsPage() {
                 type="button"
                 onClick={() => navigate({ search: (prev: MarketsSearch) => ({ ...prev, category: c.slug }) })}
                 className={cn(
-                  "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-xs font-medium whitespace-nowrap transition-colors duration-150 sm:min-h-8",
+                  "inline-flex min-h-11 shrink-0 snap-start items-center gap-1.5 rounded-full border px-3.5 text-xs font-medium whitespace-nowrap transition-colors duration-150 sm:min-h-8",
                   category === c.slug
                     ? "border-accent-solid bg-accent-subtle text-accent-solid"
                     : "border-border text-muted-foreground hover:text-foreground",
