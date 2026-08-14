@@ -102,7 +102,7 @@ export function MarketChart({
       grid: { vertLines: { visible: false }, horzLines: { visible: false } },
       rightPriceScale: { visible: false },
       leftPriceScale: { visible: false },
-      timeScale: { visible: false, fixLeftEdge: true, fixRightEdge: true, rightOffset: 12 },
+      timeScale: { visible: false, fixLeftEdge: true, rightOffset: 12 },
       crosshair: {
         mode: 1,
         vertLine: { width: 1, color: "rgba(255,255,255,0.2)", labelVisible: false },
@@ -155,7 +155,7 @@ export function MarketChart({
         width: containerRef.current.clientWidth,
         height: containerRef.current.clientHeight,
       });
-      chart.timeScale().fitContent();
+      fitWithRightGap();
       queueLabels();
     });
     observer.observe(el);
@@ -170,6 +170,24 @@ export function MarketChart({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /** Fits the series while reserving room on the right for the overlay labels. */
+  function fitWithRightGap() {
+    const chart = chartRef.current;
+    if (!chart) return;
+    const count = Math.max(
+      latest.current.yesSeriesData.length,
+      latest.current.noSeriesData.length,
+    );
+    if (count < 2) {
+      chart.timeScale().fitContent();
+      return;
+    }
+    const width = containerRef.current?.clientWidth ?? 320;
+    // Reserve ~90px on the right so labels sit clear of the last data point.
+    const pad = Math.max(1, ((count - 1) * 90) / Math.max(1, width - 90));
+    chart.timeScale().setVisibleLogicalRange({ from: 0, to: count - 1 + pad });
+  }
 
   function queueLabels() {
     requestAnimationFrame(() => {
@@ -206,7 +224,7 @@ export function MarketChart({
     if (!chart || !yesSeriesRef.current || !noSeriesRef.current) return;
     yesSeriesRef.current.setData(yesSeriesData);
     noSeriesRef.current.setData(noSeriesData);
-    chart.timeScale().fitContent();
+    fitWithRightGap();
     queueLabels();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [yesSeriesData, noSeriesData, currentYes, currentNo]);
