@@ -24,6 +24,7 @@ import {
   formatVolume,
 } from "@/lib/format";
 import { marketQuery, marketTradesQuery, watchlistQuery } from "@/lib/markets";
+import { trendColor, trendDirection } from "@/lib/market-trend";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/market/$marketId")({
@@ -115,7 +116,7 @@ function MarketDetailPage() {
   if (!market.data) return <p className="text-sm text-muted-foreground">Market not found.</p>;
 
   const m = market.data;
-  const up = m.change24h >= 0;
+  const direction = trendDirection(m.change24h);
 
   return (
     <div
@@ -173,9 +174,10 @@ function MarketDetailPage() {
             className={cn(
               "vane-num inline-flex items-center gap-1 text-sm font-medium",
             )}
-            style={{ color: up ? "var(--vanti-yes)" : "var(--vanti-no)" }}
+            style={{ color: trendColor(direction) }}
           >
-            {up ? <TrendingUp className="size-4" /> : <TrendingDown className="size-4" />}
+            {direction === "up" ? <TrendingUp className="size-4" /> : null}
+            {direction === "down" ? <TrendingDown className="size-4" /> : null}
             {formatDelta(m.change24h)} 24h
           </span>
         </div>
