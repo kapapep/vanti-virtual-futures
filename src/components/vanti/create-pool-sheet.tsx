@@ -17,7 +17,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useSession } from "@/hooks/use-vanti-session";
-import { formatCents } from "@/lib/format";
+import { formatProbability } from "@/lib/format";
 import type { Market } from "@/lib/markets";
 import { createPool, sidePrice, type PoolSide } from "@/lib/pools";
 import { cn } from "@/lib/utils";
@@ -144,14 +144,14 @@ export function CreatePoolSheet({
                 >
                   {option}{" "}
                   <span className="num font-semibold">
-                    {formatCents(sidePrice(market.yesPrice, option))}
+                    {formatProbability(sidePrice(market.yesPrice, option))}
                   </span>
                 </button>
               ))}
             </div>
             <p className="text-meta text-muted-foreground">
               Contributions buy shares at the live price, currently{" "}
-              <span className="num">{formatCents(price)}</span>.
+              <span className="num">{formatProbability(price)}</span>.
             </p>
           </div>
 

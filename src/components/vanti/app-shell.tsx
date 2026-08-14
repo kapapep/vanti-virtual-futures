@@ -166,7 +166,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Mobile top bar */}
       <header
         className={cn(
-          "sticky top-0 z-20 grid items-center gap-2 bg-background/90 px-4 py-3 backdrop-blur lg:hidden",
+          "sticky top-0 z-20 grid items-center gap-2 bg-background px-4 py-3 lg:hidden",
           isHome
             ? "grid-cols-[1fr_auto_1fr] border-b border-border"
             : "grid-cols-[minmax(0,1fr)_auto] border-b border-border",

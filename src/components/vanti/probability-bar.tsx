@@ -1,12 +1,12 @@
 import { cn } from "@/lib/utils";
-import { formatCents } from "@/lib/format";
+import { formatProbability } from "@/lib/format";
 
 type ProbabilityBarProps = {
   /** Current YES price, 0.01–0.99. */
   price: number;
   /** Bar height in pixels. Cards use 4, market detail uses 12. */
   height?: number;
-  /** Renders "YES 63¢" / "NO 37¢" at the ends. */
+  /** Renders "YES 63%" / "NO 37%" at the ends. */
   showLabels?: boolean;
   className?: string;
 };
@@ -30,7 +30,7 @@ export function ProbabilityBar({
         className="flex w-full overflow-hidden rounded-full bg-negative"
         style={{ height }}
         role="img"
-        aria-label={`YES ${formatCents(price)}, NO ${formatCents(1 - price)}`}
+        aria-label={`YES ${formatProbability(price)}, NO ${formatProbability(1 - price)}`}
       >
         <div
           className="h-full bg-positive transition-[width] duration-300 ease-out"
@@ -39,8 +39,8 @@ export function ProbabilityBar({
       </div>
       {showLabels ? (
         <div className="mt-2 flex items-baseline justify-between text-meta font-medium">
-          <span className="num text-positive">YES {formatCents(price)}</span>
-          <span className="num text-negative">NO {formatCents(1 - price)}</span>
+          <span className="num text-positive">YES {formatProbability(price)}</span>
+          <span className="num text-negative">NO {formatProbability(1 - price)}</span>
         </div>
       ) : null}
     </div>

@@ -17,7 +17,7 @@ import {
 import { poolActivityQuery, type Pool } from "@/lib/pools";
 import { PostComposerModal } from "@/components/vanti/post-composer-modal";
 import { useSession } from "@/hooks/use-vanti-session";
-import { formatCents, formatDelta } from "@/lib/format";
+import { formatProbability, formatDelta } from "@/lib/format";
 import { TREND_LABEL, trendLabel } from "@/lib/market-trend";
 import { marketsQuery, watchlistQuery, type Market } from "@/lib/markets";
 import {
@@ -105,7 +105,7 @@ function PriceMoveCard({ market, label }: { market: Market; label: string }) {
             {formatDelta(market.change24h)} in 24h
           </span>
           <span className="num text-muted-foreground">
-            YES now {formatCents(market.yesPrice)} · NO {formatCents(market.noPrice)}
+            YES now {formatProbability(market.yesPrice)} · NO {formatProbability(market.noPrice)}
           </span>
         </p>
       </div>

@@ -30,20 +30,25 @@ type Props = {
 
 const YES_COLOR = "#00D68F";
 const NO_COLOR = "#FFFFFF";
+/** Minimum vertical distance between the two overlay labels, in pixels. */
+const LABEL_MIN_GAP = 60;
 
+/**
+ * Drops empty/invalid points, keeps the last value per timestamp, sorts
+ * ascending and clamps to 1–99 so the line never spikes to an edge.
+ */
 function toSeries(points: MarketChartPoint[]): LineData<Time>[] {
-  const seen = new Set<number>();
-  const out: LineData<Time>[] = [];
+  const byTime = new Map<number, number>();
   for (const p of points) {
-    const time = Math.floor(p.time) as UTCTimestamp;
-    if (seen.has(time)) {
-      out[out.length - 1] = { time, value: p.value };
-      continue;
-    }
-    seen.add(time);
-    out.push({ time, value: p.value });
+    const value = Number(p.value);
+    if (value === null || value === undefined || !Number.isFinite(value) || value === 0) continue;
+    const time = Math.floor(Number(p.time));
+    if (!Number.isFinite(time)) continue;
+    byTime.set(time, Math.min(99, Math.max(1, value)));
   }
-  return out;
+  return [...byTime.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([time, value]) => ({ time: time as UTCTimestamp, value }));
 }
 
 const fullRange = {
@@ -72,10 +77,15 @@ export function MarketChart({
 
   const [yesTop, setYesTop] = useState<number | null>(null);
   const [noTop, setNoTop] = useState<number | null>(null);
+  const [labelLeft, setLabelLeft] = useState<number | null>(null);
   const [hover, setHover] = useState<{ yes: number; no: number } | null>(null);
 
   const yesSeriesData = useMemo(() => toSeries(yesData), [yesData]);
   const noSeriesData = useMemo(() => toSeries(noData), [noData]);
+
+  // Latest values the label placement needs, read from inside stable callbacks.
+  const latest = useRef({ currentYes, currentNo, yesSeriesData, noSeriesData });
+  latest.current = { currentYes, currentNo, yesSeriesData, noSeriesData };
 
   // Create the chart once.
   useEffect(() => {
@@ -92,7 +102,7 @@ export function MarketChart({
       grid: { vertLines: { visible: false }, horzLines: { visible: false } },
       rightPriceScale: { visible: false },
       leftPriceScale: { visible: false },
-      timeScale: { visible: false, fixLeftEdge: true, fixRightEdge: true },
+      timeScale: { visible: false, fixLeftEdge: true, rightOffset: 12 },
       crosshair: {
         mode: 1,
         vertLine: { width: 1, color: "rgba(255,255,255,0.2)", labelVisible: false },
@@ -163,11 +173,30 @@ export function MarketChart({
 
   function queueLabels() {
     requestAnimationFrame(() => {
+      const chart = chartRef.current;
       const yes = yesSeriesRef.current;
       const no = noSeriesRef.current;
-      if (!yes || !no) return;
-      setYesTop(yes.priceToCoordinate(currentYes));
-      setNoTop(no.priceToCoordinate(currentNo));
+      if (!chart || !yes || !no) return;
+      const snap = latest.current;
+
+      const lastYes = snap.yesSeriesData.at(-1);
+      const lastNo = snap.noSeriesData.at(-1);
+      let y: number | null = yes.priceToCoordinate(lastYes?.value ?? snap.currentYes);
+      let n: number | null = no.priceToCoordinate(lastNo?.value ?? snap.currentNo);
+
+      // Never let the two labels collide: push the lower one further down.
+      if (y !== null && n !== null && Math.abs(y - n) < LABEL_MIN_GAP) {
+        if (y >= n) y = n + LABEL_MIN_GAP;
+        else n = y + LABEL_MIN_GAP;
+      }
+
+      const lastTime = lastYes?.time ?? lastNo?.time;
+      const x =
+        lastTime === undefined ? null : chart.timeScale().timeToCoordinate(lastTime as Time);
+
+      setYesTop(y);
+      setNoTop(n);
+      setLabelLeft(x === null ? null : x + 8);
     });
   }
 
@@ -187,16 +216,12 @@ export function MarketChart({
 
   return (
     <div className="w-full">
-      <div className="relative h-[280px] w-full sm:h-[340px]">
-        <div ref={containerRef} className="absolute inset-0" />
+      <div className="relative h-[440px] w-full sm:h-[480px]">
+        {/* The plot stops short of the wrapper so the overlay labels sit clear of it. */}
+        <div ref={containerRef} className="absolute bottom-0 left-0 top-0 right-[84px]" />
 
-        <Overlay
-          top={yesTop}
-          label={yesLabel}
-          value={shownYes}
-          color={YES_COLOR}
-        />
-        <Overlay top={noTop} label={noLabel} value={shownNo} color={NO_COLOR} />
+        <Overlay top={yesTop} left={labelLeft} label={yesLabel} value={shownYes} color={YES_COLOR} />
+        <Overlay top={noTop} left={labelLeft} label={noLabel} value={shownNo} color={NO_COLOR} />
       </div>
 
       <div className="mt-3 flex items-center justify-between gap-4">
@@ -230,20 +255,22 @@ export function MarketChart({
 
 function Overlay({
   top,
+  left,
   label,
   value,
   color,
 }: {
   top: number | null;
+  left: number | null;
   label: string;
   value: number;
   color: string;
 }) {
-  if (top === null) return null;
+  if (top === null || left === null) return null;
   return (
     <div
-      className="pointer-events-none absolute right-0 translate-y-[-50%] pl-3"
-      style={{ top }}
+      className="pointer-events-none absolute translate-y-[-50%]"
+      style={{ top, left }}
     >
       <div
         className="text-[13px] uppercase tracking-[0.12em] opacity-60"

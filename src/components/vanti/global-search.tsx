@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import { formatCents } from "@/lib/format";
+import { formatProbability } from "@/lib/format";
 import { searchQuery } from "@/lib/posts";
 import { cn } from "@/lib/utils";
 
@@ -96,7 +96,7 @@ export function GlobalSearch({
                         >
                           <span className="line-clamp-2 flex-1">{market.question}</span>
                           <span className="num shrink-0 text-meta text-positive">
-                            {formatCents(market.yesPrice)}
+                            {formatProbability(market.yesPrice)}
                           </span>
                         </Link>
                       </li>

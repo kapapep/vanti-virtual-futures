@@ -4,7 +4,7 @@ import { Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   formatBalance,
-  formatCents,
+  formatProbability,
   formatContracts,
   formatDate,
   formatSignedBalance,
@@ -94,8 +94,8 @@ export function PositionRow({
             label={position.pool ? "Your shares" : "Contracts"}
             value={formatContracts(position.contracts)}
           />
-          <Stat label="Avg" value={formatCents(position.avgPrice)} />
-          <Stat label="Current" value={formatCents(position.currentPrice)} />
+          <Stat label="Avg" value={formatProbability(position.avgPrice)} />
+          <Stat label="Current" value={formatProbability(position.currentPrice)} />
           <div>
             <p className="text-meta uppercase text-muted-foreground">Unrealized</p>
             <p

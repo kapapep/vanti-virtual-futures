@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useProfile, useSession } from "@/hooks/use-vanti-session";
-import { formatBalance, formatCents } from "@/lib/format";
+import { formatBalance, formatProbability } from "@/lib/format";
 import type { Market } from "@/lib/markets";
 import {
   executeTrade,
@@ -138,7 +138,7 @@ export function TradePanel({
                     {p.side}
                   </span>{" "}
                   <span className="num text-muted-foreground">
-                    {p.contracts.toFixed(2)} @ {formatCents(p.avgPrice)}
+                    {p.contracts.toFixed(2)} @ {formatProbability(p.avgPrice)}
                   </span>
                 </span>
                 <Button
@@ -172,7 +172,7 @@ export function TradePanel({
               )}
               aria-pressed={side === s}
             >
-              {s} <span className="num">{formatCents(s === "yes" ? market.yesPrice : market.noPrice)}</span>
+              {s} <span className="num">{formatProbability(s === "yes" ? market.yesPrice : market.noPrice)}</span>
             </button>
           ))}
         </div>

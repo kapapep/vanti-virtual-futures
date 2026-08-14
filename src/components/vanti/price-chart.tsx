@@ -81,7 +81,7 @@ export function PriceChart({ points }: { points: PricePoint[] }) {
             <YAxis
               domain={[0, 100]}
               ticks={[0, 25, 50, 75, 100]}
-              tickFormatter={(v) => `${v}¢`}
+              tickFormatter={(v) => `${v}%`}
               tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
               stroke="var(--border)"
               width={48}
@@ -95,7 +95,7 @@ export function PriceChart({ points }: { points: PricePoint[] }) {
                 color: "var(--popover-foreground)",
               }}
               labelFormatter={(t) => new Date(Number(t)).toLocaleString("en-US")}
-              formatter={(value) => [`${value}¢`, "YES"]}
+              formatter={(value) => [`${value}%`, "YES"]}
             />
             <Line
               type="monotone"

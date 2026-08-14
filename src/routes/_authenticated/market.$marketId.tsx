@@ -16,7 +16,7 @@ import { TradeDialog } from "@/components/vanti/trade-dialog";
 import { useSession } from "@/hooks/use-vanti-session";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  formatCents,
+  formatProbability,
   formatCount,
   formatDate,
   formatDelta,
@@ -121,7 +121,14 @@ function MarketDetailPage() {
   const up = m.change24h >= 0;
 
   return (
-    <div className="space-y-6 pb-32 lg:pb-0">
+    <div
+      className="space-y-4 @[600px]:space-y-6"
+      style={{
+        // Clears the sticky top bar and the fixed mobile buy bar.
+        paddingTop: "env(safe-area-inset-top)",
+        paddingBottom: "calc(136px + 24px + env(safe-area-inset-bottom))",
+      }}
+    >
       <header className="space-y-4">
         <div className="flex flex-wrap items-center gap-2 text-meta text-muted-foreground">
           {m.category ? (
@@ -160,7 +167,7 @@ function MarketDetailPage() {
 
         <div className="flex items-baseline gap-4">
           <span className="num text-4xl font-semibold tracking-tight text-positive">
-            {formatCents(m.yesPrice)}
+            {formatProbability(m.yesPrice)}
           </span>
           <span
             className={cn(
@@ -177,7 +184,7 @@ function MarketDetailPage() {
       </header>
 
       <div className="@container">
-      <div className="grid gap-6 @[600px]:grid-cols-[1fr_280px] @[900px]:grid-cols-[220px_1fr_300px]">
+      <div className="grid gap-4 @[600px]:gap-6 @[600px]:grid-cols-[1fr_280px] @[900px]:grid-cols-[220px_1fr_300px]">
         <aside className="order-3 space-y-4 @[600px]:col-span-2 @[600px]:grid @[600px]:grid-cols-2 @[600px]:items-start @[600px]:gap-4 @[600px]:space-y-0 @[900px]:order-1 @[900px]:col-span-1 @[900px]:block @[900px]:space-y-4">
           <div className="rounded-lg border border-border bg-card p-4">
             <h2 className="text-meta font-semibold uppercase text-muted-foreground">Market info</h2>
@@ -192,11 +199,11 @@ function MarketDetailPage() {
               </div>
               <div className="flex justify-between gap-2">
                 <dt className="text-muted-foreground">YES</dt>
-                <dd className="num font-medium text-positive">{formatCents(m.yesPrice)}</dd>
+                <dd className="num font-medium text-positive">{formatProbability(m.yesPrice)}</dd>
               </div>
               <div className="flex justify-between gap-2">
                 <dt className="text-muted-foreground">NO</dt>
-                <dd className="num font-medium text-negative">{formatCents(m.noPrice)}</dd>
+                <dd className="num font-medium text-negative">{formatProbability(m.noPrice)}</dd>
               </div>
               <div className="flex justify-between gap-2">
                 <dt className="text-muted-foreground">Opened</dt>
@@ -259,7 +266,7 @@ function MarketDetailPage() {
                       {t.action} {t.side}
                     </span>
                     <span className="num text-muted-foreground">
-                      {formatCount(t.contracts)} @ {formatCents(t.price)}
+                      {formatCount(t.contracts)} @ {formatProbability(t.price)}
                     </span>
                   </li>
                 ))}
@@ -286,7 +293,7 @@ function MarketDetailPage() {
           side="yes"
           trigger={
             <Button className="min-h-12 w-full bg-positive text-base font-semibold text-positive-foreground hover:bg-positive/90">
-              Buy YES <span className="num">{formatCents(m.yesPrice)}</span>
+              Buy YES <span className="num">{formatProbability(m.yesPrice)}</span>
             </Button>
           }
         />
@@ -295,7 +302,7 @@ function MarketDetailPage() {
           side="no"
           trigger={
             <Button className="min-h-12 w-full bg-negative text-base font-semibold text-negative-foreground hover:bg-negative/90">
-              Buy NO <span className="num">{formatCents(m.noPrice)}</span>
+              Buy NO <span className="num">{formatProbability(m.noPrice)}</span>
             </Button>
           }
         />

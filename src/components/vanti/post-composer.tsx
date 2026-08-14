@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useProfile, useSession } from "@/hooks/use-vanti-session";
 import { supabase } from "@/integrations/supabase/client";
 import { AudioRecorder, type RecordedAudio } from "@/components/vanti/audio-recorder";
-import { formatCents } from "@/lib/format";
+import { formatProbability } from "@/lib/format";
 import { marketsQuery } from "@/lib/markets";
 import { fileToPostImageDataUrl } from "@/lib/media-file";
 import { lightHaptic } from "@/lib/haptics";
@@ -74,7 +74,7 @@ function MarketPicker({
                   >
                     <span className="line-clamp-2 flex-1">{m.question}</span>
                     <span className="num shrink-0 text-meta text-positive">
-                      {formatCents(m.yesPrice)}
+                      {formatProbability(m.yesPrice)}
                     </span>
                     {m.id === value ? <Check className="size-3.5 text-accent-solid" /> : null}
                   </button>

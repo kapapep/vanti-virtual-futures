@@ -22,12 +22,6 @@ export function formatProbability(price: number | string | null | undefined): st
   return `${Math.round((Number.isFinite(value) ? value : 0) * 100)}%`;
 }
 
-/** Formats a 0–1 contract price in cents, e.g. 0.63 -> "63¢". */
-export function formatCents(price: number | string | null | undefined): string {
-  const value = typeof price === "string" ? Number(price) : (price ?? 0);
-  return `${Math.round((Number.isFinite(value) ? value : 0) * 100)}¢`;
-}
-
 const compact = new Intl.NumberFormat("en-US", {
   notation: "compact",
   maximumFractionDigits: 1,
@@ -45,11 +39,11 @@ export function formatCount(value: number | string | null | undefined): string {
   return compact.format(Number.isFinite(amount) ? amount : 0);
 }
 
-/** Formats a signed probability delta in cents, e.g. 0.031 -> "+3.1¢". */
+/** Formats a signed probability delta in percentage points, e.g. 0.024 -> "+2.4%". */
 export function formatDelta(delta: number): string {
-  const cents = delta * 100;
-  const sign = cents > 0 ? "+" : cents < 0 ? "−" : "";
-  return `${sign}${Math.abs(cents).toFixed(1)}¢`;
+  const points = delta * 100;
+  const sign = points > 0 ? "+" : points < 0 ? "−" : "";
+  return `${sign}${Math.abs(points).toFixed(1)}%`;
 }
 
 /** Short resolution date, e.g. "Dec 31, 2026". */
