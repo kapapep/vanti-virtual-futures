@@ -63,6 +63,7 @@ function MarketDetailPage() {
   const [timeframe, setTimeframe] = useState<MarketTimeframe>("1W");
 
   const points = market.data?.spark ?? [];
+  const currentPrice = market.data?.yesPrice ?? 0;
   const windowed = useMemo(() => {
     const minutes: Record<MarketTimeframe, number | null> = {
       LIVE: 60,
@@ -74,10 +75,17 @@ function MarketDetailPage() {
     const span = minutes[timeframe];
     const source = span ? points.filter((p) => p.t >= Date.now() - span * 60 * 1000) : points;
     const series = source.length >= 2 ? source : points.slice(-2);
-    return {
-      yes: series.map((p) => ({ time: p.t / 1000, value: Number((p.price * 100).toFixed(1)) })),
-    };
-  }, [points, timeframe]);
+    const yes = series.map((p) => ({
+      time: p.t / 1000,
+      value: Number((p.price * 100).toFixed(1)),
+    }));
+    // The series must end on the market's live probability — one source of truth.
+    const current = Number((currentPrice * 100).toFixed(1));
+    const last = yes.at(-1);
+    if (!last) return { yes };
+    if (last.value !== current) yes.push({ time: Date.now() / 1000, value: current });
+    return { yes };
+  }, [points, timeframe, currentPrice]);
 
   const watched = (watchlist.data ?? []).includes(marketId);
 
