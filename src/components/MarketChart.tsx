@@ -171,11 +171,30 @@ export function MarketChart({
 
   function queueLabels() {
     requestAnimationFrame(() => {
+      const chart = chartRef.current;
       const yes = yesSeriesRef.current;
       const no = noSeriesRef.current;
-      if (!yes || !no) return;
-      setYesTop(yes.priceToCoordinate(currentYes));
-      setNoTop(no.priceToCoordinate(currentNo));
+      if (!chart || !yes || !no) return;
+      const snap = latest.current;
+
+      const lastYes = snap.yesSeriesData.at(-1);
+      const lastNo = snap.noSeriesData.at(-1);
+      let y = yes.priceToCoordinate(lastYes?.value ?? snap.currentYes);
+      let n = no.priceToCoordinate(lastNo?.value ?? snap.currentNo);
+
+      // Never let the two labels collide: push the lower one further down.
+      if (y !== null && n !== null && Math.abs(y - n) < LABEL_MIN_GAP) {
+        if (y >= n) y = n + LABEL_MIN_GAP;
+        else n = y + LABEL_MIN_GAP;
+      }
+
+      const lastTime = lastYes?.time ?? lastNo?.time;
+      const x =
+        lastTime === undefined ? null : chart.timeScale().timeToCoordinate(lastTime as Time);
+
+      setYesTop(y);
+      setNoTop(n);
+      setLabelLeft(x === null ? null : x + 8);
     });
   }
 
