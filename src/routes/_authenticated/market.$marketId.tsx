@@ -287,11 +287,13 @@ function MarketDetailPage() {
       </div>
 
       {/* Mobile: the primary trade action stays in thumb reach and opens the full panel. */}
+      </div>
       <div
-        className="pointer-events-auto fixed inset-x-0 z-30 flex items-stretch border-t border-border p-3 @[600px]:hidden"
+        className="pointer-events-auto fixed inset-x-0 z-30 flex items-stretch border-t border-border p-3 lg:hidden"
         style={{
           backgroundColor: "var(--vanti-ink)",
           bottom: "calc(var(--tabbar-h) + env(safe-area-inset-bottom))",
+          touchAction: "manipulation",
         }}
       >
         <TradeDialog
@@ -305,7 +307,6 @@ function MarketDetailPage() {
           side="no"
           trigger={<VaneBuyButton side="no" price={m.noPrice} />}
         />
-      </div>
       </div>
     </div>
   );
