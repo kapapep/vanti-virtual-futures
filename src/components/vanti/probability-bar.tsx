@@ -6,7 +6,7 @@ type ProbabilityBarProps = {
   price: number;
   /** Bar height in pixels. Cards use 4, market detail uses 12. */
   height?: number;
-  /** Renders "YES 63¢" / "NO 37¢" at the ends. */
+  /** Renders "YES 63%" / "NO 37%" at the ends. */
   showLabels?: boolean;
   className?: string;
 };
