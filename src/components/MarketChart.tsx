@@ -166,7 +166,18 @@ export function MarketChart({
       const yes = series.priceToCoordinate(last);
       const no = series.priceToCoordinate(100 - last);
       if (yes === null || no === null) return;
-      setLabelY({ yes, no });
+      // Keep the two stacked labels from overlapping when the line sits near 50%.
+      const gap = 52;
+      if (Math.abs(yes - no) >= gap) {
+        setLabelY({ yes, no });
+        return;
+      }
+      const shift = (gap - Math.abs(yes - no)) / 2;
+      setLabelY(
+        yes <= no
+          ? { yes: yes - shift, no: no + shift }
+          : { yes: yes + shift, no: no - shift },
+      );
     };
     place();
     const raf = requestAnimationFrame(place);
