@@ -30,6 +30,8 @@ type Props = {
 
 const YES_COLOR = "#00D68F";
 const NO_COLOR = "#FFFFFF";
+/** Minimum vertical distance between the two overlay labels, in pixels. */
+const LABEL_MIN_GAP = 60;
 
 /**
  * Drops empty/invalid points, keeps the last value per timestamp, sorts
