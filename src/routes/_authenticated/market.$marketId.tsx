@@ -180,22 +180,22 @@ function MarketDetailPage() {
           >
             {formatProbability(m.yesPrice)}
           </span>
-          <span
-            className={cn(
-              "vane-num inline-flex items-center gap-1 text-sm font-medium",
-            )}
-            style={{ color: trendColor(direction) }}
-          >
-            {direction === "up" ? <TrendingUp className="size-4" /> : null}
-            {direction === "down" ? <TrendingDown className="size-4" /> : null}
-            {formatDelta(m.change24h)} 24h
-          </span>
+          {m.change24h === null ? null : (
+            <span
+              className="vane-num inline-flex items-center gap-1 text-sm font-medium"
+              style={{ color: trendColor(direction) }}
+            >
+              {direction === "up" ? <TrendingUp className="size-4" /> : null}
+              {direction === "down" ? <TrendingDown className="size-4" /> : null}
+              {formatDelta(m.change24h)} 24h
+            </span>
+          )}
         </div>
 
         <ProbabilityBar price={m.yesPrice} height={8} showLabels />
       </header>
 
-      <div className="@container -mt-2">
+      <div className="@container mt-4">
       <div className="grid gap-4 @[600px]:gap-6 @[600px]:grid-cols-[1fr_280px] @[900px]:grid-cols-[220px_1fr_300px]">
         <aside className="order-3 space-y-4 @[600px]:col-span-2 @[600px]:grid @[600px]:grid-cols-2 @[600px]:items-start @[600px]:gap-4 @[600px]:space-y-0 @[900px]:order-1 @[900px]:col-span-1 @[900px]:block @[900px]:space-y-4">
           <div className="rounded-lg border border-border bg-card p-4">
@@ -297,10 +297,9 @@ function MarketDetailPage() {
       {/* Mobile: the primary trade action stays in thumb reach and opens the full panel. */}
       </div>
       <div
-        className="pointer-events-auto fixed inset-x-0 z-30 flex items-stretch border-t border-border p-3 lg:hidden"
+        className="pointer-events-auto fixed inset-x-0 z-30 flex items-stretch gap-3 px-4 lg:hidden"
         style={{
-          backgroundColor: "var(--vanti-ink)",
-          bottom: "calc(var(--tabbar-h) + env(safe-area-inset-bottom))",
+          bottom: "calc(var(--tabbar-h) + 12px + env(safe-area-inset-bottom))",
           touchAction: "manipulation",
         }}
       >
@@ -309,7 +308,6 @@ function MarketDetailPage() {
           side="yes"
           trigger={<VaneBuyButton side="yes" price={m.yesPrice} />}
         />
-        <VaneDivider />
         <TradeDialog
           market={m}
           side="no"
@@ -330,26 +328,12 @@ function VaneBuyButton({ side, price }: { side: "yes" | "no"; price: number }) {
         "vane-buy min-h-12 flex-1 justify-between rounded-xl px-3 text-[15px] font-semibold",
         "transition-colors duration-[120ms] ease-out",
       )}
-      style={{ ["--vane-c" as string]: color }}
+      style={{ ["--vane-c" as string]: color, boxShadow: "0 4px 16px rgba(0,0,0,0.6)" }}
     >
       <span className="uppercase tracking-[0.06em]">Buy {side}</span>
       <span className="vane-buy-pill vane-num rounded-full px-2 py-0.5 text-[13px]">
         {formatProbability(price)}
       </span>
     </Button>
-  );
-}
-
-/** Hairline divider between the two buy buttons, notched with a vane chevron. */
-function VaneDivider() {
-  return (
-    <div className="relative mx-2 flex w-px items-center justify-center self-stretch">
-      <span className="absolute inset-y-1 w-px" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />
-      <VaneChevron
-        size={6}
-        className="relative"
-        style={{ color: "var(--vanti-blue)", backgroundColor: "var(--vanti-ink)" }}
-      />
-    </div>
   );
 }
