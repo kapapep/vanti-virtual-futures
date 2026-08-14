@@ -64,10 +64,7 @@ const fullRange = {
 /** Fixed y-axis ticks: the scale is always 0–100, never fitted to the data. */
 const Y_TICKS = [100, 75, 50, 25, 0] as const;
 
-/**
- * Single YES probability line with a gradient area fill and a vane chevron
- * marker at the latest point, tilted with the probability.
- */
+/** Single YES probability line with a gradient area fill on a fixed 0–100 scale. */
 export function MarketChart({
   yesData,
   currentYes,
@@ -85,10 +82,6 @@ export function MarketChart({
   const [hover, setHover] = useState<number | null>(null);
 
   const yesSeriesData = useMemo(() => toSeries(yesData), [yesData]);
-
-  // Latest values the label placement needs, read from inside stable callbacks.
-  const latest = useRef({ currentYes, yesSeriesData });
-  latest.current = { currentYes, yesSeriesData };
 
   // Create the chart once.
   useEffect(() => {
