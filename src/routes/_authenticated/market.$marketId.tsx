@@ -10,7 +10,7 @@ import { CategoryIcon } from "@/components/vanti/category-icon";
 import { MarketChart, type MarketTimeframe } from "@/components/MarketChart";
 import { MarketDiscussion } from "@/components/vanti/market-discussion";
 import { MarketPools } from "@/components/vanti/market-pools";
-import { OddsTickRule } from "@/components/vanti/odds-tick-rule";
+import { ProbabilityBar } from "@/components/vanti/probability-bar";
 import { VaneChevron } from "@/components/vanti/vane-chevron";
 import { TradePanel } from "@/components/vanti/trade-panel";
 import { TradeDialog } from "@/components/vanti/trade-dialog";
@@ -65,10 +65,10 @@ function MarketDetailPage() {
   const points = market.data?.spark ?? [];
   const windowed = useMemo(() => {
     const minutes: Record<MarketTimeframe, number | null> = {
-      "1H": 60,
-      "6H": 360,
+      LIVE: 60,
       "1D": 1440,
       "1W": 10080,
+      "1M": 43200,
       ALL: null,
     };
     const span = minutes[timeframe];
@@ -120,11 +120,10 @@ function MarketDetailPage() {
 
   return (
     <div
-      className="space-y-4 @[600px]:space-y-6"
+      className="space-y-4 pt-[calc(var(--topbar-h)+env(safe-area-inset-top))] @[600px]:space-y-6 lg:pt-0"
       style={{
-        // Content starts below the sticky top bar and ends above the fixed buy
-        // bar + tab bar, so the title and the last card are never clipped.
-        paddingTop: "calc(env(safe-area-inset-top) + 12px)",
+        // Content clears the sticky top bar and ends above the fixed buy bar +
+        // tab bar, so the title and the last card are never clipped.
         scrollMarginTop: "calc(var(--topbar-h) + env(safe-area-inset-top))",
         paddingBottom:
           "calc(var(--buybar-h) + var(--tabbar-h) + 24px + env(safe-area-inset-bottom))",
@@ -185,7 +184,7 @@ function MarketDetailPage() {
           </span>
         </div>
 
-        <OddsTickRule price={m.yesPrice} />
+        <ProbabilityBar price={m.yesPrice} height={8} showLabels />
       </header>
 
       <div className="@container -mt-2">
