@@ -122,9 +122,12 @@ function MarketDetailPage() {
     <div
       className="space-y-4 @[600px]:space-y-6"
       style={{
-        // Clears the sticky top bar and the fixed mobile buy bar.
-        paddingTop: "env(safe-area-inset-top)",
-        paddingBottom: "calc(136px + 24px + env(safe-area-inset-bottom))",
+        // Content starts below the sticky top bar and ends above the fixed buy
+        // bar + tab bar, so the title and the last card are never clipped.
+        paddingTop: "calc(env(safe-area-inset-top) + 12px)",
+        scrollMarginTop: "calc(var(--topbar-h) + env(safe-area-inset-top))",
+        paddingBottom:
+          "calc(var(--buybar-h) + var(--tabbar-h) + 24px + env(safe-area-inset-bottom))",
       }}
     >
       <header className="space-y-4">
@@ -286,8 +289,11 @@ function MarketDetailPage() {
 
       {/* Mobile: the primary trade action stays in thumb reach and opens the full panel. */}
       <div
-        className="fixed inset-x-0 bottom-16 z-20 flex items-stretch border-t border-border p-3 @[600px]:hidden"
-        style={{ backgroundColor: "var(--vanti-ink)" }}
+        className="fixed inset-x-0 z-20 flex items-stretch border-t border-border p-3 @[600px]:hidden"
+        style={{
+          backgroundColor: "var(--vanti-ink)",
+          bottom: "calc(var(--tabbar-h) + env(safe-area-inset-bottom))",
+        }}
       >
         <TradeDialog
           market={m}
