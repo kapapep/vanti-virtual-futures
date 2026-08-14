@@ -33,6 +33,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { GlobalSearch } from "@/components/vanti/global-search";
+import { BackButton } from "@/components/vanti/back-button";
 import { HomeFeedTabs } from "@/components/vanti/home-feed-tabs";
 import { EditProfileDialog } from "@/components/vanti/edit-profile-dialog";
 import { VantiMark } from "@/components/vanti/vanti-mark";
@@ -56,6 +57,18 @@ const mobileNav = [
   { label: "Portfolio", to: "/portfolio", icon: Wallet },
   { label: "Profile", to: "/profile", icon: CircleUser },
 ] as const;
+
+/** Top-level destinations reachable from the nav — everything else is a pushed screen. */
+const rootPaths = new Set<string>([
+  "/home",
+  "/markets",
+  "/pools",
+  "/portfolio",
+  "/profile",
+  "/discover",
+  "/following",
+  "/watchlist",
+]);
 
 function AccountMenu() {
   const { data: profile } = useProfile();
@@ -125,6 +138,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [searchOpen, setSearchOpen] = useState(false);
   const isHome = pathname === "/home";
+  const normalized = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
+  const showBack = !rootPaths.has(normalized);
 
   return (
     <div className="min-h-screen w-full bg-background">
@@ -172,9 +187,13 @@ export function AppShell({ children }: { children: ReactNode }) {
             : "grid-cols-[minmax(0,1fr)_auto] border-b border-border",
         )}
       >
-        <Link to="/home" search={{ tab: "for-you" }} className="flex min-w-0 items-center">
-          <VantiMark size={36} title="Vanti" />
-        </Link>
+        {showBack ? (
+          <BackButton className="justify-self-start" />
+        ) : (
+          <Link to="/home" search={{ tab: "for-you" }} className="flex min-w-0 items-center">
+            <VantiMark size={36} title="Vanti" />
+          </Link>
+        )}
         {isHome ? <HomeFeedTabs className="justify-self-center" /> : null}
         <div className="flex shrink-0 items-center gap-2">
           <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
@@ -199,7 +218,14 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <div className="lg:pl-60">
         <div className="mx-auto flex w-full max-w-[1400px] gap-8 px-4 pb-24 pt-6 lg:px-8 lg:pb-12">
-          <main className="min-w-0 flex-1">{children}</main>
+          <main className="min-w-0 flex-1">
+            {showBack ? (
+              <div className="mb-2 hidden lg:block">
+                <BackButton showLabel />
+              </div>
+            ) : null}
+            {children}
+          </main>
 
           {/* Desktop right rail */}
           <div className="hidden w-72 shrink-0 flex-col gap-4 xl:flex">
