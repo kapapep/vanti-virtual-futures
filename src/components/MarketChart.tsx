@@ -9,7 +9,6 @@ import {
   type UTCTimestamp,
 } from "lightweight-charts";
 
-import { VaneChevron } from "@/components/vanti/vane-chevron";
 import { cn } from "@/lib/utils";
 
 export type MarketChartPoint = { time: number; value: number };
@@ -62,6 +61,9 @@ const fullRange = {
   autoscaleInfoProvider: () => ({ priceRange: { minValue: 0, maxValue: 100 } }),
 };
 
+/** Fixed y-axis ticks: the scale is always 0–100, never fitted to the data. */
+const Y_TICKS = [100, 75, 50, 25, 0] as const;
+
 /**
  * Single YES probability line with a gradient area fill and a vane chevron
  * marker at the latest point, tilted with the probability.
@@ -80,7 +82,6 @@ export function MarketChart({
   const [internalTf, setInternalTf] = useState<MarketTimeframe>("1W");
   const activeTf = timeframe ?? internalTf;
 
-  const [marker, setMarker] = useState<{ top: number; left: number } | null>(null);
   const [hover, setHover] = useState<number | null>(null);
 
   const yesSeriesData = useMemo(() => toSeries(yesData), [yesData]);
@@ -150,7 +151,6 @@ export function MarketChart({
         height: containerRef.current.clientHeight,
       });
       chart.timeScale().fitContent();
-      queueLabels();
     });
     observer.observe(el);
 
@@ -164,35 +164,16 @@ export function MarketChart({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function queueLabels() {
-    requestAnimationFrame(() => {
-      const chart = chartRef.current;
-      const yes = yesSeriesRef.current;
-      if (!chart || !yes) return;
-      const snap = latest.current;
-
-      const lastYes = snap.yesSeriesData.at(-1);
-      const y = yes.priceToCoordinate(lastYes?.value ?? snap.currentYes);
-      const x =
-        lastYes === undefined
-          ? null
-          : chart.timeScale().timeToCoordinate(lastYes.time as Time);
-      setMarker(y === null || x === null ? null : { top: y, left: x });
-    });
-  }
-
   // Push data and refresh label positions.
   useEffect(() => {
     const chart = chartRef.current;
     if (!chart || !yesSeriesRef.current) return;
     yesSeriesRef.current.setData(yesSeriesData);
     chart.timeScale().fitContent();
-    queueLabels();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [yesSeriesData, currentYes]);
 
   const shownYes = hover ?? currentYes;
-  const tilt = (shownYes - 50) * 0.6;
 
   return (
     <div className="w-full">
@@ -224,19 +205,18 @@ export function MarketChart({
       <div className="relative mt-2 h-[280px] w-full sm:h-[360px]">
         <div ref={containerRef} className="absolute inset-0" />
 
-        {marker ? (
-          <div
-            className="pointer-events-none absolute"
-            style={{
-              top: marker.top,
-              left: marker.left,
-              transform: `translate(-50%, -50%) rotate(${tilt}deg)`,
-              color: "var(--vanti-blue)",
-            }}
-          >
-            <VaneChevron size={14} />
-          </div>
-        ) : null}
+        {/* Fixed 0–100 scale labels, so a flat market reads as flat. */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 flex flex-col justify-between">
+          {Y_TICKS.map((tick) => (
+            <span
+              key={tick}
+              className="vane-num text-[10px] leading-none"
+              style={{ color: "var(--vanti-muted)" }}
+            >
+              {tick}%
+            </span>
+          ))}
+        </div>
 
         <div className="pointer-events-none absolute right-0 top-0 text-right">
           <div className="vane-label">YES</div>
