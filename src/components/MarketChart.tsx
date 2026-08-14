@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  AreaSeries,
   createChart,
-  LineSeries,
   type IChartApi,
   type ISeriesApi,
   type LineData,
@@ -9,29 +9,28 @@ import {
   type UTCTimestamp,
 } from "lightweight-charts";
 
+import { VaneChevron } from "@/components/vanti/vane-chevron";
 import { cn } from "@/lib/utils";
 
 export type MarketChartPoint = { time: number; value: number };
 
-export const MARKET_TIMEFRAMES = ["LIVE", "1D", "1W", "1M", "ALL"] as const;
+export const MARKET_TIMEFRAMES = ["1H", "6H", "1D", "1W", "ALL"] as const;
 export type MarketTimeframe = (typeof MARKET_TIMEFRAMES)[number];
 
 type Props = {
   yesData: MarketChartPoint[];
-  noData: MarketChartPoint[];
-  yesLabel: string;
-  noLabel: string;
   currentYes: number;
-  currentNo: number;
   volume?: number;
   timeframe?: MarketTimeframe;
   onTimeframeChange?: (tf: MarketTimeframe) => void;
 };
 
-const YES_COLOR = "#00D68F";
-const NO_COLOR = "#FFFFFF";
-/** Minimum vertical distance between the two overlay labels, in pixels. */
-const LABEL_MIN_GAP = 60;
+/** Reads a palette token off the document so colours live only in CSS. */
+function token(name: string, fallback: string): string {
+  if (typeof window === "undefined") return fallback;
+  const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return value || fallback;
+}
 
 /**
  * Drops empty/invalid points, keeps the last value per timestamp, sorts
@@ -55,42 +54,39 @@ const fullRange = {
   autoscaleInfoProvider: () => ({ priceRange: { minValue: 0, maxValue: 100 } }),
 };
 
-/** Market probability chart drawn with TradingView Lightweight Charts. */
+/**
+ * Single YES probability line with a gradient area fill and a vane chevron
+ * marker at the latest point, tilted with the probability.
+ */
 export function MarketChart({
   yesData,
-  noData,
-  yesLabel,
-  noLabel,
   currentYes,
-  currentNo,
   volume,
   timeframe,
   onTimeframeChange,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
-  const yesSeriesRef = useRef<ISeriesApi<"Line"> | null>(null);
-  const noSeriesRef = useRef<ISeriesApi<"Line"> | null>(null);
+  const yesSeriesRef = useRef<ISeriesApi<"Area"> | null>(null);
 
   const [internalTf, setInternalTf] = useState<MarketTimeframe>("1W");
   const activeTf = timeframe ?? internalTf;
 
-  const [yesTop, setYesTop] = useState<number | null>(null);
-  const [noTop, setNoTop] = useState<number | null>(null);
-  const [labelLeft, setLabelLeft] = useState<number | null>(null);
-  const [hover, setHover] = useState<{ yes: number; no: number } | null>(null);
+  const [marker, setMarker] = useState<{ top: number; left: number } | null>(null);
+  const [hover, setHover] = useState<number | null>(null);
 
   const yesSeriesData = useMemo(() => toSeries(yesData), [yesData]);
-  const noSeriesData = useMemo(() => toSeries(noData), [noData]);
 
   // Latest values the label placement needs, read from inside stable callbacks.
-  const latest = useRef({ currentYes, currentNo, yesSeriesData, noSeriesData });
-  latest.current = { currentYes, currentNo, yesSeriesData, noSeriesData };
+  const latest = useRef({ currentYes, yesSeriesData });
+  latest.current = { currentYes, yesSeriesData };
 
   // Create the chart once.
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
+
+    const yesColor = token("--vanti-yes", "#3ECF8E");
 
     const chart = createChart(el, {
       layout: {
@@ -102,7 +98,7 @@ export function MarketChart({
       grid: { vertLines: { visible: false }, horzLines: { visible: false } },
       rightPriceScale: { visible: false },
       leftPriceScale: { visible: false },
-      timeScale: { visible: false, fixLeftEdge: true, rightOffset: 12 },
+      timeScale: { visible: false, fixLeftEdge: true, rightOffset: 6 },
       crosshair: {
         mode: 1,
         vertLine: { width: 1, color: "rgba(255,255,255,0.2)", labelVisible: false },
@@ -114,26 +110,21 @@ export function MarketChart({
       height: el.clientHeight,
     });
 
-    const yes = chart.addSeries(LineSeries, {
-      color: YES_COLOR,
+    const yes = chart.addSeries(AreaSeries, {
+      lineColor: yesColor,
       lineWidth: 2,
+      topColor: `color-mix(in srgb, ${yesColor} 18%, transparent)`,
+      bottomColor: "rgba(0,0,0,0)",
       priceLineVisible: false,
       lastValueVisible: false,
       crosshairMarkerVisible: true,
-      ...fullRange,
-    });
-    const no = chart.addSeries(LineSeries, {
-      color: NO_COLOR,
-      lineWidth: 2,
-      priceLineVisible: false,
-      lastValueVisible: false,
-      crosshairMarkerVisible: true,
+      crosshairMarkerBorderColor: yesColor,
+      crosshairMarkerBackgroundColor: yesColor,
       ...fullRange,
     });
 
     chartRef.current = chart;
     yesSeriesRef.current = yes;
-    noSeriesRef.current = no;
 
     const unsub = chart.subscribeCrosshairMove((param) => {
       if (!param.time || !param.point) {
@@ -141,12 +132,7 @@ export function MarketChart({
         return;
       }
       const y = param.seriesData.get(yes) as { value?: number } | undefined;
-      const n = param.seriesData.get(no) as { value?: number } | undefined;
-      if (y?.value === undefined || n?.value === undefined) {
-        setHover(null);
-        return;
-      }
-      setHover({ yes: y.value, no: n.value });
+      setHover(y?.value ?? null);
     });
 
     const observer = new ResizeObserver(() => {
@@ -166,7 +152,6 @@ export function MarketChart({
       chart.remove();
       chartRef.current = null;
       yesSeriesRef.current = null;
-      noSeriesRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -175,63 +160,39 @@ export function MarketChart({
     requestAnimationFrame(() => {
       const chart = chartRef.current;
       const yes = yesSeriesRef.current;
-      const no = noSeriesRef.current;
-      if (!chart || !yes || !no) return;
+      if (!chart || !yes) return;
       const snap = latest.current;
 
       const lastYes = snap.yesSeriesData.at(-1);
-      const lastNo = snap.noSeriesData.at(-1);
-      let y: number | null = yes.priceToCoordinate(lastYes?.value ?? snap.currentYes);
-      let n: number | null = no.priceToCoordinate(lastNo?.value ?? snap.currentNo);
-
-      // Never let the two labels collide: push the lower one further down.
-      if (y !== null && n !== null && Math.abs(y - n) < LABEL_MIN_GAP) {
-        if (y >= n) y = n + LABEL_MIN_GAP;
-        else n = y + LABEL_MIN_GAP;
-      }
-
-      const lastTime = lastYes?.time ?? lastNo?.time;
+      const y = yes.priceToCoordinate(lastYes?.value ?? snap.currentYes);
       const x =
-        lastTime === undefined ? null : chart.timeScale().timeToCoordinate(lastTime as Time);
-
-      setYesTop(y);
-      setNoTop(n);
-      setLabelLeft(x === null ? null : x + 8);
+        lastYes === undefined
+          ? null
+          : chart.timeScale().timeToCoordinate(lastYes.time as Time);
+      setMarker(y === null || x === null ? null : { top: y, left: x });
     });
   }
 
   // Push data and refresh label positions.
   useEffect(() => {
     const chart = chartRef.current;
-    if (!chart || !yesSeriesRef.current || !noSeriesRef.current) return;
+    if (!chart || !yesSeriesRef.current) return;
     yesSeriesRef.current.setData(yesSeriesData);
-    noSeriesRef.current.setData(noSeriesData);
     chart.timeScale().fitContent();
     queueLabels();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [yesSeriesData, noSeriesData, currentYes, currentNo]);
+  }, [yesSeriesData, currentYes]);
 
-  const shownYes = hover ? hover.yes : currentYes;
-  const shownNo = hover ? hover.no : currentNo;
+  const shownYes = hover ?? currentYes;
+  const tilt = (shownYes - 50) * 0.6;
 
   return (
     <div className="w-full">
-      <div className="relative h-[440px] w-full sm:h-[480px]">
-        {/* The plot stops short of the wrapper so the overlay labels sit clear of it. */}
-        <div ref={containerRef} className="absolute bottom-0 left-0 top-0 right-[84px]" />
-
-        <Overlay top={yesTop} left={labelLeft} label={yesLabel} value={shownYes} color={YES_COLOR} />
-        <Overlay top={noTop} left={labelLeft} label={noLabel} value={shownNo} color={NO_COLOR} />
-      </div>
-
-      <div className="mt-3 flex items-center justify-between gap-4">
-        <span className="num text-xs text-white/35">
-          {volume === undefined
-            ? null
-            : `V${Math.round(volume).toLocaleString("en-US")} vol`}
-        </span>
-        <div className="flex items-center gap-5">
-          {MARKET_TIMEFRAMES.map((tf) => (
+      {/* Timeframe pills sit above the plot. */}
+      <div className="flex items-center gap-1.5">
+        {MARKET_TIMEFRAMES.map((tf) => {
+          const active = tf === activeTf;
+          return (
             <button
               key={tf}
               type="button"
@@ -239,48 +200,55 @@ export function MarketChart({
                 setInternalTf(tf);
                 onTimeframeChange?.(tf);
               }}
-              className={cn(
-                "bg-transparent text-xs font-semibold uppercase tracking-[0.05em] transition-opacity",
-                tf === activeTf ? "text-white opacity-100" : "text-white opacity-35",
-              )}
+              className="vane-num rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] transition-colors duration-150"
+              style={
+                active
+                  ? { color: "var(--vanti-blue)", backgroundColor: "rgba(76,111,255,0.12)" }
+                  : { color: "var(--vanti-muted)", backgroundColor: "transparent" }
+              }
             >
               {tf}
             </button>
-          ))}
+          );
+        })}
+      </div>
+
+      <div className="relative mt-2 h-[280px] w-full sm:h-[360px]">
+        <div ref={containerRef} className="absolute inset-0" />
+
+        {marker ? (
+          <div
+            className="pointer-events-none absolute"
+            style={{
+              top: marker.top,
+              left: marker.left,
+              transform: `translate(-50%, -50%) rotate(${tilt}deg)`,
+              color: "var(--vanti-blue)",
+            }}
+          >
+            <VaneChevron size={14} />
+          </div>
+        ) : null}
+
+        <div className="pointer-events-none absolute right-0 top-0 text-right">
+          <div className="vane-label">YES</div>
+          <div
+            className="vane-num text-[28px] font-extrabold leading-none"
+            style={{ color: "var(--vanti-yes)" }}
+          >
+            {Math.round(shownYes)}%
+          </div>
         </div>
       </div>
-    </div>
-  );
-}
 
-function Overlay({
-  top,
-  left,
-  label,
-  value,
-  color,
-}: {
-  top: number | null;
-  left: number | null;
-  label: string;
-  value: number;
-  color: string;
-}) {
-  if (top === null || left === null) return null;
-  return (
-    <div
-      className="pointer-events-none absolute translate-y-[-50%]"
-      style={{ top, left }}
-    >
-      <div
-        className="text-[13px] uppercase tracking-[0.12em] opacity-60"
-        style={{ color }}
-      >
-        {label}
-      </div>
-      <div className="num text-[32px] font-extrabold leading-none" style={{ color }}>
-        {Math.round(value)}%
-      </div>
+      {volume === undefined ? null : (
+        <div className={cn("mt-2 flex items-baseline gap-2")}>
+          <span className="vane-label">Volume</span>
+          <span className="vane-num text-xs" style={{ color: "var(--vanti-muted)" }}>
+            V{Math.round(volume).toLocaleString("en-US")}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
