@@ -10,7 +10,8 @@ import { CategoryIcon } from "@/components/vanti/category-icon";
 import { MarketChart, type MarketTimeframe } from "@/components/MarketChart";
 import { MarketDiscussion } from "@/components/vanti/market-discussion";
 import { MarketPools } from "@/components/vanti/market-pools";
-import { ProbabilityBar } from "@/components/vanti/probability-bar";
+import { OddsTickRule } from "@/components/vanti/odds-tick-rule";
+import { VaneChevron } from "@/components/vanti/vane-chevron";
 import { TradePanel } from "@/components/vanti/trade-panel";
 import { TradeDialog } from "@/components/vanti/trade-dialog";
 import { useSession } from "@/hooks/use-vanti-session";
@@ -63,10 +64,10 @@ function MarketDetailPage() {
   const points = market.data?.spark ?? [];
   const windowed = useMemo(() => {
     const minutes: Record<MarketTimeframe, number | null> = {
-      LIVE: 60,
+      "1H": 60,
+      "6H": 360,
       "1D": 1440,
       "1W": 10080,
-      "1M": 43200,
       ALL: null,
     };
     const span = minutes[timeframe];
@@ -74,10 +75,6 @@ function MarketDetailPage() {
     const series = source.length >= 2 ? source : points.slice(-2);
     return {
       yes: series.map((p) => ({ time: p.t / 1000, value: Number((p.price * 100).toFixed(1)) })),
-      no: series.map((p) => ({
-        time: p.t / 1000,
-        value: Number(((1 - p.price) * 100).toFixed(1)),
-      })),
     };
   }, [points, timeframe]);
 
@@ -166,24 +163,27 @@ function MarketDetailPage() {
         </div>
 
         <div className="flex items-baseline gap-4">
-          <span className="num text-4xl font-semibold tracking-tight text-positive">
+          <span
+            className="vane-num text-4xl font-extrabold"
+            style={{ color: "var(--vanti-yes)" }}
+          >
             {formatProbability(m.yesPrice)}
           </span>
           <span
             className={cn(
-              "num inline-flex items-center gap-1 text-sm font-medium",
-              up ? "text-positive" : "text-negative",
+              "vane-num inline-flex items-center gap-1 text-sm font-medium",
             )}
+            style={{ color: up ? "var(--vanti-yes)" : "var(--vanti-no)" }}
           >
             {up ? <TrendingUp className="size-4" /> : <TrendingDown className="size-4" />}
             {formatDelta(m.change24h)} 24h
           </span>
         </div>
 
-        <ProbabilityBar price={m.yesPrice} height={12} showLabels />
+        <OddsTickRule price={m.yesPrice} />
       </header>
 
-      <div className="@container">
+      <div className="@container -mt-2">
       <div className="grid gap-4 @[600px]:gap-6 @[600px]:grid-cols-[1fr_280px] @[900px]:grid-cols-[220px_1fr_300px]">
         <aside className="order-3 space-y-4 @[600px]:col-span-2 @[600px]:grid @[600px]:grid-cols-2 @[600px]:items-start @[600px]:gap-4 @[600px]:space-y-0 @[900px]:order-1 @[900px]:col-span-1 @[900px]:block @[900px]:space-y-4">
           <div className="rounded-lg border border-border bg-card p-4">
@@ -222,11 +222,7 @@ function MarketDetailPage() {
         <div className="order-1 min-w-0 space-y-6 @[900px]:order-2">
           <MarketChart
             yesData={windowed.yes}
-            noData={windowed.no}
-            yesLabel="YES"
-            noLabel="NO"
             currentYes={m.yesPrice * 100}
-            currentNo={m.noPrice * 100}
             volume={m.volume}
             timeframe={timeframe}
             onTimeframeChange={setTimeframe}
