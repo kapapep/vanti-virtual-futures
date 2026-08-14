@@ -16,7 +16,7 @@ import { TradeDialog } from "@/components/vanti/trade-dialog";
 import { useSession } from "@/hooks/use-vanti-session";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  formatCents,
+  formatProbability,
   formatCount,
   formatDate,
   formatDelta,
@@ -160,7 +160,7 @@ function MarketDetailPage() {
 
         <div className="flex items-baseline gap-4">
           <span className="num text-4xl font-semibold tracking-tight text-positive">
-            {formatCents(m.yesPrice)}
+            {formatProbability(m.yesPrice)}
           </span>
           <span
             className={cn(
@@ -192,11 +192,11 @@ function MarketDetailPage() {
               </div>
               <div className="flex justify-between gap-2">
                 <dt className="text-muted-foreground">YES</dt>
-                <dd className="num font-medium text-positive">{formatCents(m.yesPrice)}</dd>
+                <dd className="num font-medium text-positive">{formatProbability(m.yesPrice)}</dd>
               </div>
               <div className="flex justify-between gap-2">
                 <dt className="text-muted-foreground">NO</dt>
-                <dd className="num font-medium text-negative">{formatCents(m.noPrice)}</dd>
+                <dd className="num font-medium text-negative">{formatProbability(m.noPrice)}</dd>
               </div>
               <div className="flex justify-between gap-2">
                 <dt className="text-muted-foreground">Opened</dt>
@@ -259,7 +259,7 @@ function MarketDetailPage() {
                       {t.action} {t.side}
                     </span>
                     <span className="num text-muted-foreground">
-                      {formatCount(t.contracts)} @ {formatCents(t.price)}
+                      {formatCount(t.contracts)} @ {formatProbability(t.price)}
                     </span>
                   </li>
                 ))}
@@ -286,7 +286,7 @@ function MarketDetailPage() {
           side="yes"
           trigger={
             <Button className="min-h-12 w-full bg-positive text-base font-semibold text-positive-foreground hover:bg-positive/90">
-              Buy YES <span className="num">{formatCents(m.yesPrice)}</span>
+              Buy YES <span className="num">{formatProbability(m.yesPrice)}</span>
             </Button>
           }
         />
@@ -295,7 +295,7 @@ function MarketDetailPage() {
           side="no"
           trigger={
             <Button className="min-h-12 w-full bg-negative text-base font-semibold text-negative-foreground hover:bg-negative/90">
-              Buy NO <span className="num">{formatCents(m.noPrice)}</span>
+              Buy NO <span className="num">{formatProbability(m.noPrice)}</span>
             </Button>
           }
         />

@@ -227,7 +227,7 @@ export function MarketAmbientBackground() {
                 className="num flex items-center gap-2 whitespace-nowrap text-xs text-muted-foreground"
               >
                 <span className="eyebrow text-muted-foreground">{t.label}</span>
-                <span className={yes >= 50 ? "text-yes" : "text-no"}>{yes}¢</span>
+                <span className={yes >= 50 ? "text-yes" : "text-no"}>{yes}%</span>
               </span>
             );
           })}

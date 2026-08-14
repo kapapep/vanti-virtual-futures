@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProbabilityBar } from "@/components/vanti/probability-bar";
 import { TradeDialog } from "@/components/vanti/trade-dialog";
-import { formatCents, formatDelta, formatVolume } from "@/lib/format";
+import { formatProbability, formatDelta, formatVolume } from "@/lib/format";
 import { marketsQuery } from "@/lib/markets";
 import { cn } from "@/lib/utils";
 
@@ -62,7 +62,7 @@ export function MarketEmbed({ marketId }: { marketId: string }) {
                 disabled={!tradable}
                 className="border-positive/40 text-positive hover:bg-positive-subtle hover:text-positive"
               >
-                Trade YES <span className="num">{formatCents(market.yesPrice)}</span>
+                Trade YES <span className="num">{formatProbability(market.yesPrice)}</span>
               </Button>
             }
           />
@@ -76,7 +76,7 @@ export function MarketEmbed({ marketId }: { marketId: string }) {
                 disabled={!tradable}
                 className="border-negative/40 text-negative hover:bg-negative-subtle hover:text-negative"
               >
-                Trade NO <span className="num">{formatCents(market.noPrice)}</span>
+                Trade NO <span className="num">{formatProbability(market.noPrice)}</span>
               </Button>
             }
           />

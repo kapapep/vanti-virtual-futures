@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { EmptyState } from "@/components/vanti/empty-state";
 import {
   formatBalance,
-  formatCents,
+  formatProbability,
   formatContracts,
   formatDateTime,
 } from "@/lib/format";
@@ -81,7 +81,7 @@ export function TradeHistoryList({
             </div>
             <div className="text-right">
               <p className="text-meta uppercase text-muted-foreground">Price</p>
-              <p className="num text-sm font-medium text-foreground">{formatCents(trade.price)}</p>
+              <p className="num text-sm font-medium text-foreground">{formatProbability(trade.price)}</p>
             </div>
             <div className="text-right">
               <p className="text-meta uppercase text-muted-foreground">Total</p>

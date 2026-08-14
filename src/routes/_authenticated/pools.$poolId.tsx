@@ -15,7 +15,7 @@ import { useProfile, useSession } from "@/hooks/use-vanti-session";
 import { supabase } from "@/integrations/supabase/client";
 import {
   formatBalance,
-  formatCents,
+  formatProbability,
   formatContracts,
   formatPercent,
   formatSignedBalance,
@@ -116,7 +116,7 @@ function PoolDetailPage() {
       void queryClient.invalidateQueries({ queryKey: ["pool-ledger", poolId] });
       void queryClient.invalidateQueries({ queryKey: ["profile"] });
       toast.success(
-        `Bought ${formatContracts(result.sharesBought)} shares at ${formatCents(result.priceAtEntry)}.`,
+        `Bought ${formatContracts(result.sharesBought)} shares at ${formatProbability(result.priceAtEntry)}.`,
       );
     },
     onError: (error: Error) => toast.error(error.message),
@@ -206,7 +206,7 @@ function PoolDetailPage() {
               </div>
               <div>
                 <dt className="text-meta uppercase text-muted-foreground">Side price</dt>
-                <dd className="num font-semibold text-foreground">{formatCents(price)}</dd>
+                <dd className="num font-semibold text-foreground">{formatProbability(price)}</dd>
               </div>
               <div>
                 <dt className="text-meta uppercase text-muted-foreground">Min contribution</dt>
@@ -263,7 +263,7 @@ function PoolDetailPage() {
                 <span className="text-sm font-semibold">{formatSignedPercent(pnl.ratio)}</span>
               </p>
               <p className="num text-meta text-muted-foreground">
-                {formatContracts(s.totalShares)} shares × {formatCents(pnl.price)} ={" "}
+                {formatContracts(s.totalShares)} shares × {formatProbability(pnl.price)} ={" "}
                 {formatBalance(pnl.value)} vs {formatBalance(s.totalContributed)} contributed
               </p>
             </section>
@@ -360,8 +360,8 @@ function PoolDetailPage() {
 
                 <p className="num text-sm text-foreground">
                   {previewShares > 0
-                    ? `${formatBalance(parsed)} buys ${formatContracts(previewShares)} shares at ${formatCents(price)}`
-                    : `Shares are bought at the live price, currently ${formatCents(price)}`}
+                    ? `${formatBalance(parsed)} buys ${formatContracts(previewShares)} shares at ${formatProbability(price)}`
+                    : `Shares are bought at the live price, currently ${formatProbability(price)}`}
                 </p>
                 <p className="num text-meta text-muted-foreground">
                   If this resolves {s.outcomeSide.toUpperCase()} you receive{" "}

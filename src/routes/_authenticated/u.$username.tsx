@@ -25,7 +25,7 @@ import { TradeHistoryList } from "@/components/vanti/trade-history-list";
 import { useSession } from "@/hooks/use-vanti-session";
 import {
   formatBalance,
-  formatCents,
+  formatProbability,
   formatContracts,
   formatCount,
   formatDate,
@@ -288,7 +288,7 @@ function UserProfilePage() {
                     </span>
                     <span className="num text-meta text-muted-foreground">
                       {formatContracts(position.contracts)} contracts @{" "}
-                      {formatCents(position.avgPrice)}
+                      {formatProbability(position.avgPrice)}
                     </span>
                   </div>
                   <Link

@@ -5,7 +5,7 @@ import { Clock, TrendingDown, TrendingUp, Users } from "lucide-react";
 import { CategoryIcon } from "@/components/vanti/category-icon";
 import { MarketSparkline } from "@/components/vanti/market-sparkline";
 import { ProbabilityBar } from "@/components/vanti/probability-bar";
-import { formatCents, formatCount, formatDate, formatDelta, formatVolume } from "@/lib/format";
+import { formatProbability, formatCount, formatDate, formatDelta, formatVolume } from "@/lib/format";
 import type { Market } from "@/lib/markets";
 import { cn } from "@/lib/utils";
 
@@ -43,11 +43,11 @@ export function MarketCard({ market, actions }: { market: Market; actions?: Reac
           <div className="mt-auto flex items-end justify-between gap-3">
             <div className="flex items-baseline gap-3">
               <span className="num text-lg font-semibold text-positive">
-                {formatCents(market.yesPrice)}
+                {formatProbability(market.yesPrice)}
                 <span className="ml-1 text-meta font-medium text-muted-foreground">YES</span>
               </span>
               <span className="num text-lg font-semibold text-negative">
-                {formatCents(market.noPrice)}
+                {formatProbability(market.noPrice)}
                 <span className="ml-1 text-meta font-medium text-muted-foreground">NO</span>
               </span>
             </div>

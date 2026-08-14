@@ -23,7 +23,7 @@ export function formatProbability(price: number | string | null | undefined): st
 }
 
 /** Formats a 0–1 contract price in cents, e.g. 0.63 -> "63¢". */
-export function formatCents(price: number | string | null | undefined): string {
+export function formatProbability(price: number | string | null | undefined): string {
   const value = typeof price === "string" ? Number(price) : (price ?? 0);
   return `${Math.round((Number.isFinite(value) ? value : 0) * 100)}¢`;
 }
