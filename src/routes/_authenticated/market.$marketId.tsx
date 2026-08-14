@@ -121,7 +121,14 @@ function MarketDetailPage() {
   const up = m.change24h >= 0;
 
   return (
-    <div className="space-y-6 pb-32 lg:pb-0">
+    <div
+      className="space-y-4 @[600px]:space-y-6"
+      style={{
+        // Clears the sticky top bar and the fixed mobile buy bar.
+        paddingTop: "env(safe-area-inset-top)",
+        paddingBottom: "calc(136px + 24px + env(safe-area-inset-bottom))",
+      }}
+    >
       <header className="space-y-4">
         <div className="flex flex-wrap items-center gap-2 text-meta text-muted-foreground">
           {m.category ? (
@@ -177,7 +184,7 @@ function MarketDetailPage() {
       </header>
 
       <div className="@container">
-      <div className="grid gap-6 @[600px]:grid-cols-[1fr_280px] @[900px]:grid-cols-[220px_1fr_300px]">
+      <div className="grid gap-4 @[600px]:gap-6 @[600px]:grid-cols-[1fr_280px] @[900px]:grid-cols-[220px_1fr_300px]">
         <aside className="order-3 space-y-4 @[600px]:col-span-2 @[600px]:grid @[600px]:grid-cols-2 @[600px]:items-start @[600px]:gap-4 @[600px]:space-y-0 @[900px]:order-1 @[900px]:col-span-1 @[900px]:block @[900px]:space-y-4">
           <div className="rounded-lg border border-border bg-card p-4">
             <h2 className="text-meta font-semibold uppercase text-muted-foreground">Market info</h2>
