@@ -75,10 +75,15 @@ export function MarketChart({
 
   const [yesTop, setYesTop] = useState<number | null>(null);
   const [noTop, setNoTop] = useState<number | null>(null);
+  const [labelLeft, setLabelLeft] = useState<number | null>(null);
   const [hover, setHover] = useState<{ yes: number; no: number } | null>(null);
 
   const yesSeriesData = useMemo(() => toSeries(yesData), [yesData]);
   const noSeriesData = useMemo(() => toSeries(noData), [noData]);
+
+  // Latest values the label placement needs, read from inside stable callbacks.
+  const latest = useRef({ currentYes, currentNo, yesSeriesData, noSeriesData });
+  latest.current = { currentYes, currentNo, yesSeriesData, noSeriesData };
 
   // Create the chart once.
   useEffect(() => {
