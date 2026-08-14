@@ -10,7 +10,8 @@ import { CategoryIcon } from "@/components/vanti/category-icon";
 import { MarketChart, type MarketTimeframe } from "@/components/MarketChart";
 import { MarketDiscussion } from "@/components/vanti/market-discussion";
 import { MarketPools } from "@/components/vanti/market-pools";
-import { ProbabilityBar } from "@/components/vanti/probability-bar";
+import { OddsTickRule } from "@/components/vanti/odds-tick-rule";
+import { VaneChevron } from "@/components/vanti/vane-chevron";
 import { TradePanel } from "@/components/vanti/trade-panel";
 import { TradeDialog } from "@/components/vanti/trade-dialog";
 import { useSession } from "@/hooks/use-vanti-session";
@@ -63,10 +64,10 @@ function MarketDetailPage() {
   const points = market.data?.spark ?? [];
   const windowed = useMemo(() => {
     const minutes: Record<MarketTimeframe, number | null> = {
-      LIVE: 60,
+      "1H": 60,
+      "6H": 360,
       "1D": 1440,
       "1W": 10080,
-      "1M": 43200,
       ALL: null,
     };
     const span = minutes[timeframe];
@@ -74,10 +75,6 @@ function MarketDetailPage() {
     const series = source.length >= 2 ? source : points.slice(-2);
     return {
       yes: series.map((p) => ({ time: p.t / 1000, value: Number((p.price * 100).toFixed(1)) })),
-      no: series.map((p) => ({
-        time: p.t / 1000,
-        value: Number(((1 - p.price) * 100).toFixed(1)),
-      })),
     };
   }, [points, timeframe]);
 
@@ -166,24 +163,27 @@ function MarketDetailPage() {
         </div>
 
         <div className="flex items-baseline gap-4">
-          <span className="num text-4xl font-semibold tracking-tight text-positive">
+          <span
+            className="vane-num text-4xl font-extrabold"
+            style={{ color: "var(--vanti-yes)" }}
+          >
             {formatProbability(m.yesPrice)}
           </span>
           <span
             className={cn(
-              "num inline-flex items-center gap-1 text-sm font-medium",
-              up ? "text-positive" : "text-negative",
+              "vane-num inline-flex items-center gap-1 text-sm font-medium",
             )}
+            style={{ color: up ? "var(--vanti-yes)" : "var(--vanti-no)" }}
           >
             {up ? <TrendingUp className="size-4" /> : <TrendingDown className="size-4" />}
             {formatDelta(m.change24h)} 24h
           </span>
         </div>
 
-        <ProbabilityBar price={m.yesPrice} height={12} showLabels />
+        <OddsTickRule price={m.yesPrice} />
       </header>
 
-      <div className="@container">
+      <div className="@container -mt-2">
       <div className="grid gap-4 @[600px]:gap-6 @[600px]:grid-cols-[1fr_280px] @[900px]:grid-cols-[220px_1fr_300px]">
         <aside className="order-3 space-y-4 @[600px]:col-span-2 @[600px]:grid @[600px]:grid-cols-2 @[600px]:items-start @[600px]:gap-4 @[600px]:space-y-0 @[900px]:order-1 @[900px]:col-span-1 @[900px]:block @[900px]:space-y-4">
           <div className="rounded-lg border border-border bg-card p-4">
@@ -222,11 +222,7 @@ function MarketDetailPage() {
         <div className="order-1 min-w-0 space-y-6 @[900px]:order-2">
           <MarketChart
             yesData={windowed.yes}
-            noData={windowed.no}
-            yesLabel="YES"
-            noLabel="NO"
             currentYes={m.yesPrice * 100}
-            currentNo={m.noPrice * 100}
             volume={m.volume}
             timeframe={timeframe}
             onTimeframeChange={setTimeframe}
@@ -287,27 +283,57 @@ function MarketDetailPage() {
       </div>
 
       {/* Mobile: the primary trade action stays in thumb reach and opens the full panel. */}
-      <div className="fixed inset-x-0 bottom-16 z-20 grid grid-cols-2 gap-2 border-t border-border bg-background p-3 @[600px]:hidden">
+      <div
+        className="fixed inset-x-0 bottom-16 z-20 flex items-stretch border-t border-border p-3 @[600px]:hidden"
+        style={{ backgroundColor: "var(--vanti-ink)" }}
+      >
         <TradeDialog
           market={m}
           side="yes"
-          trigger={
-            <Button className="min-h-12 w-full bg-positive text-base font-semibold text-positive-foreground hover:bg-positive/90">
-              Buy YES <span className="num">{formatProbability(m.yesPrice)}</span>
-            </Button>
-          }
+          trigger={<VaneBuyButton side="yes" price={m.yesPrice} />}
         />
+        <VaneDivider />
         <TradeDialog
           market={m}
           side="no"
-          trigger={
-            <Button className="min-h-12 w-full bg-negative text-base font-semibold text-negative-foreground hover:bg-negative/90">
-              Buy NO <span className="num">{formatProbability(m.noPrice)}</span>
-            </Button>
-          }
+          trigger={<VaneBuyButton side="no" price={m.noPrice} />}
         />
       </div>
       </div>
+    </div>
+  );
+}
+
+/** Outlined buy button that floods to its solid colour on press. */
+function VaneBuyButton({ side, price }: { side: "yes" | "no"; price: number }) {
+  const color = side === "yes" ? "var(--vanti-yes)" : "var(--vanti-no)";
+  return (
+    <Button
+      variant="ghost"
+      className={cn(
+        "vane-buy min-h-12 flex-1 justify-between rounded-xl px-3 text-[15px] font-semibold",
+        "transition-colors duration-[120ms] ease-out",
+      )}
+      style={{ ["--vane-c" as string]: color }}
+    >
+      <span className="uppercase tracking-[0.06em]">Buy {side}</span>
+      <span className="vane-buy-pill vane-num rounded-full px-2 py-0.5 text-[13px]">
+        {formatProbability(price)}
+      </span>
+    </Button>
+  );
+}
+
+/** Hairline divider between the two buy buttons, notched with a vane chevron. */
+function VaneDivider() {
+  return (
+    <div className="relative mx-2 flex w-px items-center justify-center self-stretch">
+      <span className="absolute inset-y-1 w-px" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />
+      <VaneChevron
+        size={6}
+        className="relative"
+        style={{ color: "var(--vanti-blue)", backgroundColor: "var(--vanti-ink)" }}
+      />
     </div>
   );
 }

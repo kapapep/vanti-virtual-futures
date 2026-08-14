@@ -19,6 +19,21 @@
   letter-spacing: -0.01em;
 }
 
+/* Vane meter identity — market detail page only. */
+@utility vane-num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  letter-spacing: -0.02em;
+}
+
+@utility vane-label {
+  font-size: 11px;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--vanti-muted);
+}
+
 /* Metadata / eyebrow text: monospaced, uppercase, tracked out. */
 @utility eyebrow {
   font-family: var(--font-mono);
@@ -145,6 +160,18 @@
   --track: #1f2438;
   --yes: #30d158;
   --no: #ff453a;
+
+  /*
+   * Vane meter palette. Scoped to the market detail identity — do not reuse
+   * these tokens elsewhere in the app.
+   */
+  --vanti-blue: #4c6fff;
+  --vanti-deep: #2b3bd6;
+  --vanti-yes: #3ecf8e;
+  --vanti-no: #ff5c7a;
+  --vanti-ink: #06070a;
+  --vanti-surface: #0e1016;
+  --vanti-muted: #8a90a0;
 
   /* Semantic mapping — existing components reference these keys. */
   --background: var(--bg);
@@ -330,6 +357,34 @@
 }
 
 /* Custom "Posted" toast animation. */
+/* Vane meter buy buttons: outlined at rest, flooded on press. */
+.vane-buy {
+  background-color: color-mix(in srgb, var(--vane-c) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--vane-c) 40%, transparent);
+  color: var(--vane-c);
+}
+
+.vane-buy .vane-buy-pill {
+  background-color: color-mix(in srgb, var(--vane-c) 18%, transparent);
+  color: var(--vane-c);
+}
+
+.vane-buy:active {
+  background-color: var(--vane-c);
+  color: var(--vanti-ink);
+}
+
+.vane-buy:active .vane-buy-pill {
+  background-color: color-mix(in srgb, var(--vanti-ink) 18%, transparent);
+  color: var(--vanti-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vane-buy {
+    transition: none !important;
+  }
+}
+
 @keyframes posted-toast-in {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
