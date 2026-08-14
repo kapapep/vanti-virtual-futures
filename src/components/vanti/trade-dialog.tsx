@@ -8,7 +8,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { TradePanel } from "@/components/vanti/trade-panel";
 import { useSession } from "@/hooks/use-vanti-session";
@@ -22,7 +21,7 @@ import type { TradeSide } from "@/lib/trade";
  */
 function DisabledTrigger({ trigger }: { trigger: ReactNode }) {
   return (
-    <div aria-busy className="pointer-events-none flex-1 opacity-60">
+    <div aria-busy className="pointer-events-none flex flex-1 opacity-60">
       {trigger}
     </div>
   );
@@ -50,7 +49,7 @@ export function TradeDialog({
   if (!user) {
     return (
       <div
-        className="flex-1"
+        className="flex flex-1"
         onClick={() => {
           console.log("[trade] buy blocked — signed out", { side, marketId: market.id });
           toast.error("Sign in to place a trade.");
