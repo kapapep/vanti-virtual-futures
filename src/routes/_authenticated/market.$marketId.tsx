@@ -283,27 +283,57 @@ function MarketDetailPage() {
       </div>
 
       {/* Mobile: the primary trade action stays in thumb reach and opens the full panel. */}
-      <div className="fixed inset-x-0 bottom-16 z-20 grid grid-cols-2 gap-2 border-t border-border bg-background p-3 @[600px]:hidden">
+      <div
+        className="fixed inset-x-0 bottom-16 z-20 flex items-stretch border-t border-border p-3 @[600px]:hidden"
+        style={{ backgroundColor: "var(--vanti-ink)" }}
+      >
         <TradeDialog
           market={m}
           side="yes"
-          trigger={
-            <Button className="min-h-12 w-full bg-positive text-base font-semibold text-positive-foreground hover:bg-positive/90">
-              Buy YES <span className="num">{formatProbability(m.yesPrice)}</span>
-            </Button>
-          }
+          trigger={<VaneBuyButton side="yes" price={m.yesPrice} />}
         />
+        <VaneDivider />
         <TradeDialog
           market={m}
           side="no"
-          trigger={
-            <Button className="min-h-12 w-full bg-negative text-base font-semibold text-negative-foreground hover:bg-negative/90">
-              Buy NO <span className="num">{formatProbability(m.noPrice)}</span>
-            </Button>
-          }
+          trigger={<VaneBuyButton side="no" price={m.noPrice} />}
         />
       </div>
       </div>
+    </div>
+  );
+}
+
+/** Outlined buy button that floods to its solid colour on press. */
+function VaneBuyButton({ side, price }: { side: "yes" | "no"; price: number }) {
+  const color = side === "yes" ? "var(--vanti-yes)" : "var(--vanti-no)";
+  return (
+    <Button
+      variant="ghost"
+      className={cn(
+        "vane-buy min-h-12 flex-1 justify-between rounded-xl px-3 text-[15px] font-semibold",
+        "transition-colors duration-[120ms] ease-out",
+      )}
+      style={{ ["--vane-c" as string]: color }}
+    >
+      <span className="uppercase tracking-[0.06em]">Buy {side}</span>
+      <span className="vane-buy-pill vane-num rounded-full px-2 py-0.5 text-[13px]">
+        {formatProbability(price)}
+      </span>
+    </Button>
+  );
+}
+
+/** Hairline divider between the two buy buttons, notched with a vane chevron. */
+function VaneDivider() {
+  return (
+    <div className="relative mx-2 flex w-px items-center justify-center self-stretch">
+      <span className="absolute inset-y-1 w-px" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />
+      <VaneChevron
+        size={6}
+        className="relative"
+        style={{ color: "var(--vanti-blue)", backgroundColor: "var(--vanti-ink)" }}
+      />
     </div>
   );
 }
