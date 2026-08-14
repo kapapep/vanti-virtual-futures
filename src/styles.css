@@ -19,6 +19,21 @@
   letter-spacing: -0.01em;
 }
 
+/* Vane meter identity — market detail page only. */
+@utility vane-num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  letter-spacing: -0.02em;
+}
+
+@utility vane-label {
+  font-size: 11px;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--vanti-muted);
+}
+
 /* Metadata / eyebrow text: monospaced, uppercase, tracked out. */
 @utility eyebrow {
   font-family: var(--font-mono);
