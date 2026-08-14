@@ -58,14 +58,16 @@ export function MarketCard({ market, actions }: { market: Market; actions?: Reac
           </div>
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-border pt-3 text-meta text-muted-foreground">
-            <span
-              className="num inline-flex items-center gap-1 font-medium"
-              style={{ color: trendColor(direction) }}
-            >
-              {direction === "up" ? <TrendingUp className="size-3" /> : null}
-              {direction === "down" ? <TrendingDown className="size-3" /> : null}
-              {formatDelta(market.change24h)} 24h
-            </span>
+            {market.change24h === null ? null : (
+              <span
+                className="num inline-flex items-center gap-1 font-medium"
+                style={{ color: trendColor(direction) }}
+              >
+                {direction === "up" ? <TrendingUp className="size-3" /> : null}
+                {direction === "down" ? <TrendingDown className="size-3" /> : null}
+                {formatDelta(market.change24h)} 24h
+              </span>
+            )}
             <span className="num">{formatVolume(market.volume)} vol</span>
             <span className="num inline-flex items-center gap-1">
               <Users className="size-3" />

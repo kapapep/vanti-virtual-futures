@@ -18,7 +18,8 @@ export function MarketEmbed({ marketId }: { marketId: string }) {
   if (markets.isPending && !market) return <Skeleton className="h-28 w-full rounded-lg" />;
   if (!market) return null;
 
-  const up = market.change24h >= 0;
+  const change = market.change24h;
+  const up = (change ?? 0) >= 0;
   const tradable = market.status === "active";
 
   return (
@@ -34,15 +35,17 @@ export function MarketEmbed({ marketId }: { marketId: string }) {
         </Link>
 
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-meta text-muted-foreground">
-          <span
-            className={cn(
-              "num inline-flex items-center gap-1 font-medium",
-              up ? "text-positive" : "text-negative",
-            )}
-          >
-            {up ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
-            {formatDelta(market.change24h)} 24h
-          </span>
+          {change === null ? null : (
+            <span
+              className={cn(
+                "num inline-flex items-center gap-1 font-medium",
+                up ? "text-positive" : "text-negative",
+              )}
+            >
+              {up ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
+              {formatDelta(change)} 24h
+            </span>
+          )}
           <span className="num">{formatVolume(market.volume)} vol</span>
           {!tradable ? (
             <span className="font-medium uppercase">

@@ -14,8 +14,8 @@ export const TREND_LABEL = {
 } as const;
 
 /** Picks the trend descriptor from a market's 24h YES-price change. */
-export function trendLabel(change24h: number): string {
-  return change24h >= 0 ? TREND_LABEL.PRICE_UP : TREND_LABEL.PRICE_DOWN;
+export function trendLabel(change24h: number | null): string {
+  return (change24h ?? 0) >= 0 ? TREND_LABEL.PRICE_UP : TREND_LABEL.PRICE_DOWN;
 }
 
 export type TrendDirection = "up" | "down" | "flat";
@@ -24,8 +24,8 @@ export type TrendDirection = "up" | "down" | "flat";
  * Single source of truth for how a 24h change is rendered: arrow direction and
  * colour always derive from the sign of the one shared change value.
  */
-export function trendDirection(change24h: number): TrendDirection {
-  if (!Number.isFinite(change24h) || change24h === 0) return "flat";
+export function trendDirection(change24h: number | null): TrendDirection {
+  if (change24h === null || !Number.isFinite(change24h) || change24h === 0) return "flat";
   return change24h > 0 ? "up" : "down";
 }
 

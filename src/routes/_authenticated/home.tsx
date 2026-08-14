@@ -79,7 +79,8 @@ type PoolItem = {
 type FeedItem = { kind: "post"; post: FeedPost; at: number } | PriceMoveItem | PoolItem;
 
 function PriceMoveCard({ market, label }: { market: Market; label: string }) {
-  const up = market.change24h >= 0;
+  const change = market.change24h;
+  const up = (change ?? 0) >= 0;
   return (
     <article className="flex gap-3 rounded-lg border border-border bg-surface p-4">
       <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-accent-subtle">
@@ -95,15 +96,17 @@ function PriceMoveCard({ market, label }: { market: Market; label: string }) {
           {market.question}
         </Link>
         <p className="mt-1 flex flex-wrap items-center gap-x-3 text-meta">
-          <span
-            className={cn(
-              "num inline-flex items-center gap-1",
-              up ? "text-positive" : "text-negative",
-            )}
-          >
-            {up ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
-            {formatDelta(market.change24h)} in 24h
-          </span>
+          {change === null ? null : (
+            <span
+              className={cn(
+                "num inline-flex items-center gap-1",
+                up ? "text-positive" : "text-negative",
+              )}
+            >
+              {up ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
+              {formatDelta(change)} in 24h
+            </span>
+          )}
           <span className="num text-muted-foreground">
             YES now {formatProbability(market.yesPrice)} · NO {formatProbability(market.noPrice)}
           </span>
@@ -232,10 +235,10 @@ function HomePage() {
     const all = markets.data ?? [];
     const source =
       tab === "following"
-        ? all.filter((m) => watched.has(m.id) && Math.abs(m.change24h) >= MOVE_THRESHOLD)
+        ? all.filter((m) => Math.abs(m.change24h ?? 0) >= MOVE_THRESHOLD && watched.has(m.id))
         : [...all]
-            .filter((m) => Math.abs(m.change24h) >= MOVE_THRESHOLD)
-            .sort((a, b) => Math.abs(b.change24h) - Math.abs(a.change24h));
+            .filter((m) => Math.abs(m.change24h ?? 0) >= MOVE_THRESHOLD)
+            .sort((a, b) => Math.abs(b.change24h ?? 0) - Math.abs(a.change24h ?? 0));
     return source.slice(0, 3).map((market) => ({
       kind: "move" as const,
       id: `move-${market.id}`,
