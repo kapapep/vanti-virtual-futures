@@ -289,7 +289,7 @@ function MarketDetailPage() {
 
       {/* Mobile: the primary trade action stays in thumb reach and opens the full panel. */}
       <div
-        className="fixed inset-x-0 z-20 flex items-stretch border-t border-border p-3 @[600px]:hidden"
+        className="pointer-events-auto fixed inset-x-0 z-30 flex items-stretch border-t border-border p-3 @[600px]:hidden"
         style={{
           backgroundColor: "var(--vanti-ink)",
           bottom: "calc(var(--tabbar-h) + env(safe-area-inset-bottom))",
