@@ -99,6 +99,11 @@ function AccountMenu() {
         <DropdownMenuItem asChild>
           <Link to="/profile">Profile</Link>
         </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/glossary">
+            <BookOpen className="size-4" /> Glossary
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => setEditOpen(true)}>
           <Pencil className="size-4" /> Edit profile
         </DropdownMenuItem>
