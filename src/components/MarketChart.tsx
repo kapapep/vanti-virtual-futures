@@ -110,8 +110,7 @@ export function MarketChart({
       },
       handleScroll: false,
       handleScale: false,
-      width: el.clientWidth,
-      height: el.clientHeight,
+      autoSize: true,
     });
 
     const yes = chart.addSeries(LineSeries, {
@@ -151,10 +150,6 @@ export function MarketChart({
 
     const observer = new ResizeObserver(() => {
       if (!containerRef.current) return;
-      chart.applyOptions({
-        width: containerRef.current.clientWidth,
-        height: containerRef.current.clientHeight,
-      });
       chart.timeScale().fitContent();
       queueLabels();
     });
