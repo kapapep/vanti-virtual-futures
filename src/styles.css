@@ -161,6 +161,18 @@
   --yes: #30d158;
   --no: #ff453a;
 
+  /*
+   * Vane meter palette. Scoped to the market detail identity — do not reuse
+   * these tokens elsewhere in the app.
+   */
+  --vanti-blue: #4c6fff;
+  --vanti-deep: #2b3bd6;
+  --vanti-yes: #3ecf8e;
+  --vanti-no: #ff5c7a;
+  --vanti-ink: #06070a;
+  --vanti-surface: #0e1016;
+  --vanti-muted: #8a90a0;
+
   /* Semantic mapping — existing components reference these keys. */
   --background: var(--bg);
   --surface: var(--elev);
