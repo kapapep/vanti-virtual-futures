@@ -181,8 +181,8 @@ export function MarketChart({
 
       const lastYes = snap.yesSeriesData.at(-1);
       const lastNo = snap.noSeriesData.at(-1);
-      let y = yes.priceToCoordinate(lastYes?.value ?? snap.currentYes);
-      let n = no.priceToCoordinate(lastNo?.value ?? snap.currentNo);
+      let y: number | null = yes.priceToCoordinate(lastYes?.value ?? snap.currentYes);
+      let n: number | null = no.priceToCoordinate(lastNo?.value ?? snap.currentNo);
 
       // Never let the two labels collide: push the lower one further down.
       if (y !== null && n !== null && Math.abs(y - n) < LABEL_MIN_GAP) {
