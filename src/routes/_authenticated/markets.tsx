@@ -35,7 +35,7 @@ function sortMarkets(markets: Market[], sort: SortKey) {
     case "ending":
       return list.sort((a, b) => +new Date(a.resolutionDate) - +new Date(b.resolutionDate));
     case "move":
-      return list.sort((a, b) => Math.abs(b.change24h) - Math.abs(a.change24h));
+      return list.sort((a, b) => Math.abs(b.change24h ?? 0) - Math.abs(a.change24h ?? 0));
     default:
       return list.sort((a, b) => b.volume - a.volume);
   }

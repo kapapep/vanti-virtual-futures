@@ -26,7 +26,8 @@ export type Market = {
   outcome: string | null;
   createdAt: string;
   category: { name: string; slug: string; icon: string | null } | null;
-  change24h: number;
+  /** 24h change in probability points (0–1 scale), or null when history is shorter than 24h. */
+  change24h: number | null;
   spark: PricePoint[];
 };
 
@@ -34,22 +35,54 @@ function clampPrice(value: number) {
   return Math.min(0.99, Math.max(0.01, value));
 }
 
+/** Largest believable move between two consecutive points, in probability points. */
+const MAX_STEP = 0.4;
+
+/**
+ * Read-side guard for corrupt price history: drops null/NaN values, dedupes by
+ * timestamp keeping the latest row, sorts ascending, clamps to 0.01–0.99 and
+ * rejects any point that jumps more than 40 points from the previous one.
+ */
+export function sanitizePoints(points: PricePoint[]): PricePoint[] {
+  const byTime = new Map<number, number>();
+  for (const p of points) {
+    const t = Number(p.t);
+    const price = Number(p.price);
+    if (!Number.isFinite(t) || !Number.isFinite(price) || price === 0) continue;
+    byTime.set(t, clampPrice(price));
+  }
+  const ordered = [...byTime.entries()].sort((a, b) => a[0] - b[0]);
+  const out: PricePoint[] = [];
+  for (const [t, price] of ordered) {
+    const prev = out.at(-1);
+    if (prev && Math.abs(price - prev.price) > MAX_STEP) continue;
+    out.push({ t, price });
+  }
+  return out;
+}
+
 /**
  * Single source of truth for 24h change: current YES price vs the YES price
- * recorded closest to (but not after) 24h ago. Used by every surface.
+ * recorded closest to (but not after) 24h ago. Returns null when the market has
+ * no history older than 24h, so callers can hide the indicator instead of
+ * showing a fake 0.0%.
  */
-export function computeChange24h(points: PricePoint[], currentPrice: number) {
+export function computeChange24h(points: PricePoint[], currentPrice: number): number | null {
   const cutoff = Date.now() - 24 * 60 * 60 * 1000;
   const older = points.filter((p) => p.t <= cutoff);
-  const reference = older.length ? older[older.length - 1]!.price : (points[0]?.price ?? currentPrice);
+  if (!older.length) return null;
+  // Closest point at or before the cutoff.
+  const reference = older[older.length - 1]!.price;
   return currentPrice - reference;
 }
 
 /** 24h change and sparkline series derived from a market's recent price points. */
-function deriveSeries(points: PricePoint[], currentPrice: number) {
+function deriveSeries(rawPoints: PricePoint[], currentPrice: number) {
+  const points = sanitizePoints(rawPoints);
   return {
     change24h: computeChange24h(points, currentPrice),
     spark: points.slice(-40),
+    series: points,
   };
 }
 
@@ -149,7 +182,7 @@ export function marketQuery(marketId: string) {
         t: new Date(p.recorded_at).getTime(),
         price: Number(p.yes_price),
       }));
-      const { change24h } = deriveSeries(points, yesPrice);
+      const { change24h, series } = deriveSeries(points, yesPrice);
       return {
         id: row.id,
         question: row.question,
@@ -166,7 +199,7 @@ export function marketQuery(marketId: string) {
         createdAt: row.created_at,
         category: row.categories ?? null,
         change24h,
-        spark: points,
+        spark: series,
       } satisfies Market;
     },
   });
