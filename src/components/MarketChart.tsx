@@ -216,16 +216,11 @@ export function MarketChart({
 
   return (
     <div className="w-full">
-      <div className="relative h-[280px] w-full sm:h-[340px]">
+      <div className="relative h-[440px] w-full sm:h-[480px]">
         <div ref={containerRef} className="absolute inset-0" />
 
-        <Overlay
-          top={yesTop}
-          label={yesLabel}
-          value={shownYes}
-          color={YES_COLOR}
-        />
-        <Overlay top={noTop} label={noLabel} value={shownNo} color={NO_COLOR} />
+        <Overlay top={yesTop} left={labelLeft} label={yesLabel} value={shownYes} color={YES_COLOR} />
+        <Overlay top={noTop} left={labelLeft} label={noLabel} value={shownNo} color={NO_COLOR} />
       </div>
 
       <div className="mt-3 flex items-center justify-between gap-4">
@@ -259,20 +254,22 @@ export function MarketChart({
 
 function Overlay({
   top,
+  left,
   label,
   value,
   color,
 }: {
   top: number | null;
+  left: number | null;
   label: string;
   value: number;
   color: string;
 }) {
-  if (top === null) return null;
+  if (top === null || left === null) return null;
   return (
     <div
-      className="pointer-events-none absolute right-0 translate-y-[-50%] pl-3"
-      style={{ top }}
+      className="pointer-events-none absolute translate-y-[-50%]"
+      style={{ top, left }}
     >
       <div
         className="text-[13px] uppercase tracking-[0.12em] opacity-60"
