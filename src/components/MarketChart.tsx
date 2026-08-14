@@ -155,7 +155,7 @@ export function MarketChart({
         width: containerRef.current.clientWidth,
         height: containerRef.current.clientHeight,
       });
-      fitWithRightGap();
+      chart.timeScale().fitContent();
       queueLabels();
     });
     observer.observe(el);
@@ -170,24 +170,6 @@ export function MarketChart({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  /** Fits the series while reserving room on the right for the overlay labels. */
-  function fitWithRightGap() {
-    const chart = chartRef.current;
-    if (!chart) return;
-    const count = Math.max(
-      latest.current.yesSeriesData.length,
-      latest.current.noSeriesData.length,
-    );
-    if (count < 2) {
-      chart.timeScale().fitContent();
-      return;
-    }
-    const width = containerRef.current?.clientWidth ?? 320;
-    // Reserve ~90px on the right so labels sit clear of the last data point.
-    const pad = Math.max(1, ((count - 1) * 90) / Math.max(1, width - 90));
-    chart.timeScale().setVisibleLogicalRange({ from: 0, to: count - 1 + pad });
-  }
 
   function queueLabels() {
     requestAnimationFrame(() => {
@@ -224,7 +206,7 @@ export function MarketChart({
     if (!chart || !yesSeriesRef.current || !noSeriesRef.current) return;
     yesSeriesRef.current.setData(yesSeriesData);
     noSeriesRef.current.setData(noSeriesData);
-    fitWithRightGap();
+    chart.timeScale().fitContent();
     queueLabels();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [yesSeriesData, noSeriesData, currentYes, currentNo]);
@@ -235,7 +217,8 @@ export function MarketChart({
   return (
     <div className="w-full">
       <div className="relative h-[440px] w-full sm:h-[480px]">
-        <div ref={containerRef} className="absolute inset-0" />
+        {/* The plot stops short of the wrapper so the overlay labels sit clear of it. */}
+        <div ref={containerRef} className="absolute bottom-0 left-0 top-0 right-[84px]" />
 
         <Overlay top={yesTop} left={labelLeft} label={yesLabel} value={shownYes} color={YES_COLOR} />
         <Overlay top={noTop} left={labelLeft} label={noLabel} value={shownNo} color={NO_COLOR} />
