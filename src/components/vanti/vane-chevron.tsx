@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 /** The Vanti vane: two strokes meeting at a point. Used as a chart/tick cap marker. */
 export function VaneChevron({
   size = 14,
@@ -6,7 +8,7 @@ export function VaneChevron({
 }: {
   size?: number;
   className?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
 }) {
   return (
     <svg
