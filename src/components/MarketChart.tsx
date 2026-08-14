@@ -31,19 +31,22 @@ type Props = {
 const YES_COLOR = "#00D68F";
 const NO_COLOR = "#FFFFFF";
 
+/**
+ * Drops empty/invalid points, keeps the last value per timestamp, sorts
+ * ascending and clamps to 1–99 so the line never spikes to an edge.
+ */
 function toSeries(points: MarketChartPoint[]): LineData<Time>[] {
-  const seen = new Set<number>();
-  const out: LineData<Time>[] = [];
+  const byTime = new Map<number, number>();
   for (const p of points) {
-    const time = Math.floor(p.time) as UTCTimestamp;
-    if (seen.has(time)) {
-      out[out.length - 1] = { time, value: p.value };
-      continue;
-    }
-    seen.add(time);
-    out.push({ time, value: p.value });
+    const value = Number(p.value);
+    if (value === null || value === undefined || !Number.isFinite(value) || value === 0) continue;
+    const time = Math.floor(Number(p.time));
+    if (!Number.isFinite(time)) continue;
+    byTime.set(time, Math.min(99, Math.max(1, value)));
   }
-  return out;
+  return [...byTime.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([time, value]) => ({ time: time as UTCTimestamp, value }));
 }
 
 const fullRange = {
@@ -92,7 +95,7 @@ export function MarketChart({
       grid: { vertLines: { visible: false }, horzLines: { visible: false } },
       rightPriceScale: { visible: false },
       leftPriceScale: { visible: false },
-      timeScale: { visible: false, fixLeftEdge: true, fixRightEdge: true },
+      timeScale: { visible: false, fixLeftEdge: true, fixRightEdge: true, rightOffset: 12 },
       crosshair: {
         mode: 1,
         vertLine: { width: 1, color: "rgba(255,255,255,0.2)", labelVisible: false },
