@@ -164,9 +164,18 @@ export function AppShell({ children }: { children: ReactNode }) {
             );
           })}
         </nav>
-        <p className="mt-auto px-1 text-meta text-muted-foreground">
-          Virtual money only. No real funds, ever.
-        </p>
+        <div className="mt-auto space-y-2">
+          <Link
+            to="/glossary"
+            className="flex items-center gap-2 px-1 text-meta text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <BookOpen className="size-3.5" />
+            Glossary
+          </Link>
+          <p className="px-1 text-meta text-muted-foreground">
+            Virtual money only. No real funds, ever.
+          </p>
+        </div>
       </aside>
 
       {/* Mobile top bar */}
