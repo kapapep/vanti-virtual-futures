@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Star, TrendingDown, TrendingUp } from "lucide-react";
@@ -6,7 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CategoryIcon } from "@/components/vanti/category-icon";
-import { PriceChart } from "@/components/vanti/price-chart";
+import { MarketChart, type MarketTimeframe } from "@/components/MarketChart";
 import { MarketDiscussion } from "@/components/vanti/market-discussion";
 import { MarketPools } from "@/components/vanti/market-pools";
 import { ProbabilityBar } from "@/components/vanti/probability-bar";
@@ -57,6 +58,28 @@ function MarketDetailPage() {
   const market = useQuery(marketQuery(marketId));
   const trades = useQuery(marketTradesQuery(marketId, user?.id));
   const watchlist = useQuery(watchlistQuery(user?.id));
+  const [timeframe, setTimeframe] = useState<MarketTimeframe>("1W");
+
+  const points = market.data?.spark ?? [];
+  const windowed = useMemo(() => {
+    const minutes: Record<MarketTimeframe, number | null> = {
+      LIVE: 60,
+      "1D": 1440,
+      "1W": 10080,
+      "1M": 43200,
+      ALL: null,
+    };
+    const span = minutes[timeframe];
+    const source = span ? points.filter((p) => p.t >= Date.now() - span * 60 * 1000) : points;
+    const series = source.length >= 2 ? source : points.slice(-2);
+    return {
+      yes: series.map((p) => ({ time: p.t / 1000, value: Number((p.price * 100).toFixed(1)) })),
+      no: series.map((p) => ({
+        time: p.t / 1000,
+        value: Number(((1 - p.price) * 100).toFixed(1)),
+      })),
+    };
+  }, [points, timeframe]);
 
   const watched = (watchlist.data ?? []).includes(marketId);
 
@@ -190,9 +213,17 @@ function MarketDetailPage() {
         </aside>
 
         <div className="order-1 min-w-0 space-y-6 @[900px]:order-2">
-          <div className="rounded-lg border border-border bg-card p-4">
-            <PriceChart points={m.spark} />
-          </div>
+          <MarketChart
+            yesData={windowed.yes}
+            noData={windowed.no}
+            yesLabel="YES"
+            noLabel="NO"
+            currentYes={m.yesPrice * 100}
+            currentNo={m.noPrice * 100}
+            volume={m.volume}
+            timeframe={timeframe}
+            onTimeframeChange={setTimeframe}
+          />
 
           <div className="space-y-4 rounded-lg border border-border bg-card p-4">
             <div>
