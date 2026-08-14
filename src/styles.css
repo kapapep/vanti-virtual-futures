@@ -173,6 +173,15 @@
   --vanti-surface: #0e1016;
   --vanti-muted: #8a90a0;
 
+  /*
+   * Mobile chrome heights. Scroll containers pad by these plus the matching
+   * safe-area inset so nothing hides under the sticky top bar, the fixed buy
+   * bar, or the bottom tab bar.
+   */
+  --topbar-h: 68px;
+  --tabbar-h: 64px;
+  --buybar-h: 72px;
+
   /* Semantic mapping — existing components reference these keys. */
   --background: var(--bg);
   --surface: var(--elev);
