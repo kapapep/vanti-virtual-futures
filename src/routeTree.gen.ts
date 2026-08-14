@@ -15,7 +15,6 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedBalanceRouteImport } from './routes/_authenticated/balance'
 import { Route as AuthenticatedDiscoverRouteImport } from './routes/_authenticated/discover'
 import { Route as AuthenticatedFollowingRouteImport } from './routes/_authenticated/following'
-import { Route as AuthenticatedGlossaryRouteImport } from './routes/_authenticated/glossary'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedMarketsRouteImport } from './routes/_authenticated/markets'
 import { Route as AuthenticatedPortfolioRouteImport } from './routes/_authenticated/portfolio'
@@ -54,11 +53,6 @@ const AuthenticatedDiscoverRoute = AuthenticatedDiscoverRouteImport.update({
 const AuthenticatedFollowingRoute = AuthenticatedFollowingRouteImport.update({
   id: '/following',
   path: '/following',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedGlossaryRoute = AuthenticatedGlossaryRouteImport.update({
-  id: '/glossary',
-  path: '/glossary',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
@@ -121,7 +115,6 @@ export interface FileRoutesByFullPath {
   '/balance': typeof AuthenticatedBalanceRoute
   '/discover': typeof AuthenticatedDiscoverRoute
   '/following': typeof AuthenticatedFollowingRoute
-  '/glossary': typeof AuthenticatedGlossaryRoute
   '/home': typeof AuthenticatedHomeRoute
   '/markets': typeof AuthenticatedMarketsRoute
   '/portfolio': typeof AuthenticatedPortfolioRoute
@@ -139,7 +132,6 @@ export interface FileRoutesByTo {
   '/balance': typeof AuthenticatedBalanceRoute
   '/discover': typeof AuthenticatedDiscoverRoute
   '/following': typeof AuthenticatedFollowingRoute
-  '/glossary': typeof AuthenticatedGlossaryRoute
   '/home': typeof AuthenticatedHomeRoute
   '/markets': typeof AuthenticatedMarketsRoute
   '/portfolio': typeof AuthenticatedPortfolioRoute
@@ -159,7 +151,6 @@ export interface FileRoutesById {
   '/_authenticated/balance': typeof AuthenticatedBalanceRoute
   '/_authenticated/discover': typeof AuthenticatedDiscoverRoute
   '/_authenticated/following': typeof AuthenticatedFollowingRoute
-  '/_authenticated/glossary': typeof AuthenticatedGlossaryRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/markets': typeof AuthenticatedMarketsRoute
   '/_authenticated/portfolio': typeof AuthenticatedPortfolioRoute
@@ -179,7 +170,6 @@ export interface FileRouteTypes {
     | '/balance'
     | '/discover'
     | '/following'
-    | '/glossary'
     | '/home'
     | '/markets'
     | '/portfolio'
@@ -197,7 +187,6 @@ export interface FileRouteTypes {
     | '/balance'
     | '/discover'
     | '/following'
-    | '/glossary'
     | '/home'
     | '/markets'
     | '/portfolio'
@@ -216,7 +205,6 @@ export interface FileRouteTypes {
     | '/_authenticated/balance'
     | '/_authenticated/discover'
     | '/_authenticated/following'
-    | '/_authenticated/glossary'
     | '/_authenticated/home'
     | '/_authenticated/markets'
     | '/_authenticated/portfolio'
@@ -277,13 +265,6 @@ declare module '@tanstack/react-router' {
       path: '/following'
       fullPath: '/following'
       preLoaderRoute: typeof AuthenticatedFollowingRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/glossary': {
-      id: '/_authenticated/glossary'
-      path: '/glossary'
-      fullPath: '/glossary'
-      preLoaderRoute: typeof AuthenticatedGlossaryRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/home': {
@@ -363,7 +344,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedBalanceRoute: typeof AuthenticatedBalanceRoute
   AuthenticatedDiscoverRoute: typeof AuthenticatedDiscoverRoute
   AuthenticatedFollowingRoute: typeof AuthenticatedFollowingRoute
-  AuthenticatedGlossaryRoute: typeof AuthenticatedGlossaryRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedMarketsRoute: typeof AuthenticatedMarketsRoute
   AuthenticatedPortfolioRoute: typeof AuthenticatedPortfolioRoute
@@ -380,7 +360,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBalanceRoute: AuthenticatedBalanceRoute,
   AuthenticatedDiscoverRoute: AuthenticatedDiscoverRoute,
   AuthenticatedFollowingRoute: AuthenticatedFollowingRoute,
-  AuthenticatedGlossaryRoute: AuthenticatedGlossaryRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedMarketsRoute: AuthenticatedMarketsRoute,
   AuthenticatedPortfolioRoute: AuthenticatedPortfolioRoute,
