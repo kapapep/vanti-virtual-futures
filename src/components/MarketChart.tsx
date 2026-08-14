@@ -50,9 +50,14 @@ function toSeries(points: MarketChartPoint[]): LineData<Time>[] {
     if (!Number.isFinite(time)) continue;
     byTime.set(time, Math.min(99, Math.max(1, value)));
   }
-  return [...byTime.entries()]
-    .sort((a, b) => a[0] - b[0])
-    .map(([time, value]) => ({ time: time as UTCTimestamp, value }));
+  const out: LineData<Time>[] = [];
+  for (const [time, value] of [...byTime.entries()].sort((a, b) => a[0] - b[0])) {
+    const prev = out.at(-1)?.value;
+    // A >40 point step between neighbouring samples is corrupt data, not a move.
+    if (prev !== undefined && Math.abs(value - prev) > 40) continue;
+    out.push({ time: time as UTCTimestamp, value });
+  }
+  return out;
 }
 
 const fullRange = {
@@ -70,6 +75,7 @@ export function MarketChart({
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const yesSeriesRef = useRef<ISeriesApi<"Area"> | null>(null);
+  const noSeriesRef = useRef<ISeriesApi<"Area"> | null>(null);
 
   const [internalTf, setInternalTf] = useState<MarketTimeframe>("1W");
   const activeTf = timeframe ?? internalTf;
@@ -78,6 +84,11 @@ export function MarketChart({
   const [labelY, setLabelY] = useState<{ yes: number; no: number } | null>(null);
 
   const yesSeriesData = useMemo(() => toSeries(yesData), [yesData]);
+  // NO mirrors YES at every point: they always sum to 100.
+  const noSeriesData = useMemo(
+    () => yesSeriesData.map((p) => ({ time: p.time, value: 100 - p.value })),
+    [yesSeriesData],
+  );
 
   // Create the chart once.
   useEffect(() => {
@@ -121,8 +132,22 @@ export function MarketChart({
       ...fullRange,
     });
 
+    const no = chart.addSeries(AreaSeries, {
+      lineColor: "#FFFFFF",
+      lineWidth: 2,
+      topColor: "rgba(0,0,0,0)",
+      bottomColor: "rgba(0,0,0,0)",
+      priceLineVisible: false,
+      lastValueVisible: false,
+      crosshairMarkerVisible: true,
+      crosshairMarkerBorderColor: "#FFFFFF",
+      crosshairMarkerBackgroundColor: "#FFFFFF",
+      ...fullRange,
+    });
+
     chartRef.current = chart;
     yesSeriesRef.current = yes;
+    noSeriesRef.current = no;
 
     const unsub = chart.subscribeCrosshairMove((param) => {
       if (!param.time || !param.point) {
@@ -149,6 +174,7 @@ export function MarketChart({
       chart.remove();
       chartRef.current = null;
       yesSeriesRef.current = null;
+      noSeriesRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -157,14 +183,17 @@ export function MarketChart({
   useEffect(() => {
     const chart = chartRef.current;
     const series = yesSeriesRef.current;
-    if (!chart || !series) return;
+    const noSeries = noSeriesRef.current;
+    if (!chart || !series || !noSeries) return;
     series.setData(yesSeriesData);
+    noSeries.setData(noSeriesData);
     chart.timeScale().fitContent();
 
     const place = () => {
       const last = yesSeriesData.at(-1)?.value ?? currentYes;
+      const lastNo = noSeriesData.at(-1)?.value ?? 100 - currentYes;
       const yes = series.priceToCoordinate(last);
-      const no = series.priceToCoordinate(100 - last);
+      const no = noSeries.priceToCoordinate(lastNo);
       if (yes === null || no === null) return;
       // Keep the two stacked labels from overlapping when the line sits near 50%.
       const gap = 52;
@@ -183,14 +212,14 @@ export function MarketChart({
     const raf = requestAnimationFrame(place);
     return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [yesSeriesData, currentYes]);
+  }, [yesSeriesData, noSeriesData, currentYes]);
 
   const shownYes = hover ?? currentYes;
   const shownNo = 100 - shownYes;
 
   return (
     <div className="w-full">
-      <div className="relative h-[280px] w-full sm:h-[360px]">
+      <div className="relative h-[400px] w-full sm:h-[460px]">
         <div ref={containerRef} className="absolute inset-0" />
 
         {/* Overlay labels track the end of the line, 8px right of the last point. */}
