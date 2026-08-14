@@ -95,7 +95,10 @@ export function TradePanel({
       void queryClient.invalidateQueries({ queryKey: ["market-trades", market.id] });
       void queryClient.invalidateQueries({ queryKey: ["markets"] });
     },
-    onError: (error) => toast.error(tradeErrorMessage(error)),
+    onError: (error) => {
+      console.error("[trade] buy failed", error);
+      toast.error(tradeErrorMessage(error));
+    },
   });
 
   const sellAll = useMutation({
@@ -115,7 +118,10 @@ export function TradePanel({
       void queryClient.invalidateQueries({ queryKey: ["market-trades", market.id] });
       void queryClient.invalidateQueries({ queryKey: ["markets"] });
     },
-    onError: (error) => toast.error(tradeErrorMessage(error)),
+    onError: (error) => {
+      console.error("[trade] sell failed", error);
+      toast.error(tradeErrorMessage(error));
+    },
   });
 
   const busy = trade.isPending || sellAll.isPending;
