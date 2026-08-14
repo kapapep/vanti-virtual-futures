@@ -6,11 +6,12 @@ import { CategoryIcon } from "@/components/vanti/category-icon";
 import { MarketSparkline } from "@/components/vanti/market-sparkline";
 import { ProbabilityBar } from "@/components/vanti/probability-bar";
 import { formatProbability, formatCount, formatDate, formatDelta, formatVolume } from "@/lib/format";
+import { trendColor, trendDirection } from "@/lib/market-trend";
 import type { Market } from "@/lib/markets";
 import { cn } from "@/lib/utils";
 
 export function MarketCard({ market, actions }: { market: Market; actions?: ReactNode }) {
-  const up = market.change24h >= 0;
+  const direction = trendDirection(market.change24h);
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-accent-solid/50">
@@ -52,18 +53,17 @@ export function MarketCard({ market, actions }: { market: Market; actions?: Reac
               </span>
             </div>
             <div className="w-20 shrink-0">
-              <MarketSparkline points={market.spark} up={up} />
+              <MarketSparkline points={market.spark} direction={direction} />
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-border pt-3 text-meta text-muted-foreground">
             <span
-              className={cn(
-                "num inline-flex items-center gap-1 font-medium",
-                up ? "text-positive" : "text-negative",
-              )}
+              className="num inline-flex items-center gap-1 font-medium"
+              style={{ color: trendColor(direction) }}
             >
-              {up ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
+              {direction === "up" ? <TrendingUp className="size-3" /> : null}
+              {direction === "down" ? <TrendingDown className="size-3" /> : null}
               {formatDelta(market.change24h)} 24h
             </span>
             <span className="num">{formatVolume(market.volume)} vol</span>

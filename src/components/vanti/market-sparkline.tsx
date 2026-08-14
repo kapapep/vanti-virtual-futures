@@ -1,11 +1,18 @@
 import { Line, LineChart, ResponsiveContainer, YAxis } from "recharts";
 
 import type { PricePoint } from "@/lib/markets";
+import { trendColor, type TrendDirection } from "@/lib/market-trend";
 
-/** Tiny trend line for a market card. Colour follows the 24h direction. */
-export function MarketSparkline({ points, up }: { points: PricePoint[]; up: boolean }) {
+/** Tiny YES-price trend line for a market card. Colour follows the 24h direction. */
+export function MarketSparkline({
+  points,
+  direction,
+}: {
+  points: PricePoint[];
+  direction: TrendDirection;
+}) {
   if (points.length < 2) return <div className="h-8" />;
-  const color = up ? "var(--positive)" : "var(--negative)";
+  const color = trendColor(direction);
 
   return (
     <div className="h-8 w-full">
