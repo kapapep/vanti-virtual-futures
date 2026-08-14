@@ -61,19 +61,26 @@ export function sanitizePoints(points: PricePoint[]): PricePoint[] {
   return out;
 }
 
+/** How far a reference point may sit from the 24h mark before we call it stale. */
+const REFERENCE_TOLERANCE_MS = 12 * 60 * 60 * 1000;
+
 /**
- * Single source of truth for 24h change: current YES price vs the YES price
- * recorded closest to (but not after) 24h ago. Returns null when the market has
- * no history older than 24h, so callers can hide the indicator instead of
- * showing a fake 0.0%.
+ * Single source of truth for 24h change: current YES price minus the YES price
+ * recorded closest to 24h ago. Returns null when the market has no usable
+ * reference near that mark (too little or stale history) so callers hide the
+ * indicator rather than printing a fake 0.0%.
  */
 export function computeChange24h(points: PricePoint[], currentPrice: number): number | null {
+  if (points.length < 2) return null;
   const cutoff = Date.now() - 24 * 60 * 60 * 1000;
-  const older = points.filter((p) => p.t <= cutoff);
-  if (!older.length) return null;
-  // Closest point at or before the cutoff.
-  const reference = older[older.length - 1]!.price;
-  return currentPrice - reference;
+  let reference: PricePoint | null = null;
+  for (const p of points) {
+    if (!reference || Math.abs(p.t - cutoff) < Math.abs(reference.t - cutoff)) reference = p;
+  }
+  if (!reference) return null;
+  // A reference far from the 24h mark cannot describe a 24h move.
+  if (Math.abs(reference.t - cutoff) > REFERENCE_TOLERANCE_MS) return null;
+  return currentPrice - reference.price;
 }
 
 /** 24h change and sparkline series derived from a market's recent price points. */
