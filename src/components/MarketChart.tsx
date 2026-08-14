@@ -9,11 +9,9 @@ import {
   type UTCTimestamp,
 } from "lightweight-charts";
 
-import { cn } from "@/lib/utils";
-
 export type MarketChartPoint = { time: number; value: number };
 
-export const MARKET_TIMEFRAMES = ["1H", "6H", "1D", "1W", "ALL"] as const;
+export const MARKET_TIMEFRAMES = ["LIVE", "1D", "1W", "1M", "ALL"] as const;
 export type MarketTimeframe = (typeof MARKET_TIMEFRAMES)[number];
 
 type Props = {
@@ -61,9 +59,6 @@ const fullRange = {
   autoscaleInfoProvider: () => ({ priceRange: { minValue: 0, maxValue: 100 } }),
 };
 
-/** Fixed y-axis ticks: the scale is always 0–100, never fitted to the data. */
-const Y_TICKS = [100, 75, 50, 25, 0] as const;
-
 /** Single YES probability line with a gradient area fill on a fixed 0–100 scale. */
 export function MarketChart({
   yesData,
@@ -80,6 +75,7 @@ export function MarketChart({
   const activeTf = timeframe ?? internalTf;
 
   const [hover, setHover] = useState<number | null>(null);
+  const [labelY, setLabelY] = useState<{ yes: number; no: number } | null>(null);
 
   const yesSeriesData = useMemo(() => toSeries(yesData), [yesData]);
 
@@ -160,58 +156,48 @@ export function MarketChart({
   // Push data and refresh label positions.
   useEffect(() => {
     const chart = chartRef.current;
-    if (!chart || !yesSeriesRef.current) return;
-    yesSeriesRef.current.setData(yesSeriesData);
+    const series = yesSeriesRef.current;
+    if (!chart || !series) return;
+    series.setData(yesSeriesData);
     chart.timeScale().fitContent();
+
+    const place = () => {
+      const last = yesSeriesData.at(-1)?.value ?? currentYes;
+      const yes = series.priceToCoordinate(last);
+      const no = series.priceToCoordinate(100 - last);
+      if (yes === null || no === null) return;
+      // Keep the two stacked labels from overlapping when the line sits near 50%.
+      const gap = 52;
+      if (Math.abs(yes - no) >= gap) {
+        setLabelY({ yes, no });
+        return;
+      }
+      const shift = (gap - Math.abs(yes - no)) / 2;
+      setLabelY(
+        yes <= no
+          ? { yes: yes - shift, no: no + shift }
+          : { yes: yes + shift, no: no - shift },
+      );
+    };
+    place();
+    const raf = requestAnimationFrame(place);
+    return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [yesSeriesData, currentYes]);
 
   const shownYes = hover ?? currentYes;
+  const shownNo = 100 - shownYes;
 
   return (
     <div className="w-full">
-      {/* Timeframe pills sit above the plot. */}
-      <div className="flex items-center gap-1.5">
-        {MARKET_TIMEFRAMES.map((tf) => {
-          const active = tf === activeTf;
-          return (
-            <button
-              key={tf}
-              type="button"
-              onClick={() => {
-                setInternalTf(tf);
-                onTimeframeChange?.(tf);
-              }}
-              className="vane-num rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] transition-colors duration-150"
-              style={
-                active
-                  ? { color: "var(--vanti-blue)", backgroundColor: "rgba(76,111,255,0.12)" }
-                  : { color: "var(--vanti-muted)", backgroundColor: "transparent" }
-              }
-            >
-              {tf}
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="relative mt-2 h-[280px] w-full sm:h-[360px]">
+      <div className="relative h-[280px] w-full sm:h-[360px]">
         <div ref={containerRef} className="absolute inset-0" />
 
-        {/* Fixed 0–100 scale labels, so a flat market reads as flat. */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 flex flex-col justify-between">
-          {Y_TICKS.map((tick) => (
-            <span
-              key={tick}
-              className="vane-num text-[10px] leading-none"
-              style={{ color: "var(--vanti-muted)" }}
-            >
-              {tick}%
-            </span>
-          ))}
-        </div>
-
-        <div className="pointer-events-none absolute right-0 top-0 text-right">
+        {/* Overlay labels track the end of the line, 8px right of the last point. */}
+        <div
+          className="pointer-events-none absolute right-0 pl-2"
+          style={{ top: labelY ? labelY.yes : 0, transform: "translateY(-50%)" }}
+        >
           <div className="vane-label">YES</div>
           <div
             className="vane-num text-[28px] font-extrabold leading-none"
@@ -220,16 +206,50 @@ export function MarketChart({
             {Math.round(shownYes)}%
           </div>
         </div>
+        <div
+          className="pointer-events-none absolute right-0 pl-2"
+          style={{ top: labelY ? labelY.no : 0, transform: "translateY(-50%)" }}
+        >
+          <div className="vane-label">NO</div>
+          <div
+            className="vane-num text-[28px] font-extrabold leading-none"
+            style={{ color: "#FFFFFF" }}
+          >
+            {Math.round(shownNo)}%
+          </div>
+        </div>
       </div>
 
-      {volume === undefined ? null : (
-        <div className={cn("mt-2 flex items-baseline gap-2")}>
-          <span className="vane-label">Volume</span>
-          <span className="vane-num text-xs" style={{ color: "var(--vanti-muted)" }}>
-            V{Math.round(volume).toLocaleString("en-US")}
-          </span>
+      {/* Volume left, plain-text timeframes right — one row below the plot. */}
+      <div className="mt-3 flex items-center justify-between gap-4">
+        <span
+          className="vane-num text-[12px]"
+          style={{ color: "rgba(255,255,255,0.35)" }}
+        >
+          {volume === undefined
+            ? ""
+            : `V${Math.round(volume).toLocaleString("en-US")} vol`}
+        </span>
+        <div className="flex items-center" style={{ gap: 20 }}>
+          {MARKET_TIMEFRAMES.map((tf) => {
+            const active = tf === activeTf;
+            return (
+              <button
+                key={tf}
+                type="button"
+                onClick={() => {
+                  setInternalTf(tf);
+                  onTimeframeChange?.(tf);
+                }}
+                className="text-[12px] font-semibold uppercase tracking-[0.05em]"
+                style={{ color: active ? "#FFFFFF" : "rgba(255,255,255,0.35)" }}
+              >
+                {tf}
+              </button>
+            );
+          })}
         </div>
-      )}
+      </div>
     </div>
   );
 }
