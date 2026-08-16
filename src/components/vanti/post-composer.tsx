@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, ChevronDown, ImagePlus, Loader2, X } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { useProfile, useSession } from "@/hooks/use-vanti-session";
+import { useKeyboardOffset } from "@/hooks/use-keyboard-offset";
 import { supabase } from "@/integrations/supabase/client";
 import { AudioRecorder, type RecordedAudio } from "@/components/vanti/audio-recorder";
 import { formatProbability } from "@/lib/format";
