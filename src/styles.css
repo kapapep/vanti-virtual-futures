@@ -263,6 +263,16 @@
     border-color: var(--color-border);
   }
 
+  /* Native-app feel: no pinch zoom, no horizontal drift, no rubber-banding. */
+  html,
+  body {
+    overflow-x: hidden;
+    overscroll-behavior: none;
+    max-width: 100%;
+    touch-action: pan-y;
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
