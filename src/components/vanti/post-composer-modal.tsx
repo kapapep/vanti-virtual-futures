@@ -263,9 +263,11 @@ export function PostComposerModal({
         audioUrl: audio?.dataUrl ?? null,
       });
     },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["feed"] });
+    onSuccess: async () => {
+      // Refetch the feeds before dismissing so the new post is already there.
+      await queryClient.invalidateQueries({ queryKey: ["feed"] });
       void queryClient.invalidateQueries({ queryKey: ["market-posts"] });
+      void queryClient.invalidateQueries({ queryKey: ["post-replies"] });
       void queryClient.invalidateQueries({ queryKey: ["user-posts"] });
       onClose();
       showPostedToast({ onView: onPosted });
