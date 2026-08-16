@@ -127,10 +127,10 @@ function MarketDetailPage() {
 
   return (
     <div
-      className="space-y-4 pt-[calc(var(--topbar-h)+env(safe-area-inset-top))] @[600px]:space-y-6 lg:pt-0"
+      className="space-y-4 @[600px]:space-y-6"
       style={{
-        // Content clears the sticky top bar and ends above the fixed buy bar +
-        // tab bar, so the title and the last card are never clipped.
+        // The top bar is sticky (in flow), so no extra top padding is needed.
+        // Content ends above the floating buy bar + tab bar so nothing clips.
         scrollMarginTop: "calc(var(--topbar-h) + env(safe-area-inset-top))",
         paddingBottom:
           "calc(var(--buybar-h) + var(--tabbar-h) + 48px + env(safe-area-inset-bottom))",
@@ -194,7 +194,7 @@ function MarketDetailPage() {
         <ProbabilityBar price={m.yesPrice} height={8} showLabels />
       </header>
 
-      <div className="@container mt-4">
+      <div className="@container w-full">
       <div className="grid gap-4 @[600px]:gap-6 @[600px]:grid-cols-[1fr_280px] @[900px]:grid-cols-[220px_1fr_300px]">
         <aside className="order-3 space-y-4 @[600px]:col-span-2 @[600px]:grid @[600px]:grid-cols-2 @[600px]:items-start @[600px]:gap-4 @[600px]:space-y-0 @[900px]:order-1 @[900px]:col-span-1 @[900px]:block @[900px]:space-y-4">
           <div className="rounded-lg border border-border bg-card p-4">
