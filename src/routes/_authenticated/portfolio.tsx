@@ -308,7 +308,8 @@ function PortfolioPage() {
         </CollapsibleContent>
       </Collapsible>
 
-    </div>
+      </div>
+    </PullToRefresh>
   );
 }
 
