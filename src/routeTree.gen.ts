@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as LbProbeRouteImport } from './routes/lb-probe'
 import { Route as AuthenticatedBalanceRouteImport } from './routes/_authenticated/balance'
 import { Route as AuthenticatedDiscoverRouteImport } from './routes/_authenticated/discover'
 import { Route as AuthenticatedFollowingRouteImport } from './routes/_authenticated/following'
@@ -40,11 +39,6 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LbProbeRoute = LbProbeRouteImport.update({
-  id: '/lb-probe',
-  path: '/lb-probe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedBalanceRoute = AuthenticatedBalanceRouteImport.update({
@@ -124,7 +118,6 @@ const ApiPublicModerateMediaRoute = ApiPublicModerateMediaRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/lb-probe': typeof LbProbeRoute
   '/balance': typeof AuthenticatedBalanceRoute
   '/discover': typeof AuthenticatedDiscoverRoute
   '/following': typeof AuthenticatedFollowingRoute
@@ -143,7 +136,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/lb-probe': typeof LbProbeRoute
   '/balance': typeof AuthenticatedBalanceRoute
   '/discover': typeof AuthenticatedDiscoverRoute
   '/following': typeof AuthenticatedFollowingRoute
@@ -164,7 +156,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/lb-probe': typeof LbProbeRoute
   '/_authenticated/balance': typeof AuthenticatedBalanceRoute
   '/_authenticated/discover': typeof AuthenticatedDiscoverRoute
   '/_authenticated/following': typeof AuthenticatedFollowingRoute
@@ -185,7 +176,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
-    | '/lb-probe'
     | '/balance'
     | '/discover'
     | '/following'
@@ -204,7 +194,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
-    | '/lb-probe'
     | '/balance'
     | '/discover'
     | '/following'
@@ -224,7 +213,6 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
-    | '/lb-probe'
     | '/_authenticated/balance'
     | '/_authenticated/discover'
     | '/_authenticated/following'
@@ -245,7 +233,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  LbProbeRoute: typeof LbProbeRoute
   ApiPublicModerateMediaRoute: typeof ApiPublicModerateMediaRoute
 }
 
@@ -270,13 +257,6 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lb-probe': {
-      id: '/lb-probe'
-      path: '/lb-probe'
-      fullPath: '/lb-probe'
-      preLoaderRoute: typeof LbProbeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/balance': {
@@ -419,7 +399,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
-  LbProbeRoute: LbProbeRoute,
   ApiPublicModerateMediaRoute: ApiPublicModerateMediaRoute,
 }
 export const routeTree = rootRouteImport
