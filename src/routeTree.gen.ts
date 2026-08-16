@@ -25,6 +25,7 @@ import { Route as AuthenticatedMarketMarketIdRouteImport } from './routes/_authe
 import { Route as AuthenticatedPoolsIndexRouteImport } from './routes/_authenticated/pools.index'
 import { Route as AuthenticatedPoolsPoolIdRouteImport } from './routes/_authenticated/pools.$poolId'
 import { Route as AuthenticatedUUsernameRouteImport } from './routes/_authenticated/u.$username'
+import { Route as ApiPublicModerateMediaRouteImport } from './routes/api/public/moderate-media'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -108,6 +109,11 @@ const AuthenticatedUUsernameRoute = AuthenticatedUUsernameRouteImport.update({
   path: '/u/$username',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicModerateMediaRoute = ApiPublicModerateMediaRouteImport.update({
+  id: '/api/public/moderate-media',
+  path: '/api/public/moderate-media',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/market/$marketId': typeof AuthenticatedMarketMarketIdRoute
   '/pools/$poolId': typeof AuthenticatedPoolsPoolIdRoute
   '/u/$username': typeof AuthenticatedUUsernameRoute
+  '/api/public/moderate-media': typeof ApiPublicModerateMediaRoute
   '/pools/': typeof AuthenticatedPoolsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -141,6 +148,7 @@ export interface FileRoutesByTo {
   '/market/$marketId': typeof AuthenticatedMarketMarketIdRoute
   '/pools/$poolId': typeof AuthenticatedPoolsPoolIdRoute
   '/u/$username': typeof AuthenticatedUUsernameRoute
+  '/api/public/moderate-media': typeof ApiPublicModerateMediaRoute
   '/pools': typeof AuthenticatedPoolsIndexRoute
 }
 export interface FileRoutesById {
@@ -160,6 +168,7 @@ export interface FileRoutesById {
   '/_authenticated/market/$marketId': typeof AuthenticatedMarketMarketIdRoute
   '/_authenticated/pools/$poolId': typeof AuthenticatedPoolsPoolIdRoute
   '/_authenticated/u/$username': typeof AuthenticatedUUsernameRoute
+  '/api/public/moderate-media': typeof ApiPublicModerateMediaRoute
   '/_authenticated/pools/': typeof AuthenticatedPoolsIndexRoute
 }
 export interface FileRouteTypes {
@@ -179,6 +188,7 @@ export interface FileRouteTypes {
     | '/market/$marketId'
     | '/pools/$poolId'
     | '/u/$username'
+    | '/api/public/moderate-media'
     | '/pools/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -196,6 +206,7 @@ export interface FileRouteTypes {
     | '/market/$marketId'
     | '/pools/$poolId'
     | '/u/$username'
+    | '/api/public/moderate-media'
     | '/pools'
   id:
     | '__root__'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '/_authenticated/market/$marketId'
     | '/_authenticated/pools/$poolId'
     | '/_authenticated/u/$username'
+    | '/api/public/moderate-media'
     | '/_authenticated/pools/'
   fileRoutesById: FileRoutesById
 }
@@ -221,6 +233,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicModerateMediaRoute: typeof ApiPublicModerateMediaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -337,6 +350,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUUsernameRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/moderate-media': {
+      id: '/api/public/moderate-media'
+      path: '/api/public/moderate-media'
+      fullPath: '/api/public/moderate-media'
+      preLoaderRoute: typeof ApiPublicModerateMediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -379,6 +399,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicModerateMediaRoute: ApiPublicModerateMediaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

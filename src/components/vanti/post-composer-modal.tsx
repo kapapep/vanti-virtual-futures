@@ -14,7 +14,7 @@ import { formatProbability } from "@/lib/format";
 import { lightHaptic } from "@/lib/haptics";
 import { marketsQuery } from "@/lib/markets";
 import { fileToPostImageDataUrl } from "@/lib/media-file";
-import { moderatePostMedia } from "@/lib/moderation.functions";
+import { moderatePostMedia } from "@/lib/moderation";
 import { showPostedToast } from "@/components/vanti/posted-toast";
 import { createPost } from "@/lib/posts";
 import { cn } from "@/lib/utils";
@@ -238,11 +238,9 @@ export function PostComposerModal({
 
       if (image || audio) {
         const verdict = await moderatePostMedia({
-          data: {
-            body,
-            ...(image ? { imageDataUrl: image } : {}),
-            ...(audio ? { audioDataUrl: audio.dataUrl, audioFormat: audio.format } : {}),
-          },
+          body,
+          ...(image ? { imageDataUrl: image } : {}),
+          ...(audio ? { audioDataUrl: audio.dataUrl, audioFormat: audio.format } : {}),
         });
         if (verdict.explicit) {
           await supabase.rpc("record_explicit_violation", { p_reason: "explicit_content" });
