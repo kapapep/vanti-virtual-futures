@@ -36,6 +36,7 @@ export function ImageLightbox({
 
   const surfaceRef = useRef<HTMLDivElement>(null);
   const pointers = useRef(new Map<number, Point>());
+  const last = useRef<Point | null>(null);
   const gesture = useRef<{
     startZoom: number;
     startOffset: Point;
@@ -163,6 +164,7 @@ export function ImageLightbox({
       return;
     }
     gesture.current.lastTap = now;
+    last.current = pts[0] ?? null;
     gesture.current = {
       ...gesture.current,
       mode: "pan",
@@ -188,22 +190,20 @@ export function ImageLightbox({
     }
 
     if (gesture.current.mode !== "pan" || pts.length !== 1) return;
-    const start = gesture.current;
+    // Safari reports movementX/Y as 0 for touch pointers, so track deltas manually.
+    const p = pts[0]!;
+    const prev = last.current ?? p;
+    last.current = p;
+    const dx = p.x - prev.x;
+    const dy = p.y - prev.y;
 
     if (zoom > 1) {
       // Panning the zoomed image.
-      setOffset({
-        x: start.startOffset.x + (e.movementX || 0),
-        y: start.startOffset.y + (e.movementY || 0),
-      });
-      setDrag((d) => ({
-        x: d.x + (e.movementX || 0),
-        y: d.y + (e.movementY || 0),
-      }));
+      setOffset((o) => ({ x: o.x + dx, y: o.y + dy }));
       return;
     }
     // At fit scale the drag becomes a swipe: sideways pages, down dismisses.
-    setDrag((d) => ({ x: d.x + (e.movementX || 0), y: d.y + (e.movementY || 0) }));
+    setDrag((d) => ({ x: d.x + dx, y: d.y + dy }));
   };
 
   const endGesture = (e: React.PointerEvent) => {
@@ -227,9 +227,11 @@ export function ImageLightbox({
         setDrag({ x: 0, y: 0 });
       }
       gesture.current.mode = "none";
+      last.current = null;
       return;
     }
     // One finger left after a pinch: restart a pan from the current state.
+    last.current = [...pointers.current.values()][0] ?? null;
     gesture.current = {
       ...gesture.current,
       mode: "pan",
