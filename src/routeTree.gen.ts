@@ -24,6 +24,7 @@ import { Route as AuthenticatedConnectionsUsernameRouteImport } from './routes/_
 import { Route as AuthenticatedMarketMarketIdRouteImport } from './routes/_authenticated/market.$marketId'
 import { Route as AuthenticatedPoolsIndexRouteImport } from './routes/_authenticated/pools.index'
 import { Route as AuthenticatedPoolsPoolIdRouteImport } from './routes/_authenticated/pools.$poolId'
+import { Route as AuthenticatedPostPostIdRouteImport } from './routes/_authenticated/post.$postId'
 import { Route as AuthenticatedUUsernameRouteImport } from './routes/_authenticated/u.$username'
 import { Route as ApiPublicModerateMediaRouteImport } from './routes/api/public/moderate-media'
 
@@ -104,6 +105,11 @@ const AuthenticatedPoolsPoolIdRoute =
     path: '/pools/$poolId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedPostPostIdRoute = AuthenticatedPostPostIdRouteImport.update({
+  id: '/post/$postId',
+  path: '/post/$postId',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedUUsernameRoute = AuthenticatedUUsernameRouteImport.update({
   id: '/u/$username',
   path: '/u/$username',
@@ -129,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/connections/$username': typeof AuthenticatedConnectionsUsernameRoute
   '/market/$marketId': typeof AuthenticatedMarketMarketIdRoute
   '/pools/$poolId': typeof AuthenticatedPoolsPoolIdRoute
+  '/post/$postId': typeof AuthenticatedPostPostIdRoute
   '/u/$username': typeof AuthenticatedUUsernameRoute
   '/api/public/moderate-media': typeof ApiPublicModerateMediaRoute
   '/pools/': typeof AuthenticatedPoolsIndexRoute
@@ -147,6 +154,7 @@ export interface FileRoutesByTo {
   '/connections/$username': typeof AuthenticatedConnectionsUsernameRoute
   '/market/$marketId': typeof AuthenticatedMarketMarketIdRoute
   '/pools/$poolId': typeof AuthenticatedPoolsPoolIdRoute
+  '/post/$postId': typeof AuthenticatedPostPostIdRoute
   '/u/$username': typeof AuthenticatedUUsernameRoute
   '/api/public/moderate-media': typeof ApiPublicModerateMediaRoute
   '/pools': typeof AuthenticatedPoolsIndexRoute
@@ -167,6 +175,7 @@ export interface FileRoutesById {
   '/_authenticated/connections/$username': typeof AuthenticatedConnectionsUsernameRoute
   '/_authenticated/market/$marketId': typeof AuthenticatedMarketMarketIdRoute
   '/_authenticated/pools/$poolId': typeof AuthenticatedPoolsPoolIdRoute
+  '/_authenticated/post/$postId': typeof AuthenticatedPostPostIdRoute
   '/_authenticated/u/$username': typeof AuthenticatedUUsernameRoute
   '/api/public/moderate-media': typeof ApiPublicModerateMediaRoute
   '/_authenticated/pools/': typeof AuthenticatedPoolsIndexRoute
@@ -187,6 +196,7 @@ export interface FileRouteTypes {
     | '/connections/$username'
     | '/market/$marketId'
     | '/pools/$poolId'
+    | '/post/$postId'
     | '/u/$username'
     | '/api/public/moderate-media'
     | '/pools/'
@@ -205,6 +215,7 @@ export interface FileRouteTypes {
     | '/connections/$username'
     | '/market/$marketId'
     | '/pools/$poolId'
+    | '/post/$postId'
     | '/u/$username'
     | '/api/public/moderate-media'
     | '/pools'
@@ -224,6 +235,7 @@ export interface FileRouteTypes {
     | '/_authenticated/connections/$username'
     | '/_authenticated/market/$marketId'
     | '/_authenticated/pools/$poolId'
+    | '/_authenticated/post/$postId'
     | '/_authenticated/u/$username'
     | '/api/public/moderate-media'
     | '/_authenticated/pools/'
@@ -343,6 +355,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPoolsPoolIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/post/$postId': {
+      id: '/_authenticated/post/$postId'
+      path: '/post/$postId'
+      fullPath: '/post/$postId'
+      preLoaderRoute: typeof AuthenticatedPostPostIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/u/$username': {
       id: '/_authenticated/u/$username'
       path: '/u/$username'
@@ -372,6 +391,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedConnectionsUsernameRoute: typeof AuthenticatedConnectionsUsernameRoute
   AuthenticatedMarketMarketIdRoute: typeof AuthenticatedMarketMarketIdRoute
   AuthenticatedPoolsPoolIdRoute: typeof AuthenticatedPoolsPoolIdRoute
+  AuthenticatedPostPostIdRoute: typeof AuthenticatedPostPostIdRoute
   AuthenticatedUUsernameRoute: typeof AuthenticatedUUsernameRoute
   AuthenticatedPoolsIndexRoute: typeof AuthenticatedPoolsIndexRoute
 }
@@ -388,6 +408,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConnectionsUsernameRoute: AuthenticatedConnectionsUsernameRoute,
   AuthenticatedMarketMarketIdRoute: AuthenticatedMarketMarketIdRoute,
   AuthenticatedPoolsPoolIdRoute: AuthenticatedPoolsPoolIdRoute,
+  AuthenticatedPostPostIdRoute: AuthenticatedPostPostIdRoute,
   AuthenticatedUUsernameRoute: AuthenticatedUUsernameRoute,
   AuthenticatedPoolsIndexRoute: AuthenticatedPoolsIndexRoute,
 }

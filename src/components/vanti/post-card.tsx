@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Heart, MessageCircle, Repeat2, Share2, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -56,14 +56,17 @@ export function PostCard({
   replies = [],
   nested = false,
   hideMarket = false,
+  linkToDetail = true,
 }: {
   post: FeedPost;
   replies?: FeedPost[];
   nested?: boolean;
   hideMarket?: boolean;
+  linkToDetail?: boolean;
 }) {
   const { user } = useSession();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [replying, setReplying] = useState(false);
   const [showReplies, setShowReplies] = useState(false);
   const [viewerOpen, setViewerOpen] = useState(false);
@@ -73,6 +76,7 @@ export function PostCard({
     void queryClient.invalidateQueries({ queryKey: ["market-posts"] });
     void queryClient.invalidateQueries({ queryKey: ["post-replies"] });
     void queryClient.invalidateQueries({ queryKey: ["user-posts"] });
+    void queryClient.invalidateQueries({ queryKey: ["post"] });
   }
 
   const like = useMutation({
@@ -115,10 +119,21 @@ export function PostCard({
     }
   }
 
+  /** Opens the post detail unless the tap landed on an interactive control. */
+  function handleCardClick(event: React.MouseEvent<HTMLElement>) {
+    if (!linkToDetail) return;
+    const target = event.target as HTMLElement | null;
+    if (target?.closest("a,button,audio,input,textarea,[role='menu'],[role='dialog']")) return;
+    if (window.getSelection()?.toString()) return;
+    void navigate({ to: "/post/$postId", params: { postId: post.id } });
+  }
+
   return (
     <article
+      onClick={handleCardClick}
       className={cn(
         "flex gap-3 rounded-lg border border-border bg-card p-4",
+        linkToDetail && "cursor-pointer transition-colors hover:bg-secondary/30",
         nested && "rounded-none border-0 border-t border-border bg-transparent p-3 pl-0",
       )}
     >

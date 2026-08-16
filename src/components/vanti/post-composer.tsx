@@ -207,6 +207,7 @@ export function PostComposer({
       void queryClient.invalidateQueries({ queryKey: ["market-posts"] });
       void queryClient.invalidateQueries({ queryKey: ["pool-posts"] });
       void queryClient.invalidateQueries({ queryKey: ["post-replies"] });
+      void queryClient.invalidateQueries({ queryKey: ["post"] });
       void queryClient.invalidateQueries({ queryKey: ["user-posts"] });
       onPosted?.();
       toast.success(parentId ? "Reply posted" : "Posted", {
