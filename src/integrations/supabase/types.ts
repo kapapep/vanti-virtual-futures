@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           icon: string | null
@@ -196,6 +229,39 @@ export type Database = {
           },
         ]
       }
+      mutes: {
+        Row: {
+          created_at: string
+          muted_id: string
+          muter_id: string
+        }
+        Insert: {
+          created_at?: string
+          muted_id: string
+          muter_id: string
+        }
+        Update: {
+          created_at?: string
+          muted_id?: string
+          muter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mutes_muted_id_fkey"
+            columns: ["muted_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mutes_muter_id_fkey"
+            columns: ["muter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       positions: {
         Row: {
           avg_price: number
@@ -354,6 +420,48 @@ export type Database = {
           username?: string
         }
         Relationships: []
+      }
+      reports: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          post_id: string
+          reason: string
+          reporter_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          post_id: string
+          reason: string
+          reporter_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          post_id?: string
+          reason?: string
+          reporter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reposts: {
         Row: {

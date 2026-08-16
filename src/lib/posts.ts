@@ -1,6 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 
 import { supabase } from "@/integrations/supabase/client";
+import { fetchHiddenAuthorIds } from "@/lib/moderation-actions";
 
 export type PostAuthor = {
   id: string;
@@ -46,7 +47,9 @@ type PostRow = {
 
 /** Attaches like/repost/reply counts and the viewer's own interaction state. */
 async function hydrate(rows: PostRow[], viewerId: string | undefined): Promise<FeedPost[]> {
-  const ids = rows.map((r) => r.id);
+  const hidden = await fetchHiddenAuthorIds(viewerId);
+  const visible = rows.filter((r) => r.profiles && !hidden.has(r.profiles.id));
+  const ids = visible.map((r) => r.id);
   if (ids.length === 0) return [];
 
   const [likesRes, repostsRes, repliesRes] = await Promise.all([
@@ -76,7 +79,7 @@ async function hydrate(rows: PostRow[], viewerId: string | undefined): Promise<F
     replyCount.set(row.parent_id, (replyCount.get(row.parent_id) ?? 0) + 1);
   }
 
-  return rows
+  return visible
     .filter((row) => row.profiles)
     .map((row) => ({
       id: row.id,
