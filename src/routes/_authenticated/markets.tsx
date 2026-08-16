@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { ChevronDown, SlidersHorizontal } from "lucide-react";
 
@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CategoryIcon } from "@/components/vanti/category-icon";
+import { PullToRefresh } from "@/components/vanti/pull-to-refresh";
 import { TradableMarketCard } from "@/components/vanti/tradable-market-card";
 import { MarketGridSkeleton } from "@/components/vanti/skeletons";
 import { categoriesQuery, marketsQuery, type Market } from "@/lib/markets";
@@ -110,6 +111,7 @@ export const Route = createFileRoute("/_authenticated/markets")({
 function MarketsPage() {
   const { category, sort = "volume" } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
+  const queryClient = useQueryClient();
   const markets = useQuery(marketsQuery);
   const categories = useQuery(categoriesQuery);
 
@@ -128,8 +130,17 @@ function MarketsPage() {
   const activeSort = SORTS.find((s) => s.key === sort) ?? SORTS[0];
   const railRef = useAutoScrollRail((categories.data?.length ?? 0) > 0);
 
+  const refresh = async () => {
+    await Promise.all(
+      [["markets"], ["categories"], ["watchlist"]].map((queryKey) =>
+        queryClient.invalidateQueries({ queryKey }),
+      ),
+    );
+  };
+
   return (
-    <section className="space-y-6">
+    <PullToRefresh onRefresh={refresh}>
+      <section className="space-y-6">
       <h1 className="text-figure font-semibold text-foreground">Markets</h1>
 
       <div className="sticky top-[57px] z-10 -mx-4 border-b border-border bg-background px-4 pb-2 pt-2 lg:top-0">
@@ -230,6 +241,7 @@ function MarketsPage() {
           </section>
         </div>
       )}
-    </section>
+      </section>
+    </PullToRefresh>
   );
 }

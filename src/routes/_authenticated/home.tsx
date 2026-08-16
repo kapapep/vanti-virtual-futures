@@ -16,6 +16,7 @@ import {
 } from "@/components/vanti/pool-feed-card";
 import { poolActivityQuery, type Pool } from "@/lib/pools";
 import { PostComposerModal } from "@/components/vanti/post-composer-modal";
+import { PullToRefresh } from "@/components/vanti/pull-to-refresh";
 import { useSession } from "@/hooks/use-vanti-session";
 import { formatProbability, formatDelta } from "@/lib/format";
 import { TREND_LABEL, trendLabel } from "@/lib/market-trend";
@@ -190,6 +191,7 @@ function SuggestedAccounts({
 
 function HomePage() {
   const { user } = useSession();
+  const queryClient = useQueryClient();
   const navigate = Route.useNavigate();
   const { tab } = Route.useSearch();
   const viewerId = user?.id;
@@ -270,8 +272,23 @@ function HomePage() {
   const loading = !ready || (feed.isPending && posts.length === 0);
   const showSuggestions = tab === "following" && ready && followingIds.length === 0;
 
+  const refresh = async () => {
+    await Promise.all(
+      [
+        ["feed"],
+        ["post-replies"],
+        ["following-ids"],
+        ["watchlist"],
+        ["markets"],
+        ["pool-activity"],
+        ["suggested-accounts"],
+      ].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+    );
+  };
+
   return (
-    <div className="space-y-5">
+    <PullToRefresh onRefresh={refresh} className="space-y-5">
+      <div className="space-y-5">
       {/* Mobile switcher lives in the top bar; desktop keeps it above the feed. */}
       <nav className="sticky top-0 z-10 -mt-6 hidden items-center justify-center gap-6 bg-background/95 pb-1 pt-0.5 backdrop-blur lg:flex">
         {(
@@ -376,6 +393,7 @@ function HomePage() {
           }}
         />
       ) : null}
-    </div>
+      </div>
+    </PullToRefresh>
   );
 }
