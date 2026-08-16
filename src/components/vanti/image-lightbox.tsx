@@ -189,9 +189,6 @@ export function ImageLightbox({
 
     if (gesture.current.mode !== "pan" || pts.length !== 1) return;
     const start = gesture.current;
-    const p = pts[0]!;
-    const dx = p.x - (start.startCenter.x || p.x);
-    void dx;
 
     if (zoom > 1) {
       // Panning the zoomed image.
