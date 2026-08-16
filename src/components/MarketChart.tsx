@@ -104,6 +104,7 @@ export function MarketChart({
         fontFamily: "Figtree",
         attributionLogo: false,
       },
+      localization: { locale: "en-US" },
       grid: { vertLines: { visible: false }, horzLines: { visible: false } },
       rightPriceScale: { visible: false },
       leftPriceScale: { visible: false },
@@ -116,8 +117,6 @@ export function MarketChart({
       handleScroll: false,
       handleScale: false,
       autoSize: true,
-      width: el.clientWidth || 320,
-      height: el.clientHeight || 320,
     });
 
     const yes = chart.addSeries(AreaSeries, {
@@ -164,7 +163,7 @@ export function MarketChart({
       if (!node) return;
       const w = node.clientWidth;
       const h = node.clientHeight;
-      if (w > 0 && h > 0) chart.applyOptions({ width: w, height: h });
+      if (w > 0 && h > 0) chart.applyOptions({ autoSize: false, width: w, height: h });
       chart.timeScale().fitContent();
     };
 
