@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MarketEmbed } from "@/components/vanti/market-embed";
+import { PostActionsMenu } from "@/components/vanti/post-actions-menu";
 import { PostComposer } from "@/components/vanti/post-composer";
 import { useSession } from "@/hooks/use-vanti-session";
 import { formatRelativeTime } from "@/lib/format";
@@ -144,16 +145,23 @@ export function PostCard({
           <time dateTime={post.createdAt} className="num">
             {formatRelativeTime(post.createdAt)}
           </time>
-          {user?.id === post.author.id ? (
-            <button
-              type="button"
-              onClick={() => remove.mutate()}
-              aria-label="Delete post"
-              className="ml-auto rounded-md p-1 text-muted-foreground transition-colors hover:text-negative"
-            >
-              <Trash2 className="size-3.5" />
-            </button>
-          ) : null}
+          <div className="ml-auto flex items-center gap-0.5">
+            {user?.id === post.author.id ? (
+              <button
+                type="button"
+                onClick={() => remove.mutate()}
+                aria-label="Delete post"
+                className="rounded-md p-1 text-muted-foreground transition-colors hover:text-negative"
+              >
+                <Trash2 className="size-3.5" />
+              </button>
+            ) : null}
+            <PostActionsMenu
+              postId={post.id}
+              authorId={post.author.id}
+              username={post.author.username}
+            />
+          </div>
         </div>
 
         <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-foreground">
