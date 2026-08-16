@@ -232,8 +232,40 @@ export function MarketChart({
 
   return (
     <div className="w-full">
-      <div className="relative h-[400px] w-full sm:h-[460px]">
-        <div ref={containerRef} className="absolute inset-0" />
+      {/* Volume left, plain-text timeframes right — its own row above the plot so
+          it can never collide with the floating buy buttons. */}
+      <div className="mb-3 flex items-center justify-between gap-4">
+        <span
+          className="vane-num text-[12px]"
+          style={{ color: "rgba(255,255,255,0.35)" }}
+        >
+          {volume === undefined
+            ? ""
+            : `V${Math.round(volume).toLocaleString("en-US")} vol`}
+        </span>
+        <div className="flex items-center gap-4 sm:gap-5">
+          {MARKET_TIMEFRAMES.map((tf) => {
+            const active = tf === activeTf;
+            return (
+              <button
+                key={tf}
+                type="button"
+                onClick={() => {
+                  setInternalTf(tf);
+                  onTimeframeChange?.(tf);
+                }}
+                className="min-h-9 px-1 text-[12px] font-semibold uppercase tracking-[0.05em]"
+                style={{ color: active ? "#FFFFFF" : "rgba(255,255,255,0.35)" }}
+              >
+                {tf}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="relative h-[280px] w-full pr-14 sm:h-[380px] lg:h-[440px]">
+        <div ref={containerRef} className="absolute inset-y-0 left-0 right-14" />
 
         {/* Overlay labels track the end of the line, 8px right of the last point. */}
         <div
@@ -259,37 +291,6 @@ export function MarketChart({
           >
             {Math.round(shownNo)}%
           </div>
-        </div>
-      </div>
-
-      {/* Volume left, plain-text timeframes right — one row below the plot. */}
-      <div className="mt-3 flex items-center justify-between gap-4">
-        <span
-          className="vane-num text-[12px]"
-          style={{ color: "rgba(255,255,255,0.35)" }}
-        >
-          {volume === undefined
-            ? ""
-            : `V${Math.round(volume).toLocaleString("en-US")} vol`}
-        </span>
-        <div className="flex items-center" style={{ gap: 20 }}>
-          {MARKET_TIMEFRAMES.map((tf) => {
-            const active = tf === activeTf;
-            return (
-              <button
-                key={tf}
-                type="button"
-                onClick={() => {
-                  setInternalTf(tf);
-                  onTimeframeChange?.(tf);
-                }}
-                className="text-[12px] font-semibold uppercase tracking-[0.05em]"
-                style={{ color: active ? "#FFFFFF" : "rgba(255,255,255,0.35)" }}
-              >
-                {tf}
-              </button>
-            );
-          })}
         </div>
       </div>
     </div>
