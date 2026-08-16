@@ -107,6 +107,16 @@ export function engagementScore(post: FeedPost) {
   return post.likeCount + post.repostCount * 2 + post.replyCount * 2;
 }
 
+/**
+ * Ranks the For You feed by engagement with a recency decay, so a brand-new
+ * post (including the viewer's own) surfaces at the top instead of sinking
+ * below older, more-engaged posts.
+ */
+function forYouRank(post: FeedPost, now: number) {
+  const hours = Math.max(0, (now - new Date(post.createdAt).getTime()) / 3_600_000);
+  return (engagementScore(post) + 1) / Math.pow(hours + 2, 1.2);
+}
+
 export const FEED_PAGE_SIZE = 15;
 
 /** Posts from followed traders plus posts on watched markets, newest first. */
@@ -143,7 +153,8 @@ export async function fetchForYouFeed(viewerId: string | undefined): Promise<Fee
     .limit(120);
   if (error) throw error;
   const posts = await hydrate((data ?? []) as PostRow[], viewerId);
-  return posts.sort((a, b) => engagementScore(b) - engagementScore(a));
+  const now = Date.now();
+  return posts.sort((a, b) => forYouRank(b, now) - forYouRank(a, now));
 }
 
 /** Top-level posts attached to one market, newest first. */
