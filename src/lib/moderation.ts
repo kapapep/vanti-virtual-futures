@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { apiBaseUrl } from "@/lib/api-base";
-import type { ModerationInput, ModerationVerdict } from "@/lib/moderation.server";
+import type { ModerationInput, ModerationVerdict } from "@/lib/moderation-types";
 
 export type { ModerationVerdict };
 

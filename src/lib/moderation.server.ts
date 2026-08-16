@@ -1,11 +1,4 @@
-export type ModerationVerdict = { explicit: boolean; reason: string };
-
-export type ModerationInput = {
-  body?: string;
-  imageDataUrl?: string;
-  audioDataUrl?: string;
-  audioFormat?: string;
-};
+import type { ModerationInput, ModerationVerdict } from "@/lib/moderation-types";
 
 const RULES = [
   "You are the content-safety reviewer for Vanti, a virtual-money prediction market.",
