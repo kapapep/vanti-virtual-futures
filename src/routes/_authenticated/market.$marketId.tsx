@@ -133,7 +133,7 @@ function MarketDetailPage() {
         // tab bar, so the title and the last card are never clipped.
         scrollMarginTop: "calc(var(--topbar-h) + env(safe-area-inset-top))",
         paddingBottom:
-          "calc(var(--buybar-h) + var(--tabbar-h) + 24px + env(safe-area-inset-bottom))",
+          "calc(var(--buybar-h) + var(--tabbar-h) + 48px + env(safe-area-inset-bottom))",
       }}
     >
       <header className="space-y-4">
