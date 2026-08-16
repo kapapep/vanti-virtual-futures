@@ -115,8 +115,9 @@ export function MarketChart({
       },
       handleScroll: false,
       handleScale: false,
-      width: el.clientWidth,
-      height: el.clientHeight,
+      autoSize: true,
+      width: el.clientWidth || 320,
+      height: el.clientHeight || 320,
     });
 
     const yes = chart.addSeries(AreaSeries, {
@@ -158,17 +159,29 @@ export function MarketChart({
       setHover(y?.value ?? null);
     });
 
-    const observer = new ResizeObserver(() => {
-      if (!containerRef.current) return;
-      chart.applyOptions({
-        width: containerRef.current.clientWidth,
-        height: containerRef.current.clientHeight,
-      });
+    const resize = () => {
+      const node = containerRef.current;
+      if (!node) return;
+      const w = node.clientWidth;
+      const h = node.clientHeight;
+      if (w > 0 && h > 0) chart.applyOptions({ width: w, height: h });
       chart.timeScale().fitContent();
-    });
+    };
+
+    const observer = new ResizeObserver(resize);
     observer.observe(el);
 
+    // iOS Safari can report a 0/stale width during the first layout pass.
+    const raf1 = requestAnimationFrame(resize);
+    const raf2 = requestAnimationFrame(() => requestAnimationFrame(resize));
+    window.addEventListener("resize", resize);
+    window.addEventListener("orientationchange", resize);
+
     return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+      window.removeEventListener("resize", resize);
+      window.removeEventListener("orientationchange", resize);
       observer.disconnect();
       void unsub;
       chart.remove();
