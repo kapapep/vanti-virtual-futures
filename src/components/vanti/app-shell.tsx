@@ -186,6 +186,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             ? "grid-cols-[1fr_auto_1fr] border-b border-border"
             : "grid-cols-[minmax(0,1fr)_auto] border-b border-border",
         )}
+        style={{ paddingTop: "calc(0.75rem + env(safe-area-inset-top))" }}
       >
         {showBack ? (
           <BackButton className="justify-self-start" />
