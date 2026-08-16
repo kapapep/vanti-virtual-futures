@@ -66,6 +66,7 @@ export function PostCard({
   const queryClient = useQueryClient();
   const [replying, setReplying] = useState(false);
   const [showReplies, setShowReplies] = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(false);
 
   function refresh() {
     void queryClient.invalidateQueries({ queryKey: ["feed"] });
