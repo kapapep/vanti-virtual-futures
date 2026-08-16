@@ -128,6 +128,23 @@ export function PostComposer({
   const [preparing, setPreparing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  const wrapper = useRef<HTMLDivElement>(null);
+  const keyboard = useKeyboardOffset();
+  /* Inline replies sit low in a scrolled feed: keep them clear of the keyboard
+     and the fixed bottom tab bar by scrolling them into view with a bottom
+     scroll margin, and give the page room to scroll that far. */
+  const clearance = keyboard > 0 ? keyboard + 96 : 0;
+
+  useEffect(() => {
+    if (!compact) return;
+    const el = wrapper.current;
+    if (!el) return;
+    const id = window.setTimeout(
+      () => el.scrollIntoView({ block: "center", behavior: "smooth" }),
+      keyboard > 0 ? 60 : 0,
+    );
+    return () => window.clearTimeout(id);
+  }, [compact, keyboard]);
 
   const suspendedUntil = profile?.suspended_until ?? null;
   const suspended = Boolean(suspendedUntil && new Date(suspendedUntil).getTime() > Date.now());
@@ -211,6 +228,8 @@ export function PostComposer({
 
   return (
     <div
+      ref={wrapper}
+      style={{ scrollMarginBottom: clearance || undefined, marginBottom: clearance || undefined }}
       className={cn(
         "rounded-lg border border-border bg-card p-3",
         compact && "border-0 bg-transparent p-0",
