@@ -81,7 +81,6 @@ export function MarketChart({
   const activeTf = timeframe ?? internalTf;
 
   const [hover, setHover] = useState<number | null>(null);
-  const [labelY, setLabelY] = useState<{ yes: number; no: number } | null>(null);
 
   const yesSeriesData = useMemo(() => toSeries(yesData), [yesData]);
   // NO mirrors YES at every point: they always sum to 100.
@@ -98,6 +97,8 @@ export function MarketChart({
     const yesColor = token("--vanti-yes", "#3ECF8E");
 
     const chart = createChart(el, {
+      width: el.clientWidth || 300,
+      height: el.clientHeight || 280,
       layout: {
         background: { color: "transparent" },
         textColor: "transparent",
@@ -116,7 +117,7 @@ export function MarketChart({
       },
       handleScroll: false,
       handleScale: false,
-      autoSize: true,
+      autoSize: false,
     });
 
     const yes = chart.addSeries(AreaSeries, {
@@ -163,12 +164,14 @@ export function MarketChart({
       if (!node) return;
       const w = node.clientWidth;
       const h = node.clientHeight;
-      if (w > 0 && h > 0) chart.applyOptions({ autoSize: false, width: w, height: h });
+      if (w <= 0 || h <= 0) return;
+      chart.applyOptions({ width: w, height: h });
       chart.timeScale().fitContent();
     };
 
     const observer = new ResizeObserver(resize);
     observer.observe(el);
+    resize();
 
     // iOS Safari can report a 0/stale width during the first layout pass.
     const raf1 = requestAnimationFrame(resize);
@@ -191,7 +194,7 @@ export function MarketChart({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Push data and refresh label positions.
+  // Push data, then re-measure so the series always spans the full container.
   useEffect(() => {
     const chart = chartRef.current;
     const series = yesSeriesRef.current;
@@ -199,29 +202,17 @@ export function MarketChart({
     if (!chart || !series || !noSeries) return;
     series.setData(yesSeriesData);
     noSeries.setData(noSeriesData);
-    chart.timeScale().fitContent();
 
-    const place = () => {
-      const last = yesSeriesData.at(-1)?.value ?? currentYes;
-      const lastNo = noSeriesData.at(-1)?.value ?? 100 - currentYes;
-      const yes = series.priceToCoordinate(last);
-      const no = noSeries.priceToCoordinate(lastNo);
-      if (yes === null || no === null) return;
-      // Keep the two stacked labels from overlapping when the line sits near 50%.
-      const gap = 52;
-      if (Math.abs(yes - no) >= gap) {
-        setLabelY({ yes, no });
-        return;
-      }
-      const shift = (gap - Math.abs(yes - no)) / 2;
-      setLabelY(
-        yes <= no
-          ? { yes: yes - shift, no: no + shift }
-          : { yes: yes + shift, no: no - shift },
-      );
+    const fit = () => {
+      const node = containerRef.current;
+      if (!node) return;
+      const w = node.clientWidth;
+      const h = node.clientHeight;
+      if (w > 0 && h > 0) chart.applyOptions({ width: w, height: h });
+      chart.timeScale().fitContent();
     };
-    place();
-    const raf = requestAnimationFrame(place);
+    fit();
+    const raf = requestAnimationFrame(fit);
     return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [yesSeriesData, noSeriesData, currentYes]);
@@ -263,32 +254,28 @@ export function MarketChart({
         </div>
       </div>
 
-      <div className="relative h-[280px] w-full pr-14 sm:h-[380px] lg:h-[440px]">
-        <div ref={containerRef} className="absolute inset-y-0 left-0 right-14" />
-
-        {/* Overlay labels track the end of the line, 8px right of the last point. */}
-        <div
-          className="pointer-events-none absolute right-0 pl-2"
-          style={{ top: labelY ? labelY.yes : 0, transform: "translateY(-50%)" }}
-        >
-          <div className="vane-label">YES</div>
-          <div
-            className="vane-num text-[28px] font-extrabold leading-none"
-            style={{ color: "var(--vanti-yes)" }}
-          >
-            {Math.round(shownYes)}%
+      {/* Plot and labels share one flex row: the plot keeps every pixel the
+          labels do not use, so it is always measured and never overlapped. */}
+      <div className="flex h-[280px] w-full items-stretch gap-2 sm:h-[380px] lg:h-[440px]">
+        <div ref={containerRef} className="h-full min-w-0 flex-1" />
+        <div className="flex w-[54px] shrink-0 flex-col justify-center gap-6">
+          <div>
+            <div className="vane-label">YES</div>
+            <div
+              className="vane-num text-[24px] font-extrabold leading-none"
+              style={{ color: "var(--vanti-yes)" }}
+            >
+              {Math.round(shownYes)}%
+            </div>
           </div>
-        </div>
-        <div
-          className="pointer-events-none absolute right-0 pl-2"
-          style={{ top: labelY ? labelY.no : 0, transform: "translateY(-50%)" }}
-        >
-          <div className="vane-label">NO</div>
-          <div
-            className="vane-num text-[28px] font-extrabold leading-none"
-            style={{ color: "#FFFFFF" }}
-          >
-            {Math.round(shownNo)}%
+          <div>
+            <div className="vane-label">NO</div>
+            <div
+              className="vane-num text-[24px] font-extrabold leading-none"
+              style={{ color: "#FFFFFF" }}
+            >
+              {Math.round(shownNo)}%
+            </div>
           </div>
         </div>
       </div>
