@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MarketEmbed } from "@/components/vanti/market-embed";
+import { ImageLightbox } from "@/components/vanti/image-lightbox";
 import { PostActionsMenu } from "@/components/vanti/post-actions-menu";
 import { PostComposer } from "@/components/vanti/post-composer";
 import { useSession } from "@/hooks/use-vanti-session";
@@ -65,6 +66,7 @@ export function PostCard({
   const queryClient = useQueryClient();
   const [replying, setReplying] = useState(false);
   const [showReplies, setShowReplies] = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(false);
 
   function refresh() {
     void queryClient.invalidateQueries({ queryKey: ["feed"] });
@@ -169,11 +171,27 @@ export function PostCard({
         </p>
 
         {post.imageUrl ? (
-          <img
-            src={post.imageUrl}
+          <button
+            type="button"
+            onClick={() => setViewerOpen(true)}
+            aria-label="Open image full screen"
+            className="mt-3 block w-full overflow-hidden rounded-lg border border-border"
+          >
+            <img
+              src={post.imageUrl}
+              alt={`Image posted by @${post.author.username}`}
+              loading="lazy"
+              className="max-h-[28rem] w-full object-cover"
+            />
+          </button>
+        ) : null}
+
+        {viewerOpen && post.imageUrl ? (
+          <ImageLightbox
+            images={[post.imageUrl]}
+            index={0}
             alt={`Image posted by @${post.author.username}`}
-            loading="lazy"
-            className="mt-3 max-h-[28rem] w-full rounded-lg border border-border object-cover"
+            onClose={() => setViewerOpen(false)}
           />
         ) : null}
 
