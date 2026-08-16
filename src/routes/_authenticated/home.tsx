@@ -287,6 +287,7 @@ function HomePage() {
   };
 
   return (
+    <>
     <PullToRefresh onRefresh={refresh} className="space-y-5">
       <div className="space-y-5">
       {/* Mobile switcher lives in the top bar; desktop keeps it above the feed. */}
@@ -373,12 +374,19 @@ function HomePage() {
         </div>
       ) : null}
 
-      {/* Floating composer trigger */}
+      </div>
+    </PullToRefresh>
+
+      {/* Floating composer trigger. Kept outside PullToRefresh: its wrapper is
+          transformed during a pull, which would re-anchor `fixed` children. */}
       <button
         type="button"
         onClick={() => setComposerOpen(true)}
         aria-label="Write a post"
-        className="fixed bottom-20 right-4 z-30 grid size-14 place-items-center rounded-full bg-accent-solid text-accent-solid-foreground shadow-lg transition-transform hover:scale-105 lg:bottom-8 lg:right-8"
+        style={{
+          bottom: "calc(var(--tabbar-h) + 16px + env(safe-area-inset-bottom))",
+        }}
+        className="fixed right-4 z-30 grid size-14 place-items-center rounded-full bg-accent-solid text-accent-solid-foreground shadow-lg transition-transform hover:scale-105 lg:bottom-8! lg:right-8"
       >
         <Plus className="size-6" />
       </button>
@@ -393,7 +401,6 @@ function HomePage() {
           }}
         />
       ) : null}
-      </div>
-    </PullToRefresh>
+    </>
   );
 }
