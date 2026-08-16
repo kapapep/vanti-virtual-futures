@@ -254,11 +254,11 @@ export function MarketChart({
         </div>
       </div>
 
-      {/* Plot and labels share one flex row: the plot keeps every pixel the
-          labels do not use, so it is always measured and never overlapped. */}
-      <div className="flex h-[280px] w-full items-stretch gap-2 sm:h-[380px] lg:h-[440px]">
-        <div ref={containerRef} className="h-full min-w-0 flex-1" />
-        <div className="flex w-[54px] shrink-0 flex-col justify-center gap-6">
+      {/* The plot is absolutely positioned inside a full-width box, so it always
+          has a definite width to measure (flex basis could collapse it). */}
+      <div className="relative h-[280px] w-full sm:h-[380px] lg:h-[440px]">
+        <div ref={containerRef} className="absolute inset-y-0 left-0 right-[60px]" />
+        <div className="absolute inset-y-0 right-0 flex w-[54px] flex-col justify-center gap-6">
           <div>
             <div className="vane-label">YES</div>
             <div
