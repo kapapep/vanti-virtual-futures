@@ -287,6 +287,7 @@ function HomePage() {
   };
 
   return (
+    <>
     <PullToRefresh onRefresh={refresh} className="space-y-5">
       <div className="space-y-5">
       {/* Mobile switcher lives in the top bar; desktop keeps it above the feed. */}
