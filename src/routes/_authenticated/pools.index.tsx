@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Users2 } from "lucide-react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { PoolCard } from "@/components/vanti/pool-card";
+import { PullToRefresh } from "@/components/vanti/pull-to-refresh";
 import { browsePoolsQuery, type Pool } from "@/lib/pools";
 
 type SectionKey = "funding" | "locking" | "members" | "active";
@@ -112,14 +113,24 @@ function Carousel({ sectionKey, list }: { sectionKey: SectionKey; list: Pool[] }
 
 function PoolsPage() {
   const { section } = Route.useSearch();
+  const queryClient = useQueryClient();
   const pools = useQuery(browsePoolsQuery);
   const list = pools.data ?? [];
   const sections = buildSections(list);
   const keys: SectionKey[] = ["funding", "locking", "members", "active"];
   const empty = keys.every((k) => sections[k].length === 0);
 
+  const refresh = async () => {
+    await Promise.all(
+      [["browse-pools"], ["pool-activity"], ["markets"]].map((queryKey) =>
+        queryClient.invalidateQueries({ queryKey }),
+      ),
+    );
+  };
+
   return (
-    <div className="space-y-6 pb-24">
+    <PullToRefresh onRefresh={refresh}>
+      <div className="space-y-6 pb-24">
       <div className="space-y-1">
         <h1 className="text-figure font-semibold text-foreground">Pools</h1>
         <p className="text-sm text-muted-foreground">
@@ -182,6 +193,7 @@ function PoolsPage() {
           Start a pool
         </Link>
       ) : null}
-    </div>
+      </div>
+    </PullToRefresh>
   );
 }

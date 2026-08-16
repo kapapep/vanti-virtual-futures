@@ -19,6 +19,7 @@ import { EmptyState } from "@/components/vanti/empty-state";
 import { EquityChart } from "@/components/vanti/equity-chart";
 import { PositionRow } from "@/components/vanti/position-row";
 import { PositionRowSkeleton } from "@/components/vanti/skeletons";
+import { PullToRefresh } from "@/components/vanti/pull-to-refresh";
 import { TradeHistoryList } from "@/components/vanti/trade-history-list";
 import { usePortfolio } from "@/hooks/use-portfolio";
 import {
@@ -126,8 +127,23 @@ function PortfolioPage() {
 
   const dayUp = today.change >= 0;
 
+  const refresh = async () => {
+    await Promise.all(
+      [
+        ["profile"],
+        ["portfolio-positions"],
+        ["pool-positions"],
+        ["trade-history"],
+        ["transactions"],
+        ["resolved-results"],
+        ["markets"],
+      ].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+    );
+  };
+
   return (
-    <div className="@container space-y-8 pb-10">
+    <PullToRefresh onRefresh={refresh}>
+      <div className="@container space-y-8 pb-10">
       {/* Balance header: total account value is the hero figure. */}
       <header className="space-y-4">
         <h1 className="text-meta font-semibold uppercase text-muted-foreground">
