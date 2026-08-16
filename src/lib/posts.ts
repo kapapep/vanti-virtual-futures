@@ -218,6 +218,24 @@ export function repliesQuery(parentIds: string[], viewerId: string | undefined) 
 }
 
 /** Posts written by one trader, for their public profile. */
+export function postQuery(postId: string, viewerId: string | undefined) {
+  return queryOptions({
+    queryKey: ["post", postId, viewerId],
+    queryFn: async (): Promise<FeedPost | null> => {
+      const { data, error } = await supabase
+        .from("posts")
+        .select(POST_SELECT)
+        .eq("id", postId)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return null;
+      const posts = await hydrate([data as PostRow], viewerId);
+      return posts[0] ?? null;
+    },
+  });
+}
+
+/** Posts written by one trader, for their public profile. */
 export function userPostsQuery(userId: string | undefined, viewerId: string | undefined) {
   return queryOptions({
     queryKey: ["user-posts", userId, viewerId],
