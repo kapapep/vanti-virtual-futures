@@ -100,6 +100,7 @@ function AuthPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-4 py-12">
+      <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "red" }} />
       {showIntro && <VantiIntro onComplete={() => setShowIntro(false)} />}
       <Link to="/" className="mb-8 flex flex-col items-center gap-3">
         <VantiMark size={48} title="Vanti" />
