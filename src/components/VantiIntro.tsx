@@ -23,7 +23,6 @@ const LIGHT = "#A9BDFB";
 const DEEP = "#5C7CFA";
 const TRAIL = "#DCE4FF";
 
-const HANDOFF_Y = -168; // px the mark travels up to meet the onboarding header
 const EXIT_AT = 2650;
 const DONE_AT = 3350;
 
