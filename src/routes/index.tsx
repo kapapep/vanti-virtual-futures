@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useCallback, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import VantiIntro from "@/components/VantiIntro";
 import { MarketAmbientBackground } from "@/components/vanti/market-ambient-background";
 import { VantiMark } from "@/components/vanti/vanti-mark";
 import { cn } from "@/lib/utils";
@@ -26,9 +28,13 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
+  const [showIntro, setShowIntro] = useState(true);
+  const handleComplete = useCallback(() => setShowIntro(false), []);
+
   return (
     <div className="relative flex min-h-[100svh] flex-col overflow-hidden bg-background">
       <MarketAmbientBackground />
+      {showIntro && <VantiIntro onComplete={handleComplete} />}
 
       <main className="relative z-10 flex flex-1 flex-col justify-center px-5 pb-6 pt-10 text-center sm:mx-auto sm:w-full sm:max-w-xl sm:px-6 sm:py-16">
         <div className="flex flex-col items-center">
