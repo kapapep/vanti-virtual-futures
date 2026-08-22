@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import VantiIntro from "@/components/VantiIntro";
 import { Wordmark } from "@/components/vanti/wordmark";
 import { VantiMark } from "@/components/vanti/vanti-mark";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,6 +39,9 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showIntro, setShowIntro] = useState(
+    new URLSearchParams(window.location.search).get("intro") === "1"
+  );
 
   useEffect(() => {
     void supabase.auth.getSession().then(({ data }) => {
@@ -98,6 +102,7 @@ function AuthPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-4 py-12">
+      {showIntro && <VantiIntro onComplete={() => setShowIntro(false)} />}
       <Link to="/" className="mb-8 flex flex-col items-center gap-3">
         <VantiMark size={48} title="Vanti" />
         <Wordmark size="lg" />
